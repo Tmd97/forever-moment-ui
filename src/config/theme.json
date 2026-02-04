@@ -1,0 +1,20 @@
+{
+    "colors": {
+        "primary": "#3B82F6",
+        "secondary": "#10B981",
+        "success": "#10B981",
+        "warning": "#F59E0B",
+        "error": "#EF4444",
+        "info": "#3B82F6",
+        "background": "#FFFFFF",
+        "surface": "#F9FAFB",
+        "text": "#111827"
+    },
+    "branding": {
+        "appName": "Forever Moment",
+        "logo": "/assets/logo.png",
+        "favicon": "/assets/favicon.ico",
+        "tagline": "Creating Unforgettable Memories"
+    },
+    "darkMode": false
+}

@@ -1,0 +1,22 @@
+{
+    "roles": {
+        "admin": {
+            "permissions": [
+                "*"
+            ]
+        },
+        "manager": {
+            "permissions": [
+                "category.view",
+                "category.create",
+                "category.edit",
+                "experience.*"
+            ]
+        },
+        "customer": {
+            "permissions": [
+                "home.view"
+            ]
+        }
+    }
+}

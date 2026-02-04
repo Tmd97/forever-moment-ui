@@ -1,0 +1,83 @@
+{
+    "categoryTable": {
+        "id": "categoryTable",
+        "columns": [
+            {
+                "key": "name",
+                "header": "Name",
+                "type": "text",
+                "sortable": true,
+                "filterable": true,
+                "className": "py-4 px-6 font-medium text-gray-900 dark:text-white"
+            },
+            {
+                "key": "status",
+                "header": "Status",
+                "type": "badge",
+                "sortable": true,
+                "className": "py-4 px-6"
+            },
+            {
+                "key": "actions",
+                "header": "Actions",
+                "type": "actions",
+                "align": "right",
+                "className": "py-4 px-6 text-right"
+            }
+        ],
+        "actions": [
+            "edit",
+            "delete"
+        ],
+        "pagination": true,
+        "pageSize": 10,
+        "searchable": true
+    },
+    "experienceTable": {
+        "id": "experienceTable",
+        "columns": [
+            {
+                "key": "title",
+                "header": "Title",
+                "type": "text",
+                "sortable": true,
+                "className": "py-4 px-6 font-medium text-gray-900 dark:text-white"
+            },
+            {
+                "key": "category",
+                "header": "Category",
+                "type": "text",
+                "sortable": true,
+                "className": "py-4 px-6 text-sm text-gray-700 dark:text-gray-300"
+            },
+            {
+                "key": "price",
+                "header": "Price",
+                "type": "currency",
+                "sortable": true,
+                "className": "py-4 px-6 text-sm text-gray-700 dark:text-gray-300"
+            },
+            {
+                "key": "status",
+                "header": "Status",
+                "type": "badge",
+                "sortable": true,
+                "className": "py-4 px-6"
+            },
+            {
+                "key": "actions",
+                "header": "Actions",
+                "type": "actions",
+                "align": "right",
+                "className": "py-4 px-6 text-right"
+            }
+        ],
+        "actions": [
+            "edit",
+            "delete"
+        ],
+        "pagination": true,
+        "pageSize": 10,
+        "searchable": true
+    }
+}

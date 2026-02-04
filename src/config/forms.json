@@ -1,0 +1,99 @@
+{
+    "categoryForm": {
+        "id": "categoryForm",
+        "fields": [
+            {
+                "name": "name",
+                "label": "Category Name",
+                "type": "text",
+                "placeholder": "Enter category name",
+                "validation": {
+                    "required": true,
+                    "minLength": 3,
+                    "maxLength": 50,
+                    "message": "Category name must be between 3 and 50 characters"
+                }
+            },
+            {
+                "name": "status",
+                "label": "Status",
+                "type": "select",
+                "defaultValue": "Active",
+                "options": [
+                    {
+                        "label": "Active",
+                        "value": "Active"
+                    },
+                    {
+                        "label": "Inactive",
+                        "value": "Inactive"
+                    }
+                ],
+                "validation": {
+                    "required": true
+                }
+            }
+        ],
+        "submitLabel": "Save Category",
+        "cancelLabel": "Cancel",
+        "layout": "vertical"
+    },
+    "experienceForm": {
+        "id": "experienceForm",
+        "fields": [
+            {
+                "name": "title",
+                "label": "Title",
+                "type": "text",
+                "placeholder": "Enter experience title",
+                "validation": {
+                    "required": true,
+                    "minLength": 3,
+                    "maxLength": 100
+                }
+            },
+            {
+                "name": "category",
+                "label": "Category",
+                "type": "select",
+                "placeholder": "Select category",
+                "options": [],
+                "validation": {
+                    "required": true
+                }
+            },
+            {
+                "name": "price",
+                "label": "Price",
+                "type": "text",
+                "placeholder": "$0.00",
+                "validation": {
+                    "required": true,
+                    "pattern": "^\\$?[0-9,]+(\\.[0-9]{2})?$"
+                }
+            },
+            {
+                "name": "status",
+                "label": "Status",
+                "type": "select",
+                "defaultValue": "Active",
+                "options": [
+                    {
+                        "label": "Active",
+                        "value": "Active"
+                    },
+                    {
+                        "label": "Inactive",
+                        "value": "Inactive"
+                    }
+                ],
+                "validation": {
+                    "required": true
+                }
+            }
+        ],
+        "submitLabel": "Save Experience",
+        "cancelLabel": "Cancel",
+        "layout": "vertical"
+    }
+}

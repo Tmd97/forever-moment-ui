@@ -12,6 +12,24 @@ dist
 dist-ssr
 *.local
 
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Testing
+coverage/
+config/navigation.json
+config/forms.json
+config/tables.json
+config/routes.json
+config/permissions.json
+config/content.json
+config/theme.json
+
+# TypeScript
+*.tsbuildinfo
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

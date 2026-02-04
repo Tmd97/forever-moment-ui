@@ -1,0 +1,61 @@
+{
+    "admin": [
+        {
+            "id": "dashboard",
+            "label": "Dashboard567",
+            "path": "/admin",
+            "icon": "LayoutDashboard",
+            "roles": [
+                "admin",
+                "manager"
+            ]
+        },
+        {
+            "id": "event-management",
+            "label": "Event Management567",
+            "icon": "Calendar",
+            "roles": [
+                "admin",
+                "manager"
+            ],
+            "children": [
+                {
+                    "id": "category",
+                    "label": "Category",
+                    "path": "/admin/category",
+                    "icon": "Layers",
+                    "roles": [
+                        "admin"
+                    ]
+                },
+                {
+                    "id": "experience",
+                    "label": "Experience",
+                    "path": "/admin/experience",
+                    "icon": "Sparkles",
+                    "roles": [
+                        "admin",
+                        "manager"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "settings",
+            "label": "Settings",
+            "path": "/admin/settings",
+            "icon": "Settings",
+            "roles": [
+                "admin"
+            ]
+        }
+    ],
+    "customer": [
+        {
+            "id": "home",
+            "label": "Home",
+            "path": "/",
+            "icon": "Home"
+        }
+    ]
+}
