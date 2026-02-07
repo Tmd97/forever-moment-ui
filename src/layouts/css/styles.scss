@@ -1,0 +1,14 @@
+/* Admin Layout Styles */
+.admin-main-content {
+    flex: 1;
+    overflow: hidden;
+    /* Prevent page-level scroll */
+    background-color: #f9fafb;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-main-content.dark {
+    background-color: #0a0a0a;
+}

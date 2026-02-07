@@ -1,17 +1,25 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { dashboardReducer } from '@/features/admin/dashboard/store/reducer';
-import { categoryReducer } from '@/features/admin/category/store/reducer';
-import { experienceReducer } from '@/features/admin/experience/store/reducer';
-import { settingsReducer } from '@/features/admin/settings/store/reducer';
-import { homeReducer } from '@/features/customer/home/store/reducer';
+import { authReducer } from '@/features/auth/store/reducer';
+import { dashboardReducer } from '@/features/dashboard/store/reducer';
+import { categoryReducer } from '@/features/category/store/reducer';
+import { experienceReducer } from '@/features/experience/store/reducer';
+import { settingsReducer } from '@/features/settings/store/reducer';
+import { subCategoryReducer } from '@/features/subCategory/store/reducer';
+import { vendorReducer } from '@/features/vendor/store/reducer';
+import { userReducer } from '@/features/users/store/reducer';
+import { roleReducer } from '@/features/roles/store/reducer';
 
 export const store = configureStore({
   reducer: {
+    auth: authReducer,
     dashboard: dashboardReducer,
     category: categoryReducer,
     experience: experienceReducer,
     settings: settingsReducer,
-    home: homeReducer,
+    subCategory: subCategoryReducer,
+    vendor: vendorReducer,
+    users: userReducer,
+    roles: roleReducer,
   },
 });
 

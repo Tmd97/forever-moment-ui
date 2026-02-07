@@ -1,0 +1,9 @@
+// Admin-specific styles
+// Use all admin layout and feature styles
+
+@use '../layouts/css/styles.scss' as admin-layout;
+@use '../features/category/pages/css/styles.scss' as category;
+@use '../features/subCategory/pages/css/styles.scss' as subcategory;
+@use '../features/experience/pages/css/styles.scss' as experience;
+@use '../features/vendor/pages/css/styles.scss' as vendor;
+@use '../features/auth/pages/css/styles.scss' as auth;

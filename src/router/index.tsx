@@ -1,20 +1,32 @@
-import { createBrowserRouter } from 'react-router-dom';
-import CustomerLayout from '@/layouts/customer/CustomerLayout';
-import AdminLayout from '@/layouts/admin/AdminLayout';
-import { adminRoutes } from '@/features/admin/routes';
-import { customerRoutes } from '@/features/customer/routes';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import AdminLayout from '@/layouts/AdminLayout';
+import { adminRoutes } from '@/features/routes';
+import { NotFound } from '@/components/common/NotFound';
+import { authRoutes } from '@/features/auth/pages/routes';
+import { ProtectedRoute } from './Protected';
 
 export const router = createBrowserRouter([
-  // Customer Routes
+  // Public Login Route
+  ...authRoutes,
+  // Redirect root to admin (which checks auth)
   {
     path: '/',
-    element: <CustomerLayout />,
-    children: customerRoutes,
+    element: <Navigate to="/admin" replace />,
   },
-  // Admin Routes
+  // Admin Routes (Protected)
   {
     path: '/admin',
-    element: <AdminLayout />,
-    children: adminRoutes,
+    element: <ProtectedRoute allowedRoles={['admin']} />,
+    children: [
+      {
+        element: <AdminLayout />,
+        children: adminRoutes,
+      }
+    ]
+  },
+  // 404 Catch-all route
+  {
+    path: '*',
+    element: <NotFound />,
   },
 ]);

@@ -1,0 +1,39 @@
+// Use variables with wildcard to make them available globally
+@use './variables' as *;
+
+// Global styles
+// Note: Using Tailwind's preflight reset, so we don't need aggressive resets here
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consales, 'Courier New',
+        monospace;
+}
+
+// Utility classes
+.container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: $spacing-md;
+    padding-right: $spacing-md;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-right {
+    text-align: right;
+}

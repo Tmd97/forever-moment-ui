@@ -3,7 +3,7 @@ import { PublicRoute } from './Public';
 import { ProtectedRoute } from './Protected';
 
 // Admin routes
-import { adminRoutes } from '@/features/admin/routes';
+import { adminRoutes } from '@/features/routes';
 
 // Customer routes
 import { homeRoutes } from '@/features/customer/home/pages/routes';

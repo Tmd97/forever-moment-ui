@@ -18,7 +18,6 @@ export interface NavigationItem {
 
 export interface NavigationConfig {
     admin: NavigationItem[];
-    customer: NavigationItem[];
 }
 
 // ============================================

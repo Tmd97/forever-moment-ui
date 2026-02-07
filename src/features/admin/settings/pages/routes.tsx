@@ -1,9 +1,0 @@
-import type { RouteObject } from 'react-router-dom';
-import SettingsPage from './SettingsPage';
-
-export const settingsRoutes: RouteObject[] = [
-    {
-        path: 'settings',
-        element: <SettingsPage />,
-    }
-];

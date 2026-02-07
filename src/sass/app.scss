@@ -1,0 +1,7 @@
+// Main application styles entry point
+// Use shared variables and base styles
+@use './variables';
+@use './main';
+
+// Use domain-specific styles
+@use './admin';
