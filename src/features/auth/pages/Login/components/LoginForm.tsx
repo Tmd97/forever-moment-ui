@@ -13,10 +13,32 @@ interface LoginFormProps {
 export const LoginForm = ({ loading, error, onSubmit }: LoginFormProps) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+    const validateForm = () => {
+        const newErrors: { email?: string; password?: string } = {};
+
+        if (!email) {
+            newErrors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            newErrors.email = 'Invalid email address';
+        }
+
+        if (!password) {
+            newErrors.password = 'Password is required';
+        } else if (password.length < 6) {
+            newErrors.password = 'Password must be at least 6 characters';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit({ email, password });
+        if (validateForm()) {
+            onSubmit({ email, password });
+        }
     };
 
     return (
@@ -32,8 +54,12 @@ export const LoginForm = ({ loading, error, onSubmit }: LoginFormProps) => {
                     required
                     disabled={loading}
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@example.com"
+                    onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (errors.email) setErrors({ ...errors, email: undefined });
+                    }}
+                    placeholder="Enter email address"
+                    error={errors.email}
                 />
 
                 <Input
@@ -46,8 +72,12 @@ export const LoginForm = ({ loading, error, onSubmit }: LoginFormProps) => {
                     required
                     disabled={loading}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="password"
+                    onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (errors.password) setErrors({ ...errors, password: undefined });
+                    }}
+                    placeholder="Enter Password"
+                    error={errors.password}
                 />
             </div>
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/features/auth/store/actions';
+import { LogoutModal } from '@/features/auth/pages/Login/components/LogoutModal';
 import { ADMIN_CONFIG } from '@/config/constants';
 import {
     LayoutDashboard,
@@ -70,10 +71,16 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
     const dispatch = useDispatch();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [expandedMenus, setExpandedMenus] = useState<string[]>(['Event Management']);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     const handleLogout = () => {
+        setShowLogoutModal(true);
+    };
+
+    const confirmLogout = () => {
         dispatch(logout());
         navigate('/login');
+        setShowLogoutModal(false);
     };
 
     // Handle initial responsive state
@@ -238,6 +245,12 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
                     </button>
                 </div>
             </aside>
+            {/* Logout Confirmation Modal */}
+            <LogoutModal
+                isOpen={showLogoutModal}
+                onClose={() => setShowLogoutModal(false)}
+                onConfirm={confirmLogout}
+            />
         </>
     );
 };

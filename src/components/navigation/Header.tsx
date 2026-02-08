@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { Bell, Settings, User, LogOut, Menu } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { logout } from '@/features/auth/store/actions';
+import { LogoutModal } from '@/features/auth/pages/Login/components/LogoutModal';
 
 interface HeaderProps {
     onToggleSidebar: () => void;
@@ -8,7 +11,10 @@ interface HeaderProps {
 
 const Header = ({ onToggleSidebar }: HeaderProps) => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown when clicking outside
@@ -40,9 +46,14 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
     };
 
     const handleLogout = () => {
-        // Add logout logic here
-        console.log('Logout clicked');
         setShowDropdown(false);
+        setShowLogoutModal(true);
+    };
+
+    const confirmLogout = () => {
+        dispatch(logout());
+        navigate('/login');
+        setShowLogoutModal(false);
     };
 
     return (
@@ -100,7 +111,13 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
                     )}
                 </div>
             </div>
-        </header>
+            {/* Logout Confirmation Modal */}
+            <LogoutModal
+                isOpen={showLogoutModal}
+                onClose={() => setShowLogoutModal(false)}
+                onConfirm={confirmLogout}
+            />
+        </header >
     );
 };
 
