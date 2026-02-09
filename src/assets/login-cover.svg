@@ -1,0 +1,52 @@
+<svg width="1800" height="2400" viewBox="0 0 1800 2400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1020" />
+      <stop offset="45%" stop-color="#0f1a3a" />
+      <stop offset="100%" stop-color="#10274f" />
+    </linearGradient>
+    <radialGradient id="glowA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(450 520) rotate(45) scale(520 520)">
+      <stop offset="0%" stop-color="#49d3ff" stop-opacity="0.55" />
+      <stop offset="65%" stop-color="#1f6fff" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#123" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glowB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1360 1480) rotate(-20) scale(640 640)">
+      <stop offset="0%" stop-color="#8cffc7" stop-opacity="0.45" />
+      <stop offset="60%" stop-color="#3aa6ff" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#123" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a2a57" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#0c1836" stop-opacity="0.8" />
+    </linearGradient>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M80 0H0V80" fill="none" stroke="#2a3b70" stroke-opacity="0.35" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6fe1ff" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#5bc8ff" stop-opacity="0.2" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1800" height="2400" fill="url(#bg)" />
+  <rect width="1800" height="2400" fill="url(#grid)" />
+  <rect width="1800" height="2400" fill="url(#glowA)" />
+  <rect width="1800" height="2400" fill="url(#glowB)" />
+
+  <g opacity="0.9">
+    <rect x="220" y="340" width="1360" height="760" rx="40" fill="url(#panel)" />
+    <rect x="250" y="380" width="1300" height="680" rx="32" stroke="url(#stroke)" stroke-width="2" fill="none"/>
+    <circle cx="340" cy="440" r="8" fill="#8fd3ff" />
+    <circle cx="380" cy="440" r="8" fill="#5d8dff" />
+    <circle cx="420" cy="440" r="8" fill="#3fd7b3" />
+    <rect x="290" y="520" width="520" height="22" rx="11" fill="#9ad0ff" fill-opacity="0.35" />
+    <rect x="290" y="580" width="840" height="18" rx="9" fill="#7ab1ff" fill-opacity="0.25" />
+    <rect x="290" y="620" width="740" height="18" rx="9" fill="#7ab1ff" fill-opacity="0.18" />
+    <rect x="290" y="680" width="980" height="12" rx="6" fill="#7ab1ff" fill-opacity="0.12" />
+  </g>
+
+  <g opacity="0.75">
+    <path d="M1400 1960C1220 1820 1000 1760 760 1760C520 1760 300 1820 120 1960" stroke="#7dd3ff" stroke-opacity="0.35" stroke-width="3" />
+    <path d="M1500 2100C1250 1930 1010 1870 760 1870C510 1870 270 1930 20 2100" stroke="#7dd3ff" stroke-opacity="0.2" stroke-width="3" />
+  </g>
+</svg>

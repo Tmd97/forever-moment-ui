@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { Bell, Settings, User, LogOut, Menu } from 'lucide-react';
+import { Bell, Settings, User, LogOut, Menu, ChevronRight } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/features/auth/store/actions';
+import { cn } from '@/utils/cn';
 import { LogoutModal } from '@/features/auth/pages/Login/components/LogoutModal';
+import { sidebarItems } from '@/config/menu';
 
 interface HeaderProps {
     onToggleSidebar: () => void;
@@ -35,15 +37,50 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
     }, [showDropdown]);
 
     // Map routes to titles
-    const getPageTitle = () => {
+    // Map routes to titles using sidebar config
+    // Map routes to breadcrumbs using sidebar config
+    // Map routes to breadcrumbs using sidebar config
+    const getBreadcrumbs = () => {
         const path = location.pathname;
-        if (path.includes('/category')) return 'Category Management';
-        if (path.includes('/sub-category')) return 'Sub Category Management';
-        if (path.includes('/experience')) return 'Experience Management';
-        if (path.includes('/vendor')) return 'Vendor Management';
-        if (path.includes('/dashboard')) return 'Dashboard';
-        return 'Admin Workspace';
+        const breadcrumbs: { label: string; path?: string }[] = [];
+
+        // Helper to check if current path is sub-path of menu item
+        const isMatch = (itemPath?: string) => {
+            if (!itemPath) return false;
+            // Exact match or prefix match (e.g. /admin/users matches /admin/users/create)
+            return path === itemPath || (itemPath !== '/admin' && path.startsWith(`${itemPath}/`));
+        };
+
+        for (const item of sidebarItems) {
+            // Check children first (more specific)
+            if (item.children) {
+                for (const child of item.children) {
+                    if (isMatch(child.path)) {
+                        breadcrumbs.push({ label: item.name }); // Parent
+                        breadcrumbs.push({ label: child.name, path: child.path });
+                        return breadcrumbs;
+                    }
+                }
+            }
+
+            // Check active parent/root item
+            if (isMatch(item.path)) {
+                breadcrumbs.push({ label: item.name, path: item.path });
+                return breadcrumbs;
+            }
+        }
+
+        // Fallback
+        if (path === '/admin') {
+            breadcrumbs.push({ label: 'Dashboard', path: '/admin' });
+        } else {
+            breadcrumbs.push({ label: 'Admin Workspace' });
+        }
+        return breadcrumbs;
     };
+
+    const breadcrumbs = getBreadcrumbs();
+    const pageTitle = breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1].label : 'Admin Workspace';
 
     const handleLogout = () => {
         setShowDropdown(false);
@@ -65,7 +102,30 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
                 >
                     <Menu size={24} />
                 </button>
-                <h2 className='text-lg font-semibold text-gray-800 dark:text-gray-200 truncate max-w-[200px] md:max-w-none'>{getPageTitle()}</h2>
+
+                <div className="flex flex-col justify-center">
+                    {/* Page Title */}
+                    <h1 className="text-lg font-bold text-blue-700 dark:text-blue-400 leading-tight">
+                        {pageTitle}
+                    </h1>
+
+                    {/* Breadcrumbs */}
+                    <nav className="flex items-center text-xs text-gray-500 dark:text-gray-400 leading-tight mt-0.5">
+                        {breadcrumbs.map((crumb, index) => {
+                            const isLast = index === breadcrumbs.length - 1;
+                            return (
+                                <div key={crumb.label} className="flex items-center">
+                                    {index > 0 && <ChevronRight size={10} className="mx-1 text-gray-400" />}
+                                    <span className={cn(
+                                        isLast ? 'text-gray-700 dark:text-gray-300 font-medium' : 'text-gray-500 dark:text-gray-400'
+                                    )}>
+                                        {crumb.label}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </nav>
+                </div>
             </div>
             <div className='flex items-center gap-2 md:gap-4'>
                 <Link

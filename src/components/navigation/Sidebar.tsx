@@ -3,62 +3,15 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/features/auth/store/actions';
 import { LogoutModal } from '@/features/auth/pages/Login/components/LogoutModal';
+import { sidebarItems, type SidebarItem } from '@/config/menu';
 import { ADMIN_CONFIG } from '@/config/constants';
 import {
-    LayoutDashboard,
-    Layers,
-    Sparkles,
     ChevronRight,
     ChevronLeft,
-    Calendar,
     ChevronDown,
-    Tag,
-    Users,
     LogOut,
-    Briefcase,
-    UserCog,
-    Store
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
-
-interface SidebarItem {
-    name: string;
-    path?: string;
-    icon: React.ElementType;
-    children?: SidebarItem[];
-}
-
-const sidebarItems = [
-    {
-        name: 'Dashboard',
-        path: '/admin',
-        icon: LayoutDashboard
-    },
-    {
-        name: 'Event Management',
-        icon: Calendar,
-        children: [
-            { name: 'Category', path: '/admin/category', icon: Layers },
-            { name: 'Sub Category', path: '/admin/subCategory', icon: Tag },
-            { name: 'Experience', path: '/admin/experience', icon: Sparkles },
-        ]
-    },
-    {
-        name: 'Service Providers',
-        icon: Briefcase,
-        children: [
-            { name: 'Vendors', path: '/admin/vendors', icon: Store },
-        ]
-    },
-    {
-        name: 'User Management',
-        icon: UserCog,
-        children: [
-            { name: 'Users', path: '/admin/users', icon: Users },
-            { name: 'Roles', path: '/admin/roles', icon: Layers }, // Using Layers for Roles as it represents hierarchy/levels
-        ]
-    },
-];
 
 interface SidebarProps {
     isOpen: boolean;
@@ -103,11 +56,22 @@ const Sidebar = ({ isOpen, onToggle }: SidebarProps) => {
         }
     };
 
+    const isPathActive = (path?: string) => {
+        if (!path) return false;
+        if (path === '/admin') {
+            return location.pathname === '/admin';
+        }
+        return location.pathname === path || location.pathname.startsWith(`${path}/`);
+    };
+
     const renderItem = (item: SidebarItem, depth = 0) => {
-        const isActive = item.path ? location.pathname === item.path : false;
+        const isActive = isPathActive(item.path);
         const hasChildren = item.children && item.children.length > 0;
-        const isExpanded = expandedMenus.includes(item.name);
         const Icon = item.icon;
+
+        // Check if any child is active
+        const isChildActive = item.children?.some(child => isPathActive(child.path));
+        const isExpanded = expandedMenus.includes(item.name) || isChildActive; // Auto-expand if child is active
 
         if (hasChildren) {
             return (

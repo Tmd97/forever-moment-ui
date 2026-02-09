@@ -58,8 +58,9 @@ export const LoginForm = ({ loading, error, onSubmit }: LoginFormProps) => {
                         setEmail(e.target.value);
                         if (errors.email) setErrors({ ...errors, email: undefined });
                     }}
-                    placeholder="Enter email address"
+                    placeholder="you@company.com"
                     error={errors.email}
+                    className="h-11 bg-white/80 dark:bg-slate-950/40 border-slate-200/70 focus-visible:ring-indigo-500 dark:border-slate-700/60"
                 />
 
                 <Input
@@ -76,9 +77,26 @@ export const LoginForm = ({ loading, error, onSubmit }: LoginFormProps) => {
                         setPassword(e.target.value);
                         if (errors.password) setErrors({ ...errors, password: undefined });
                     }}
-                    placeholder="Enter Password"
+                    placeholder="Enter your password"
                     error={errors.password}
+                    className="h-11 bg-white/80 dark:bg-slate-950/40 border-slate-200/70 focus-visible:ring-indigo-500 dark:border-slate-700/60"
                 />
+            </div>
+
+            <div className="flex items-center justify-between text-sm">
+                <label className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                    <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    Remember me
+                </label>
+                <button
+                    type="button"
+                    className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200"
+                >
+                    Forgot password?
+                </button>
             </div>
 
             {error && (
@@ -105,7 +123,7 @@ export const LoginForm = ({ loading, error, onSubmit }: LoginFormProps) => {
                     variant="brand"
                     isLoading={loading}
                     loadingText="Signing in..."
-                    className="w-full"
+                    className="w-full h-11"
                 >
                     Sign in
                 </Button>
