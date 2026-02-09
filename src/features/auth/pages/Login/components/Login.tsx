@@ -27,8 +27,7 @@ const Login = ({ loading, error, login }: LoginProps) => {
     return (
         <div className="min-h-screen w-full flex bg-slate-50 dark:bg-slate-950 relative overflow-hidden">
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute -top-20 -left-20 h-72 w-72 rounded-full bg-indigo-200/50 blur-3xl dark:bg-indigo-500/10" />
-                <div className="absolute bottom-10 right-0 h-64 w-64 rounded-full bg-cyan-200/60 blur-3xl dark:bg-cyan-500/10" />
+                {/* Background blobs removed */}
             </div>
             <div className="hidden lg:block w-1/2 relative">
                 <LoginCover />

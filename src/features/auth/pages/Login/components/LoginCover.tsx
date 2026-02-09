@@ -6,8 +6,7 @@ export const LoginCover = ({ coverImage = '/src/assets/login-cover.svg' }: Login
     return (
         <div className="hidden lg:block relative h-full w-full bg-slate-950 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/90 via-slate-900/70 to-slate-800/20 z-10" />
-            <div className="absolute -top-32 -right-24 h-80 w-80 rounded-full bg-cyan-400/20 blur-3xl" />
-            <div className="absolute bottom-10 -left-20 h-72 w-72 rounded-full bg-emerald-400/20 blur-3xl" />
+            {/* Background blobs removed */}
             <img
                 src={coverImage}
                 alt="Event Management ERP"
@@ -18,7 +17,7 @@ export const LoginCover = ({ coverImage = '/src/assets/login-cover.svg' }: Login
                     Built for teams
                 </div>
                 <div className="backdrop-blur-sm bg-black/35 p-7 rounded-3xl border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.35)]">
-                    <h1 className="font-display text-4xl font-semibold mb-4 bg-gradient-to-r from-cyan-300 to-emerald-300 bg-clip-text text-transparent">
+                    <h1 className="font-display text-4xl font-semibold mb-4 text-white">
                         Event Management ERP
                     </h1>
                     <p className="text-lg text-white/80 max-w-md leading-relaxed">
