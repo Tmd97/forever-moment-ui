@@ -3,19 +3,19 @@ import { Button } from '@/components/common/Button';
 import { Loader2 } from 'lucide-react';
 
 interface CategoryFormProps {
-    initialData?: { name: string; isActive: boolean };
-    onSubmit: (data: { name: string; isActive: boolean }) => void;
+    initialData?: { name: string; description?: string; isActive: boolean };
+    onSubmit: (data: { name: string; description: string; isActive: boolean }) => void;
     onCancel: () => void;
     submitLabel: string;
     isLoading?: boolean;
 }
 
 export const CategoryForm = ({ initialData, onSubmit, onCancel, submitLabel, isLoading }: CategoryFormProps) => {
-    const [formData, setFormData] = useState(initialData || { name: '', isActive: true });
+    const [formData, setFormData] = useState(initialData || { name: '', description: '', isActive: true });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(formData);
+        onSubmit({ ...formData, description: formData.description || '' });
     };
 
     return (
@@ -33,6 +33,16 @@ export const CategoryForm = ({ initialData, onSubmit, onCancel, submitLabel, isL
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
+                    disabled={isLoading}
+                />
+            </div>
+            <div>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Description</label>
+                <textarea
+                    className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed resize-none'
+                    rows={3}
+                    value={formData.description || ''}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     disabled={isLoading}
                 />
             </div>

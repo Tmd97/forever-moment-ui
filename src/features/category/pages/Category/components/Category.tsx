@@ -38,7 +38,7 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [formData, setFormData] = useState({ name: '', isActive: true });
+    const [formData, setFormData] = useState({ name: '', description: '', isActive: true });
 
     const [categories, setCategories] = useState<CategoryType[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(null);
@@ -88,30 +88,31 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
     const handleOpenModal = (category: CategoryType | null = null) => {
         if (category) {
             setEditingId(category.id);
-            setFormData({ name: category.name, isActive: category.isActive });
+            setFormData({ name: category.name, description: category.description || '', isActive: category.isActive });
         } else {
             setEditingId(null);
-            setFormData({ name: '', isActive: true });
+            setFormData({ name: '', description: '', isActive: true });
         }
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setFormData({ name: '', isActive: true });
+        setFormData({ name: '', description: '', isActive: true });
         setEditingId(null);
     };
 
-    const handleFormSubmit = async (data: { name: string; isActive: boolean }) => {
+    const handleFormSubmit = async (submittedData: { name: string; description: string; isActive: boolean }) => {
         if (editingId) {
             try {
+                const categoryToUpdate = data?.find((c: CategoryType) => c.id === editingId);
                 await updateCategory(editingId, {
-                    name: data.name,
-                    description: selectedCategory?.description || "",
-                    slug: selectedCategory?.slug || "",
-                    icon: selectedCategory?.icon || "",
-                    displayOrder: selectedCategory?.displayOrder || 0,
-                    isActive: data.isActive
+                    name: submittedData.name,
+                    description: submittedData.description,
+                    slug: categoryToUpdate?.slug || "",
+                    icon: categoryToUpdate?.icon || "",
+                    displayOrder: categoryToUpdate?.displayOrder || 0,
+                    isActive: submittedData.isActive
                 });
                 toast.success('Category updated successfully');
                 handleCloseModal();
@@ -121,11 +122,15 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
             }
         } else {
             try {
+                const maxOrder = data?.length > 0
+                    ? Math.max(...data.map((c: CategoryType) => c.displayOrder || 0))
+                    : 0;
+                const nextOrder = maxOrder + 1;
                 await createCategory({
-                    name: data.name,
-                    description: "",
-                    displayOrder: 0,
-                    isActive: data.isActive
+                    name: submittedData.name,
+                    description: submittedData.description,
+                    displayOrder: nextOrder,
+                    isActive: submittedData.isActive
                 });
                 toast.success('Category created successfully');
                 handleCloseModal();
@@ -186,11 +191,22 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
                             {
                                 header: 'Name',
                                 accessorKey: 'name' as const,
-                                className: 'w-[60%] min-w-[200px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
+                                className: 'w-[25%] min-w-[150px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
                             },
                             {
+                                header: 'Description',
+                                accessorKey: 'description' as const,
+                                className: 'w-[30%] min-w-[200px] py-3 px-4 text-left',
+                                render: (category) => (
+                                    <div className="truncate max-w-[300px]" title={category.description}>
+                                        {category.description || '-'}
+                                    </div>
+                                )
+                            },
+
+                            {
                                 header: 'Status',
-                                className: 'w-[20%] min-w-[120px] py-3 px-4 text-left',
+                                className: 'w-[15%] min-w-[120px] py-3 px-4 text-left',
                                 render: (category) => (
                                     <span className={cn(
                                         'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
@@ -256,6 +272,8 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleConfirmDelete}
                 itemType="Category"
+                title='Delete Category'
+                description='This is will delete the category from the system.Are you sure?'
             />
         </div >
     );
