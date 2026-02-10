@@ -9,32 +9,51 @@ import { DeleteModal } from '@/components/common/DeleteModal';
 import { Filter, type FilterCategory } from '@/components/common/Filter';
 import { cn } from '@/utils/cn';
 import { Trash2, Edit2, Plus } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface SubCategoryProps {
     data: any;
     loading: boolean;
     error: string | null;
     getSubCategoryData: () => void;
+    categories: any[];
+    getCategoryData: () => void;
+    createSubCategory: (data: any) => void;
+    updateSubCategory: (id: number, data: any) => void;
+    deleteSubCategory: (id: number) => void;
 }
 
 export interface SubCategoryType {
     id: number;
     name: string;
+    description?: string;
     count: number;
     status: string;
+    categoryId?: number;
 }
 
-const SubCategory = ({ data, loading, error, getSubCategoryData }: SubCategoryProps) => {
+const SubCategory = ({
+    data,
+    loading,
+    error,
+    getSubCategoryData,
+    categories,
+    getCategoryData,
+    createSubCategory,
+    updateSubCategory,
+    deleteSubCategory
+}: SubCategoryProps) => {
+    // Keep loading for potential future use or debugging
     console.log(loading);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [formData, setFormData] = useState({ name: '', status: 'Active' });
+    const [formData, setFormData] = useState<{ name: string; description: string; status: string; categoryId?: number }>({ name: '', description: '', status: 'Active' });
 
-    const [subCategories, setSubCategories] = useState<SubCategoryType[]>([]);
+    // const [subCategories, setSubCategories] = useState<SubCategoryType[]>([]);
     const [selectedSubCategory, setSelectedSubCategory] = useState<SubCategoryType | null>(null);
-    const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
+    const [_activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
 
     const handleRowClick = (subCategory: SubCategoryType) => {
         setSelectedSubCategory(subCategory);
@@ -42,28 +61,24 @@ const SubCategory = ({ data, loading, error, getSubCategoryData }: SubCategoryPr
 
     useEffect(() => {
         getSubCategoryData();
-    }, [getSubCategoryData]);
+        getCategoryData();
+    }, [getSubCategoryData, getCategoryData]);
 
-    useEffect(() => {
-        if (data && Array.isArray(data)) {
-            setSubCategories(data);
-        }
-    }, [data]);
 
-    const SUB_CATEGORIES_DATA = [
-        { id: 1, name: 'Indian Wedding', count: 5, status: 'Active' },
-        { id: 2, name: 'Kids Birthday', count: 3, status: 'Active' },
-        { id: 3, name: 'Silver Jubilee', count: 2, status: 'Active' },
-        { id: 4, name: 'Tech Conference', count: 10, status: 'Inactive' },
-        { id: 5, name: 'Baby Shower Games', count: 1, status: 'Active' },
-    ];
-
-    useEffect(() => {
-        setSubCategories(SUB_CATEGORIES_DATA);
-    }, []);
 
     // Filter configuration
+    const categoryOptions = categories?.map(cat => ({
+        id: String(cat.id),
+        label: cat.name,
+        value: String(cat.id)
+    })) || [];
+
     const filterCategories: FilterCategory[] = [
+        {
+            id: 'categoryId',
+            name: 'Category',
+            options: categoryOptions
+        },
         {
             id: 'status',
             name: 'Status',
@@ -76,37 +91,52 @@ const SubCategory = ({ data, loading, error, getSubCategoryData }: SubCategoryPr
 
     const handleFilterChange = (filters: Record<string, string[]>) => {
         setActiveFilters(filters);
-        let filtered = SUB_CATEGORIES_DATA;
-
-        if (filters.status && filters.status.length > 0) {
-            filtered = filtered.filter(sub => filters.status.includes(sub.status));
-        }
-
-        setSubCategories(filtered);
     };
+
+    // Apply filters to data
+    let filteredSubCategories = Array.isArray(data) ? data : [];
+
+    // Filter by Status
+    if (_activeFilters.status && _activeFilters.status.length > 0) {
+        filteredSubCategories = filteredSubCategories.filter((sub: SubCategoryType) => _activeFilters.status.includes(sub.status));
+    }
+
+    // Filter by Category
+    if (_activeFilters.categoryId && _activeFilters.categoryId.length > 0) {
+        filteredSubCategories = filteredSubCategories.filter((sub: SubCategoryType) =>
+            sub.categoryId && _activeFilters.categoryId.includes(String(sub.categoryId))
+        );
+    }
 
     const handleOpenModal = (subCategory: SubCategoryType | null = null) => {
         if (subCategory) {
             setEditingId(subCategory.id);
-            setFormData({ name: subCategory.name, status: subCategory.status });
+            setFormData({
+                name: subCategory.name,
+                description: subCategory.description || '',
+                status: subCategory.status,
+                categoryId: subCategory.categoryId
+            });
         } else {
             setEditingId(null);
-            setFormData({ name: '', status: 'Active' });
+            setFormData({ name: '', description: '', status: 'Active', categoryId: undefined });
         }
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setFormData({ name: '', status: 'Active' });
+        setFormData({ name: '', description: '', status: 'Active', categoryId: undefined });
         setEditingId(null);
     };
 
-    const handleFormSubmit = (data: { name: string; status: string }) => {
+    const handleFormSubmit = (submitData: { name: string; description: string; status: string; categoryId: number }) => {
         if (editingId) {
-            setSubCategories(subCategories.map(c => c.id === editingId ? { ...c, ...data } : c));
+            updateSubCategory(editingId, submitData);
+            toast.success('Sub Category updated successfully');
         } else {
-            setSubCategories([...subCategories, { id: subCategories.length + 1, count: 0, ...data }]);
+            createSubCategory(submitData);
+            toast.success('Sub Category created successfully');
         }
         handleCloseModal();
     };
@@ -118,8 +148,10 @@ const SubCategory = ({ data, loading, error, getSubCategoryData }: SubCategoryPr
 
     const handleConfirmDelete = () => {
         if (deleteId) {
-            setSubCategories(subCategories.filter(c => c.id !== deleteId));
+            deleteSubCategory(deleteId);
+            toast.success('Sub Category deleted successfully');
             setDeleteId(null);
+            setIsDeleteModalOpen(false);
         }
     };
 
@@ -140,7 +172,7 @@ const SubCategory = ({ data, loading, error, getSubCategoryData }: SubCategoryPr
                         onFilterChange={handleFilterChange}
                     />
                     <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
-                        <Plus size={16} className="mr-2" /> Add Sub Category
+                        <Plus size={6} className="mr-2" />Add Sub Category
                     </Button>
                 </div>
             </div>
@@ -148,12 +180,25 @@ const SubCategory = ({ data, loading, error, getSubCategoryData }: SubCategoryPr
             <div className="flex flex-1 min-h-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
                 <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
                     <DataTable
-                        data={subCategories}
+                        data={filteredSubCategories}
+                        loading={loading}
                         columns={[
                             {
                                 header: 'Name',
                                 accessorKey: 'name' as const,
-                                className: 'w-[60%] min-w-[200px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
+                                className: 'w-[40%] min-w-[200px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
+                            },
+                            {
+                                header: 'Category',
+                                className: 'w-[20%] min-w-[150px] py-3 px-4 text-left',
+                                render: (subCategory) => {
+                                    const category = categories?.find(c => c.id === subCategory.categoryId);
+                                    return (
+                                        <span className="text-gray-700 dark:text-gray-300">
+                                            {category ? category.name : '-'}
+                                        </span>
+                                    );
+                                }
                             },
                             {
                                 header: 'Status',
@@ -210,10 +255,16 @@ const SubCategory = ({ data, loading, error, getSubCategoryData }: SubCategoryPr
                 title={editingId ? 'Edit Sub Category' : 'Add Sub Category'}
             >
                 <SubCategoryForm
-                    initialData={editingId ? { name: formData.name, status: formData.status } : undefined}
+                    initialData={editingId ? {
+                        name: formData.name,
+                        description: formData.description,
+                        status: formData.status,
+                        categoryId: formData.categoryId
+                    } : undefined}
                     onSubmit={handleFormSubmit}
                     onCancel={handleCloseModal}
                     submitLabel={editingId ? 'Save Changes' : 'Create Sub Category'}
+                    categories={categories}
                 />
             </Modal>
 

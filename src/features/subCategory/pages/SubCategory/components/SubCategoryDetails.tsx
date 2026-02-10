@@ -12,6 +12,10 @@ export const SubCategoryDetails = ({ subCategory, onEdit }: SubCategoryDetailsPr
         <div className="space-y-6">
             <div className="space-y-4">
                 <div>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Description</h3>
+                    <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{subCategory.description || '-'}</p>
+                </div>
+                <div>
                     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Events</h3>
                     <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{subCategory.count}</p>
                 </div>

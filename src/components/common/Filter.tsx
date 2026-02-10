@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Search, X } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Search, X, ListFilter } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import './Filter.scss';
 
@@ -91,11 +91,9 @@ export const Filter: React.FC<FilterProps> = ({
                 onClick={() => setIsOpen(!isOpen)}
             >
                 {isOpen ? (
-                    <X size={16} style={{ color: '#575757', marginRight: '8px' }} />
+                    <X size={16} className="filter-icon" />
                 ) : (
-                    <svg className="filter-icon" width="12" height="11" viewBox="0 0 12 11" fill="none">
-                        <path d="M0 0H12V1.5H0V0ZM2 4.5H10V6H2V4.5ZM4 9H8V10.5H4V9Z" fill="#575757" />
-                    </svg>
+                    <ListFilter size={16} className="filter-icon" />
                 )}
                 <span className="filter-open-btn-text">
                     Filters{' '}
