@@ -10,6 +10,7 @@ import { DeleteModal } from '@/components/common/DeleteModal';
 import { Filter, type FilterCategory } from '@/components/common/Filter';
 import { cn } from '@/utils/cn';
 import { Trash2, Edit2, Plus } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface CategoryProps {
     data: any;
@@ -33,19 +34,15 @@ export interface CategoryType {
 }
 
 const Category = ({ data, loading, error, getCategoryData, createCategory, deleteCategory, updateCategory }: CategoryProps) => {
-    // Keep local UI state for modal/forms
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [formData, setFormData] = useState({ name: '', isActive: true });
 
-    // Use local state for immediate interaction, sync with redux in real app
     const [categories, setCategories] = useState<CategoryType[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(null);
     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
-
-    // ... existing filter logic ...
 
     const handleRowClick = (category: CategoryType) => {
         setSelectedCategory(category);
@@ -55,14 +52,12 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
         getCategoryData();
     }, [getCategoryData]);
 
-    // Use store data if available
     useEffect(() => {
         if (data && Array.isArray(data)) {
             setCategories(data);
         }
     }, [data]);
 
-    // Filter configuration
     const filterCategories: FilterCategory[] = [
         {
             id: 'status',
@@ -76,8 +71,7 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
 
     const handleFilterChange = (filters: Record<string, string[]>) => {
         setActiveFilters(filters);
-        // Apply filters to categories
-        let filtered = data || []; // Use API data as source
+        let filtered = data || [];
 
         if (filters.status && filters.status.length > 0) {
             filtered = filtered.filter((cat: CategoryType) => {
@@ -111,32 +105,33 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
     const handleFormSubmit = async (data: { name: string; isActive: boolean }) => {
         if (editingId) {
             try {
-                // Update API call
                 await updateCategory(editingId, {
                     name: data.name,
-                    description: selectedCategory?.description || "", // Preserve existing or default
-                    slug: selectedCategory?.slug || "", // Preserve existing or default
-                    icon: selectedCategory?.icon || "", // Preserve existing or default
-                    displayOrder: selectedCategory?.displayOrder || 0, // Preserve existing or default
+                    description: selectedCategory?.description || "",
+                    slug: selectedCategory?.slug || "",
+                    icon: selectedCategory?.icon || "",
+                    displayOrder: selectedCategory?.displayOrder || 0,
                     isActive: data.isActive
                 });
+                toast.success('Category updated successfully');
                 handleCloseModal();
             } catch (err) {
                 console.error("Failed to update category", err);
+                toast.error('Failed to update category');
             }
         } else {
             try {
-                // Call create API
                 await createCategory({
                     name: data.name,
                     description: "",
                     displayOrder: 0,
                     isActive: data.isActive
                 });
+                toast.success('Category created successfully');
                 handleCloseModal();
             } catch (err) {
                 console.error("Failed to create category", err);
-                // Do not close modal on error
+                toast.error('Failed to create category');
             }
         }
     };
@@ -150,10 +145,12 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
         if (deleteId) {
             try {
                 await deleteCategory(deleteId);
+                toast.success('Category deleted successfully');
                 setDeleteId(null);
                 setIsDeleteModalOpen(false);
             } catch (error) {
                 console.error("Failed to delete category", error);
+                toast.error('Failed to delete category');
             }
         }
     };
@@ -176,7 +173,7 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
                         onFilterChange={handleFilterChange}
                     />
                     <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
-                        <Plus size={12} />Add Category
+                        <Plus size={2} />Add Category
                     </Button>
                 </div>
             </div>
@@ -254,7 +251,6 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
                     isLoading={loading}
                 />
             </Modal>
-
             <DeleteModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
