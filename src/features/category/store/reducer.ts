@@ -14,6 +14,28 @@ export const categoryReducer = (state = initialState, action: any) => {
             return { ...state, loading: false, data: action.payload };
         case types.GET_CATEGORY_DATA_FAILURE:
             return { ...state, loading: false, error: action.payload };
+
+        case types.CREATE_CATEGORY:
+            return { ...state, loading: true, error: null };
+        case types.CREATE_CATEGORY_SUCCESS:
+            return { ...state, loading: false }; // Data might be refreshed by getCategoryData
+        case types.CREATE_CATEGORY_FAILURE:
+            return { ...state, loading: false, error: action.payload };
+
+        case types.DELETE_CATEGORY:
+            return { ...state, loading: true, error: null };
+        case types.DELETE_CATEGORY_SUCCESS:
+            return { ...state, loading: false };
+        case types.DELETE_CATEGORY_FAILURE:
+            return { ...state, loading: false, error: action.payload };
+
+        case types.UPDATE_CATEGORY:
+            return { ...state, loading: true, error: null };
+        case types.UPDATE_CATEGORY_SUCCESS:
+            return { ...state, loading: false };
+        case types.UPDATE_CATEGORY_FAILURE:
+            return { ...state, loading: false, error: action.payload };
+
         default:
             return state;
     }

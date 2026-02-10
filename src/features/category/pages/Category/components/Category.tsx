@@ -10,36 +10,42 @@ import { DeleteModal } from '@/components/common/DeleteModal';
 import { Filter, type FilterCategory } from '@/components/common/Filter';
 import { cn } from '@/utils/cn';
 import { Trash2, Edit2, Plus } from 'lucide-react';
-import { CATEGORIES_DATA } from '../../../../data/mockData';
 
 interface CategoryProps {
     data: any;
     loading: boolean;
     error: string | null;
     getCategoryData: () => void;
+    createCategory: (data: any) => Promise<any>;
+    deleteCategory: (id: number) => Promise<any>;
+    updateCategory: (id: number, data: any) => Promise<any>;
 }
 
 export interface CategoryType {
     id: number;
     name: string;
     count: number;
-    status: string;
+    isActive: boolean;
+    description?: string;
+    slug?: string;
+    icon?: string;
+    displayOrder?: number;
 }
 
-const Category = ({ data, loading, error, getCategoryData }: CategoryProps) => {
+const Category = ({ data, loading, error, getCategoryData, createCategory, deleteCategory, updateCategory }: CategoryProps) => {
     // Keep local UI state for modal/forms
-    console.log(loading); // Silence unused var warning while keeping prop for future use
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [formData, setFormData] = useState({ name: '', status: 'Active' });
+    const [formData, setFormData] = useState({ name: '', isActive: true });
 
     // Use local state for immediate interaction, sync with redux in real app
-    // For now, initializing with props.data if available or mock
     const [categories, setCategories] = useState<CategoryType[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(null);
     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
+
+    // ... existing filter logic ...
 
     const handleRowClick = (category: CategoryType) => {
         setSelectedCategory(category);
@@ -49,33 +55,12 @@ const Category = ({ data, loading, error, getCategoryData }: CategoryProps) => {
         getCategoryData();
     }, [getCategoryData]);
 
-    // Use store data if available, otherwise keep local mock data (or initialize with it)
+    // Use store data if available
     useEffect(() => {
         if (data && Array.isArray(data)) {
             setCategories(data);
         }
     }, [data]);
-
-    useEffect(() => {
-        if (data) {
-            // In a real app, data from store would drive the UI directly
-            // For this refactor, we'll assume data comes from store
-            // But since store data is currently null/mocked async, 
-            // and the original code used a constant, I should be careful.
-            // usage of CATEGORIES_DATA was direct. 
-            // I will preserve the original behavior but trigger the action.
-        }
-    }, [data]);
-
-    // Re-importing mock data here for functionality continuity if store returns nothing yet
-    // In a real migration, we'd move this data definition to the API/Reducer.
-    // I'll stick to the user's request of "moving the code".
-    useEffect(() => {
-        // Use shared mock data if no prop data is provided
-        if ((!data || data.length === 0) && !loading) {
-            setCategories(CATEGORIES_DATA);
-        }
-    }, [data, loading]);
 
     // Filter configuration
     const filterCategories: FilterCategory[] = [
@@ -83,41 +68,25 @@ const Category = ({ data, loading, error, getCategoryData }: CategoryProps) => {
             id: 'status',
             name: 'Status',
             options: [
-                { id: '1', label: 'Active', value: 'Active' },
-                { id: '2', label: 'Inactive', value: 'Inactive' },
+                { id: '1', label: 'Active', value: 'true' },
+                { id: '2', label: 'Inactive', value: 'false' },
             ]
-        },
-        {
-            id: 'count',
-            name: 'Event Count',
-            options: [
-                { id: '1', label: '0-5 events', value: '0-5' },
-                { id: '2', label: '6-10 events', value: '6-10' },
-                { id: '3', label: '11+ events', value: '11+' },
-            ]
-        },
+        }
     ];
 
     const handleFilterChange = (filters: Record<string, string[]>) => {
         setActiveFilters(filters);
         // Apply filters to categories
-        let filtered = CATEGORIES_DATA;
+        let filtered = data || []; // Use API data as source
 
         if (filters.status && filters.status.length > 0) {
-            filtered = filtered.filter(cat => filters.status.includes(cat.status));
-        }
-
-        if (filters.count && filters.count.length > 0) {
-            filtered = filtered.filter(cat => {
-                const count = cat.count;
-                return filters.count.some(range => {
-                    if (range === '0-5') return count >= 0 && count <= 5;
-                    if (range === '6-10') return count >= 6 && count <= 10;
-                    if (range === '11+') return count >= 11;
-                    return false;
-                });
+            filtered = filtered.filter((cat: CategoryType) => {
+                const isActiveString = cat.isActive ? 'true' : 'false';
+                return filters.status.includes(isActiveString);
             });
         }
+
+
 
         setCategories(filtered);
     };
@@ -125,27 +94,51 @@ const Category = ({ data, loading, error, getCategoryData }: CategoryProps) => {
     const handleOpenModal = (category: CategoryType | null = null) => {
         if (category) {
             setEditingId(category.id);
-            setFormData({ name: category.name, status: category.status });
+            setFormData({ name: category.name, isActive: category.isActive });
         } else {
             setEditingId(null);
-            setFormData({ name: '', status: 'Active' });
+            setFormData({ name: '', isActive: true });
         }
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setFormData({ name: '', status: 'Active' });
+        setFormData({ name: '', isActive: true });
         setEditingId(null);
     };
 
-    const handleFormSubmit = (data: { name: string; status: string }) => {
+    const handleFormSubmit = async (data: { name: string; isActive: boolean }) => {
         if (editingId) {
-            setCategories(categories.map(c => c.id === editingId ? { ...c, ...data } : c));
+            try {
+                // Update API call
+                await updateCategory(editingId, {
+                    name: data.name,
+                    description: selectedCategory?.description || "", // Preserve existing or default
+                    slug: selectedCategory?.slug || "", // Preserve existing or default
+                    icon: selectedCategory?.icon || "", // Preserve existing or default
+                    displayOrder: selectedCategory?.displayOrder || 0, // Preserve existing or default
+                    isActive: data.isActive
+                });
+                handleCloseModal();
+            } catch (err) {
+                console.error("Failed to update category", err);
+            }
         } else {
-            setCategories([...categories, { id: categories.length + 1, count: 0, ...data }]);
+            try {
+                // Call create API
+                await createCategory({
+                    name: data.name,
+                    description: "",
+                    displayOrder: 0,
+                    isActive: data.isActive
+                });
+                handleCloseModal();
+            } catch (err) {
+                console.error("Failed to create category", err);
+                // Do not close modal on error
+            }
         }
-        handleCloseModal();
     };
 
     const handleDeleteClick = (id: number) => {
@@ -153,10 +146,15 @@ const Category = ({ data, loading, error, getCategoryData }: CategoryProps) => {
         setIsDeleteModalOpen(true);
     };
 
-    const handleConfirmDelete = () => {
+    const handleConfirmDelete = async () => {
         if (deleteId) {
-            setCategories(categories.filter(c => c.id !== deleteId));
-            setDeleteId(null);
+            try {
+                await deleteCategory(deleteId);
+                setDeleteId(null);
+                setIsDeleteModalOpen(false);
+            } catch (error) {
+                console.error("Failed to delete category", error);
+            }
         }
     };
 
@@ -178,7 +176,7 @@ const Category = ({ data, loading, error, getCategoryData }: CategoryProps) => {
                         onFilterChange={handleFilterChange}
                     />
                     <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
-                        <Plus size={16} className="mr-2" /> Add Category
+                        <Plus size={12} />Add Category
                     </Button>
                 </div>
             </div>
@@ -199,9 +197,9 @@ const Category = ({ data, loading, error, getCategoryData }: CategoryProps) => {
                                 render: (category) => (
                                     <span className={cn(
                                         'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
-                                        category.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+                                        category.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
                                     )}>
-                                        {category.status}
+                                        {category.isActive ? 'Active' : 'Inactive'}
                                     </span>
                                 )
                             },
@@ -223,6 +221,7 @@ const Category = ({ data, loading, error, getCategoryData }: CategoryProps) => {
                         keyExtractor={(item) => item.id}
                         onRowClick={handleRowClick}
                         selectedId={selectedCategory?.id}
+                        loading={loading}
                     />
                 </div>
 
@@ -248,10 +247,11 @@ const Category = ({ data, loading, error, getCategoryData }: CategoryProps) => {
                 title={editingId ? 'Edit Category' : 'Add Category'}
             >
                 <CategoryForm
-                    initialData={editingId ? { name: formData.name, status: formData.status } : undefined}
+                    initialData={editingId ? formData : undefined}
                     onSubmit={handleFormSubmit}
                     onCancel={handleCloseModal}
-                    submitLabel={editingId ? 'Save Changes' : 'Create Category'}
+                    submitLabel={editingId ? 'Update' : 'Save'}
+                    isLoading={loading}
                 />
             </Modal>
 

@@ -1,5 +1,5 @@
-// Table imports removed as we are using raw HTML tags to fix scrolling behavior
 import { cn } from '@/utils/cn';
+import { Loader2 } from 'lucide-react';
 
 export interface Column<T> {
     header: string;
@@ -14,9 +14,10 @@ interface DataTableProps<T> {
     keyExtractor: (item: T) => string | number;
     onRowClick?: (item: T) => void;
     selectedId?: string | number | null;
+    loading?: boolean;
 }
 
-export const DataTable = <T,>({ data, columns, keyExtractor, onRowClick, selectedId }: DataTableProps<T>) => {
+export const DataTable = <T,>({ data, columns, keyExtractor, onRowClick, selectedId, loading }: DataTableProps<T>) => {
     return (
         <div className="flex-1 overflow-auto">
             <table className="table-fixed min-w-[800px] w-full caption-bottom text-sm">
@@ -36,7 +37,16 @@ export const DataTable = <T,>({ data, columns, keyExtractor, onRowClick, selecte
                     </tr>
                 </thead>
                 <tbody className="[&_tr:last-child]:border-0">
-                    {data.length ? (
+                    {loading ? (
+                        <tr>
+                            <td colSpan={columns.length} className="h-64 text-center align-middle">
+                                <div className="flex items-center justify-center h-full w-full">
+                                    <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
+                                </div>
+                            </td>
+                        </tr>
+                    ) : data.length ? (
+                        /* ... existing mapping logic ... */
                         data.map((item) => (
                             <tr
                                 key={keyExtractor(item)}

@@ -56,6 +56,8 @@ axios.interceptors.request.use(
         const token = getLoginSession("access_token");
         if (token) {
             (config.headers as any).accessToken = token;
+            // Add Authorization header for JWT standard compliance
+            config.headers.Authorization = `Bearer ${token}`;
         }
 
         if (!config.headers?.["x-pm-header"]) {
