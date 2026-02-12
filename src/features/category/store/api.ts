@@ -15,3 +15,7 @@ export const deleteCategoryApi = async (id: number) => {
 export const updateCategoryApi = async (id: number, data: any) => {
     return await axios.put(`/admin/categories/${id}`, data);
 };
+
+export const reorderCategoryApi = async (data: { id: number; newPosition: number }) => {
+    return await axios.patch('/admin/categories/reorder', data);
+};

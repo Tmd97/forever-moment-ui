@@ -1,8 +1,10 @@
 import * as types from './action-types';
 import { createCategoryApi, fetchCategoryData, deleteCategoryApi, updateCategoryApi } from './api';
 
-export const getCategoryData = () => async (dispatch: any) => {
-    dispatch({ type: types.GET_CATEGORY_DATA });
+export const getCategoryData = (isBackground: boolean = false) => async (dispatch: any) => {
+    if (!isBackground) {
+        dispatch({ type: types.GET_CATEGORY_DATA });
+    }
     try {
         const response = await fetchCategoryData();
         dispatch({
@@ -85,3 +87,27 @@ export const updateCategory = (id: number, data: any) => async (dispatch: any) =
         throw error;
     }
 };
+
+export const reorderCategory = (data: { id: number; newPosition: number }) => async (dispatch: any) => {
+    dispatch({ type: types.REORDER_CATEGORY });
+    try {
+        // Optimistically update or just wait for refresh
+        const response = await import('./api').then(api => api.reorderCategoryApi(data));
+        dispatch({
+            type: types.REORDER_CATEGORY_SUCCESS,
+            payload: response.data,
+        });
+        dispatch(getCategoryData(true));
+        return response.data;
+    } catch (error: any) {
+        dispatch({
+            type: types.REORDER_CATEGORY_FAILURE,
+            payload: error.response?.data?.message || 'Failed to reorder category',
+        });
+        throw error;
+    }
+};
+
+export const resetStatus = () => ({
+    type: types.RESET_STATUS
+});

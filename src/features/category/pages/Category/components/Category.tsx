@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 // Modal is used in JSX
 import { Button } from '@/components/common/Button';
-import { DataTable } from '@/components/common/DataTable';
+import { DataTable } from '@/components/common/DataTable'; // Refactored import
 import { Modal } from '@/components/common/Modal';
 import { SidePanel } from '@/components/common/SidePanel';
 import { CategoryForm } from './CategoryForm';
@@ -11,15 +11,19 @@ import { Filter, type FilterCategory } from '@/components/common/Filter';
 import { cn } from '@/utils/cn';
 import { Trash2, Edit2, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
+import * as types from '@/features/category/store/action-types';
 
 interface CategoryProps {
     data: any;
     loading: boolean;
     error: string | null;
+    status: string;
     getCategoryData: () => void;
     createCategory: (data: any) => Promise<any>;
     deleteCategory: (id: number) => Promise<any>;
     updateCategory: (id: number, data: any) => Promise<any>;
+    reorderCategory: (data: { id: number; newPosition: number }) => Promise<any>;
+    resetStatus: () => void;
 }
 
 export interface CategoryType {
@@ -33,7 +37,18 @@ export interface CategoryType {
     displayOrder?: number;
 }
 
-const Category = ({ data, loading, error, getCategoryData, createCategory, deleteCategory, updateCategory }: CategoryProps) => {
+const Category = ({
+    data,
+    loading,
+    error,
+    status,
+    getCategoryData,
+    createCategory,
+    deleteCategory,
+    updateCategory,
+    reorderCategory,
+    resetStatus
+}: CategoryProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -54,9 +69,67 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
 
     useEffect(() => {
         if (data && Array.isArray(data)) {
-            setCategories(data);
+            const sortedData = [...data].sort((a: CategoryType, b: CategoryType) =>
+                (a.displayOrder || 0) - (b.displayOrder || 0)
+            );
+            setCategories(sortedData);
         }
     }, [data]);
+
+    useEffect(() => {
+        if (status === types.CREATE_CATEGORY_SUCCESS) {
+            toast.success('Category created successfully');
+            resetStatus();
+            handleCloseModal();
+        } else if (status === types.UPDATE_CATEGORY_SUCCESS) {
+            toast.success('Category updated successfully');
+            resetStatus();
+            handleCloseModal();
+        } else if (status === types.DELETE_CATEGORY_SUCCESS) {
+            toast.success('Category deleted successfully');
+            resetStatus();
+            setIsDeleteModalOpen(false);
+            setDeleteId(null);
+        } else if (status === 'FAILURE' && error) {
+            toast.error(error || 'An error occurred');
+        }
+    }, [status, error, resetStatus]);
+
+
+    const handleDragReorder = async (newOrder: CategoryType[], activeId: string | number, _overId: string | number) => {
+        // Optimistically update the state
+        setCategories(newOrder);
+
+        // Find the item that was dragged (activeId)
+        const movedItem = categories.find(c => String(c.id) === String(activeId));
+
+        if (!movedItem) {
+            console.error('Could not find moved item');
+            return;
+        }
+
+        // Find the new index of the moved item in the new order
+        const newIndex = newOrder.findIndex(c => String(c.id) === String(activeId));
+
+        if (newIndex === -1) {
+            console.error('Could not find item in new order');
+            return;
+        }
+
+        try {
+            await reorderCategory({
+                id: movedItem.id,
+                // Assuming backend expects 1-based position or display order logic
+                newPosition: newIndex + 1
+            });
+            toast.success('Category order updated');
+        } catch (error) {
+            console.error('Failed to reorder', error);
+            toast.error('Failed to reorder category');
+            // Revert state if needed or just refetch
+            getCategoryData();
+        }
+    };
 
     const filterCategories: FilterCategory[] = [
         {
@@ -104,40 +177,26 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
 
     const handleFormSubmit = async (submittedData: { name: string; description: string; isActive: boolean }) => {
         if (editingId) {
-            try {
-                const categoryToUpdate = data?.find((c: CategoryType) => c.id === editingId);
-                await updateCategory(editingId, {
-                    name: submittedData.name,
-                    description: submittedData.description,
-                    slug: categoryToUpdate?.slug || "",
-                    icon: categoryToUpdate?.icon || "",
-                    displayOrder: categoryToUpdate?.displayOrder || 0,
-                    isActive: submittedData.isActive
-                });
-                toast.success('Category updated successfully');
-                handleCloseModal();
-            } catch (err) {
-                console.error("Failed to update category", err);
-                toast.error('Failed to update category');
-            }
+            const categoryToUpdate = data?.find((c: CategoryType) => c.id === editingId);
+            updateCategory(editingId, {
+                name: submittedData.name,
+                description: submittedData.description,
+                slug: categoryToUpdate?.slug || "",
+                icon: categoryToUpdate?.icon || "",
+                displayOrder: categoryToUpdate?.displayOrder || 0,
+                isActive: submittedData.isActive
+            });
         } else {
-            try {
-                const maxOrder = data?.length > 0
-                    ? Math.max(...data.map((c: CategoryType) => c.displayOrder || 0))
-                    : 0;
-                const nextOrder = maxOrder + 1;
-                await createCategory({
-                    name: submittedData.name,
-                    description: submittedData.description,
-                    displayOrder: nextOrder,
-                    isActive: submittedData.isActive
-                });
-                toast.success('Category created successfully');
-                handleCloseModal();
-            } catch (err) {
-                console.error("Failed to create category", err);
-                toast.error('Failed to create category');
-            }
+            const maxOrder = data?.length > 0
+                ? Math.max(...data.map((c: CategoryType) => c.displayOrder || 0))
+                : 0;
+            const nextOrder = maxOrder + 1;
+            createCategory({
+                name: submittedData.name,
+                description: submittedData.description,
+                displayOrder: nextOrder,
+                isActive: submittedData.isActive
+            });
         }
     };
 
@@ -148,15 +207,7 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
 
     const handleConfirmDelete = async () => {
         if (deleteId) {
-            try {
-                await deleteCategory(deleteId);
-                toast.success('Category deleted successfully');
-                setDeleteId(null);
-                setIsDeleteModalOpen(false);
-            } catch (error) {
-                console.error("Failed to delete category", error);
-                toast.error('Failed to delete category');
-            }
+            deleteCategory(deleteId);
         }
     };
 
@@ -190,12 +241,12 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
                         columns={[
                             {
                                 header: 'Name',
-                                accessorKey: 'name' as const,
+                                accessorKey: 'name',
                                 className: 'w-[25%] min-w-[150px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
                             },
                             {
                                 header: 'Description',
-                                accessorKey: 'description' as const,
+                                accessorKey: 'description',
                                 className: 'w-[30%] min-w-[200px] py-3 px-4 text-left',
                                 render: (category) => (
                                     <div className="truncate max-w-[300px]" title={category.description}>
@@ -235,6 +286,8 @@ const Category = ({ data, loading, error, getCategoryData, createCategory, delet
                         onRowClick={handleRowClick}
                         selectedId={selectedCategory?.id}
                         loading={loading}
+                        onReorder={handleDragReorder}
+                        draggable={true}
                     />
                 </div>
 

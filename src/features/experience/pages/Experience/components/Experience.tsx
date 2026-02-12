@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/common/Button';
-import { DataTable } from '@/components/common/DataTable';
+import { DataTable } from '@/components/common/DataTable'; // Refactored import
 import { Modal } from '@/components/common/Modal';
 import { EXPERIENCES_DATA } from '@/features/data/mockData';
 import { SidePanel } from '@/components/common/SidePanel';

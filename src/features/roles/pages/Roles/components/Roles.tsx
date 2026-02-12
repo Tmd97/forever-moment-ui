@@ -8,37 +8,48 @@ import { DeleteModal } from '@/components/common/DeleteModal';
 import { Filter, type FilterCategory } from '@/components/common/Filter';
 import { cn } from '@/utils/cn';
 import { Trash2, Edit2, Plus } from 'lucide-react';
+import toast from 'react-hot-toast';
+import * as types from '@/features/roles/store/action-types';
 
 interface RolesProps {
     data: any;
     loading: boolean;
     error: string | null;
+    status: string;
     getRolesData: () => void;
+    createRole: (data: any) => void;
+    updateRole: (id: number, data: any) => void;
+    deleteRole: (id: number) => void;
+    resetStatus: () => void;
 }
 
 export interface RoleType {
     id: number;
-    name: string;
+    roleName: string;
     description: string;
-    status: string;
+    isActive: boolean;
+    permissionLevel?: number;
+    systemRole?: boolean;
 }
 
-// Temporary mock data
-const ROLES_DATA: RoleType[] = [
-    { id: 1, name: 'Admin', description: 'Full system access', status: 'Active' },
-    { id: 2, name: 'Manager', description: 'Limited management access', status: 'Active' },
-    { id: 3, name: 'User', description: 'Standard user access', status: 'Active' },
-];
-
-const Roles = ({ data, loading, error, getRolesData }: RolesProps) => {
+const Roles = ({
+    data,
+    loading,
+    error,
+    status,
+    getRolesData,
+    createRole,
+    updateRole,
+    deleteRole,
+    resetStatus
+}: RolesProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [formData, setFormData] = useState({ name: '', description: '', status: 'Active' });
+    const [formData, setFormData] = useState({ roleName: '', description: '', isActive: true });
 
-    // Local state
-    const [roles, setRoles] = useState<RoleType[]>(ROLES_DATA);
+    const [roles, setRoles] = useState<RoleType[]>([]);
     const [selectedRole, setSelectedRole] = useState<RoleType | null>(null);
     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
 
@@ -56,23 +67,45 @@ const Roles = ({ data, loading, error, getRolesData }: RolesProps) => {
         }
     }, [data]);
 
+    useEffect(() => {
+        if (status === types.CREATE_ROLE_SUCCESS) {
+            toast.success('Role created successfully');
+            resetStatus();
+            handleCloseModal();
+        } else if (status === types.UPDATE_ROLE_SUCCESS) {
+            toast.success('Role updated successfully');
+            resetStatus();
+            handleCloseModal();
+        } else if (status === types.DELETE_ROLE_SUCCESS) {
+            toast.success('Role deleted successfully');
+            resetStatus();
+            setIsDeleteModalOpen(false);
+            setDeleteId(null);
+        } else if (status === 'FAILURE' && error) {
+            toast.error(error || 'An error occurred');
+        }
+    }, [status, error, resetStatus]);
+
     const filterCategories: FilterCategory[] = [
         {
             id: 'status',
             name: 'Status',
             options: [
-                { id: '1', label: 'Active', value: 'Active' },
-                { id: '2', label: 'Inactive', value: 'Inactive' },
+                { id: '1', label: 'Active', value: 'true' },
+                { id: '2', label: 'Inactive', value: 'false' },
             ]
         }
     ];
 
     const handleFilterChange = (filters: Record<string, string[]>) => {
         setActiveFilters(filters);
-        let filtered = ROLES_DATA;
+        let filtered = data || [];
 
         if (filters.status && filters.status.length > 0) {
-            filtered = filtered.filter(role => filters.status.includes(role.status));
+            filtered = filtered.filter((role: RoleType) => {
+                const isActiveString = role.isActive ? 'true' : 'false';
+                return filters.status.includes(isActiveString);
+            });
         }
 
         setRoles(filtered);
@@ -81,27 +114,43 @@ const Roles = ({ data, loading, error, getRolesData }: RolesProps) => {
     const handleOpenModal = (role: RoleType | null = null) => {
         if (role) {
             setEditingId(role.id);
-            setFormData({ name: role.name, description: role.description, status: role.status });
+            setFormData({
+                roleName: role.roleName,
+                description: role.description,
+                isActive: role.isActive,
+            });
         } else {
             setEditingId(null);
-            setFormData({ name: '', description: '', status: 'Active' });
+            setFormData({ roleName: '', description: '', isActive: true });
         }
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setFormData({ name: '', description: '', status: 'Active' });
+        setFormData({ roleName: '', description: '', isActive: true });
         setEditingId(null);
     };
 
-    const handleFormSubmit = (data: { name: string; description: string; status: string }) => {
+    const handleFormSubmit = (submittedData: { roleName: string; description: string; isActive: boolean }) => {
         if (editingId) {
-            setRoles(roles.map(r => r.id === editingId ? { ...r, ...data } : r));
+            const existingRole = roles.find(r => r.id === editingId);
+            const payload = {
+                ...submittedData,
+                active: submittedData.isActive,
+                permissionLevel: existingRole?.permissionLevel || 0,
+                systemRole: existingRole?.systemRole || false
+            };
+            updateRole(editingId, payload);
         } else {
-            setRoles([...roles, { id: roles.length + 1, ...data }]);
+            const payload = {
+                ...submittedData,
+                active: submittedData.isActive,
+                permissionLevel: 0,
+                systemRole: true
+            };
+            createRole(payload);
         }
-        handleCloseModal();
     };
 
     const handleDeleteClick = (id: number) => {
@@ -111,8 +160,7 @@ const Roles = ({ data, loading, error, getRolesData }: RolesProps) => {
 
     const handleConfirmDelete = () => {
         if (deleteId) {
-            setRoles(roles.filter(r => r.id !== deleteId));
-            setDeleteId(null);
+            deleteRole(deleteId);
         }
     };
 
@@ -142,16 +190,22 @@ const Roles = ({ data, loading, error, getRolesData }: RolesProps) => {
                 <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
                     <DataTable
                         data={roles}
+                        loading={loading}
                         columns={[
                             {
                                 header: 'Role Name',
-                                accessorKey: 'name' as const,
+                                accessorKey: 'roleName' as const,
                                 className: 'w-[30%] min-w-[200px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
                             },
                             {
                                 header: 'Description',
                                 accessorKey: 'description' as const,
-                                className: 'w-[40%] min-w-[200px] py-3 px-4 text-left text-gray-500 dark:text-gray-400'
+                                className: 'w-[40%] min-w-[200px] py-3 px-4 text-left text-gray-600 dark:text-gray-400',
+                                render: (role) => (
+                                    <div className="truncate max-w-[300px]" title={role.description}>
+                                        {role.description || '-'}
+                                    </div>
+                                )
                             },
                             {
                                 header: 'Status',
@@ -159,9 +213,9 @@ const Roles = ({ data, loading, error, getRolesData }: RolesProps) => {
                                 render: (role) => (
                                     <span className={cn(
                                         'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
-                                        role.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+                                        role.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
                                     )}>
-                                        {role.status}
+                                        {role.isActive ? 'Active' : 'Inactive'}
                                     </span>
                                 )
                             },
@@ -189,16 +243,16 @@ const Roles = ({ data, loading, error, getRolesData }: RolesProps) => {
                 <SidePanel
                     isOpen={!!selectedRole}
                     onClose={() => setSelectedRole(null)}
-                    title={selectedRole?.name || 'Role Details'}
+                    title={selectedRole?.roleName || 'Role Details'}
                     variant="inline"
                     className="border-l border-gray-200 dark:border-gray-800"
                 >
                     {selectedRole && (
                         <div className="p-4">
-                            <h3 className="text-lg font-bold">{selectedRole.name}</h3>
+                            <h3 className="text-lg font-bold">{selectedRole.roleName}</h3>
                             <p className="text-gray-600 mt-2">{selectedRole.description}</p>
                             <div className="mt-4">
-                                <p><strong>Status:</strong> {selectedRole.status}</p>
+                                <p><strong>Status:</strong> {selectedRole.isActive ? 'Active' : 'Inactive'}</p>
                             </div>
                             <Button
                                 variant="outline"
@@ -218,10 +272,15 @@ const Roles = ({ data, loading, error, getRolesData }: RolesProps) => {
                 title={editingId ? 'Edit Role' : 'Add Role'}
             >
                 <RoleForm
-                    initialData={editingId ? { name: formData.name, description: formData.description, status: formData.status } : undefined}
+                    initialData={editingId ? {
+                        roleName: formData.roleName,
+                        description: formData.description,
+                        isActive: formData.isActive
+                    } : undefined}
                     onSubmit={handleFormSubmit}
                     onCancel={handleCloseModal}
                     submitLabel={editingId ? 'Save Changes' : 'Create Role'}
+                    isLoading={loading}
                 />
             </Modal>
 

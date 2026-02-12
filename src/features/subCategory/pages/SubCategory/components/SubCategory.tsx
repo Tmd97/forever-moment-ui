@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/common/Button';
-import { DataTable } from '@/components/common/DataTable';
+import { DataTable } from '@/components/common/DataTable'; // Refactored import
 import { Modal } from '@/components/common/Modal';
 import { SidePanel } from '@/components/common/SidePanel';
 import { SubCategoryForm } from './SubCategoryForm';
