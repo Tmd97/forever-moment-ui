@@ -117,7 +117,7 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
                                 <div key={crumb.label} className="flex items-center">
                                     {index > 0 && <ChevronRight size={10} className="mx-1 text-gray-400" />}
                                     <span className={cn(
-                                        isLast ? 'text-gray-700 dark:text-gray-300 font-medium' : 'text-gray-500 dark:text-gray-400'
+                                        'text-gray-500 dark:text-gray-400'
                                     )}>
                                         {crumb.label}
                                     </span>

@@ -5,7 +5,7 @@ export const getSubCategories = async () => {
 };
 
 export const createSubCategory = async (payload: any) => {
-    return await Http.post('/admin/subcategories', payload);
+    return await Http.post('/admin/subcategories/category', payload);
 };
 
 export const updateSubCategory = async (id: number, payload: any) => {

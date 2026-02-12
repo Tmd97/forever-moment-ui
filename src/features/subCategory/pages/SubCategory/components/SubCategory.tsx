@@ -10,17 +10,20 @@ import { Filter, type FilterCategory } from '@/components/common/Filter';
 import { cn } from '@/utils/cn';
 import { Trash2, Edit2, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
+import * as types from '@/features/subCategory/store/action-types';
 
 interface SubCategoryProps {
     data: any;
     loading: boolean;
     error: string | null;
+    status: string;
     getSubCategoryData: () => void;
     categories: any[];
     getCategoryData: () => void;
     createSubCategory: (data: any) => void;
     updateSubCategory: (id: number, data: any) => void;
     deleteSubCategory: (id: number) => void;
+    resetStatus: () => void;
 }
 
 export interface SubCategoryType {
@@ -28,7 +31,7 @@ export interface SubCategoryType {
     name: string;
     description?: string;
     count: number;
-    status: string;
+    isActive: boolean;
     categoryId?: number;
 }
 
@@ -36,12 +39,14 @@ const SubCategory = ({
     data,
     loading,
     error,
+    status,
     getSubCategoryData,
     categories,
     getCategoryData,
     createSubCategory,
     updateSubCategory,
-    deleteSubCategory
+    deleteSubCategory,
+    resetStatus
 }: SubCategoryProps) => {
     // Keep loading for potential future use or debugging
     console.log(loading);
@@ -49,11 +54,11 @@ const SubCategory = ({
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [formData, setFormData] = useState<{ name: string; description: string; status: string; categoryId?: number }>({ name: '', description: '', status: 'Active' });
+    const [formData, setFormData] = useState<{ name: string; description: string; isActive: boolean; categoryId?: number }>({ name: '', description: '', isActive: true });
 
     // const [subCategories, setSubCategories] = useState<SubCategoryType[]>([]);
     const [selectedSubCategory, setSelectedSubCategory] = useState<SubCategoryType | null>(null);
-    const [_activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
+    const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
 
     const handleRowClick = (subCategory: SubCategoryType) => {
         setSelectedSubCategory(subCategory);
@@ -63,6 +68,25 @@ const SubCategory = ({
         getSubCategoryData();
         getCategoryData();
     }, [getSubCategoryData, getCategoryData]);
+
+    useEffect(() => {
+        if (status === types.CREATE_SUB_CATEGORY_SUCCESS) {
+            toast.success('Sub Category created successfully');
+            resetStatus();
+            handleCloseModal();
+        } else if (status === types.UPDATE_SUB_CATEGORY_SUCCESS) {
+            toast.success('Sub Category updated successfully');
+            resetStatus();
+            handleCloseModal();
+        } else if (status === types.DELETE_SUB_CATEGORY_SUCCESS) {
+            toast.success('Sub Category deleted successfully');
+            resetStatus();
+            setIsDeleteModalOpen(false);
+            setDeleteId(null);
+        } else if (status === 'FAILURE' && error) {
+            console.error(error);
+        }
+    }, [status, error, resetStatus]);
 
 
 
@@ -83,13 +107,14 @@ const SubCategory = ({
             id: 'status',
             name: 'Status',
             options: [
-                { id: '1', label: 'Active', value: 'Active' },
-                { id: '2', label: 'Inactive', value: 'Inactive' },
+                { id: '1', label: 'Active', value: 'true' },
+                { id: '2', label: 'Inactive', value: 'false' },
             ]
         },
     ];
 
     const handleFilterChange = (filters: Record<string, string[]>) => {
+        console.log('Filters changed:', filters);
         setActiveFilters(filters);
     };
 
@@ -97,14 +122,17 @@ const SubCategory = ({
     let filteredSubCategories = Array.isArray(data) ? data : [];
 
     // Filter by Status
-    if (_activeFilters.status && _activeFilters.status.length > 0) {
-        filteredSubCategories = filteredSubCategories.filter((sub: SubCategoryType) => _activeFilters.status.includes(sub.status));
+    if (activeFilters.status && activeFilters.status.length > 0) {
+        filteredSubCategories = filteredSubCategories.filter((sub: SubCategoryType) => {
+            const statusStr = sub.isActive ? 'true' : 'false';
+            return activeFilters.status.includes(statusStr);
+        });
     }
 
     // Filter by Category
-    if (_activeFilters.categoryId && _activeFilters.categoryId.length > 0) {
+    if (activeFilters.categoryId && activeFilters.categoryId.length > 0) {
         filteredSubCategories = filteredSubCategories.filter((sub: SubCategoryType) =>
-            sub.categoryId && _activeFilters.categoryId.includes(String(sub.categoryId))
+            sub.categoryId && activeFilters.categoryId.includes(String(sub.categoryId))
         );
     }
 
@@ -114,31 +142,28 @@ const SubCategory = ({
             setFormData({
                 name: subCategory.name,
                 description: subCategory.description || '',
-                status: subCategory.status,
+                isActive: subCategory.isActive,
                 categoryId: subCategory.categoryId
             });
         } else {
             setEditingId(null);
-            setFormData({ name: '', description: '', status: 'Active', categoryId: undefined });
+            setFormData({ name: '', description: '', isActive: true, categoryId: undefined });
         }
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setFormData({ name: '', description: '', status: 'Active', categoryId: undefined });
+        setFormData({ name: '', description: '', isActive: true, categoryId: undefined });
         setEditingId(null);
     };
 
-    const handleFormSubmit = (submitData: { name: string; description: string; status: string; categoryId: number }) => {
+    const handleFormSubmit = (submitData: { name: string; description: string; isActive: boolean; categoryId: number }) => {
         if (editingId) {
             updateSubCategory(editingId, submitData);
-            toast.success('Sub Category updated successfully');
         } else {
             createSubCategory(submitData);
-            toast.success('Sub Category created successfully');
         }
-        handleCloseModal();
     };
 
     const handleDeleteClick = (id: number) => {
@@ -149,9 +174,6 @@ const SubCategory = ({
     const handleConfirmDelete = () => {
         if (deleteId) {
             deleteSubCategory(deleteId);
-            toast.success('Sub Category deleted successfully');
-            setDeleteId(null);
-            setIsDeleteModalOpen(false);
         }
     };
 
@@ -186,7 +208,17 @@ const SubCategory = ({
                             {
                                 header: 'Name',
                                 accessorKey: 'name' as const,
-                                className: 'w-[40%] min-w-[200px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
+                                className: 'w-[25%] min-w-[200px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
+                            },
+                            {
+                                header: 'Description',
+                                accessorKey: 'description' as const,
+                                className: 'w-[30%] min-w-[200px] py-3 px-4 text-left text-gray-600 dark:text-gray-400',
+                                render: (subCategory) => (
+                                    <span className="truncate block max-w-[300px]" title={subCategory.description}>
+                                        {subCategory.description || '-'}
+                                    </span>
+                                )
                             },
                             {
                                 header: 'Category',
@@ -202,19 +234,19 @@ const SubCategory = ({
                             },
                             {
                                 header: 'Status',
-                                className: 'w-[20%] min-w-[120px] py-3 px-4 text-left',
+                                className: 'w-[15%] min-w-[100px] py-3 px-4 text-left',
                                 render: (subCategory) => (
                                     <span className={cn(
                                         'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
-                                        subCategory.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+                                        subCategory.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
                                     )}>
-                                        {subCategory.status}
+                                        {subCategory.isActive ? 'Active' : 'Inactive'}
                                     </span>
                                 )
                             },
                             {
                                 header: 'Actions',
-                                className: 'w-[20%] min-w-[100px] py-3 px-4 text-right',
+                                className: 'w-[10%] min-w-[100px] py-3 px-4 text-right',
                                 render: (subCategory) => (
                                     <div className="flex justify-end gap-2">
                                         <button onClick={(e) => { e.stopPropagation(); handleOpenModal(subCategory); }} className='p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors'>
@@ -258,13 +290,14 @@ const SubCategory = ({
                     initialData={editingId ? {
                         name: formData.name,
                         description: formData.description,
-                        status: formData.status,
+                        isActive: formData.isActive,
                         categoryId: formData.categoryId
                     } : undefined}
                     onSubmit={handleFormSubmit}
                     onCancel={handleCloseModal}
-                    submitLabel={editingId ? 'Save Changes' : 'Create Sub Category'}
+                    submitLabel={editingId ? 'Update' : 'Save'}
                     categories={categories}
+                    loading={loading}
                 />
             </Modal>
 

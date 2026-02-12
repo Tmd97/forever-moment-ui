@@ -75,8 +75,7 @@ export const deleteSubCategory = (id: number) => async (dispatch: any) => {
     }
 };
 
-// Success/Failure actions are handled within thunks, so we can remove the individual creators if they are not used elsewhere. 
-// But if reducer expects them to be dispatched, thunk does it manually above.
-// If any other component uses them directly (unlikely), we might keep them?
-// Actually I'm replacing the whole file content so they are gone. Ideally components default export connect actions.
+export const resetStatus = () => ({
+    type: types.RESET_STATUS
+});
 
