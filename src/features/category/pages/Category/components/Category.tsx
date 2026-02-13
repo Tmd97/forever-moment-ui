@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
-// Modal is used in JSX
 import { Button } from '@/components/common/Button';
-import { DataTable } from '@/components/common/DataTable'; // Refactored import
+import { DataTable } from '@/components/common/DataTable';
 import { Modal } from '@/components/common/Modal';
 import { SidePanel } from '@/components/common/SidePanel';
 import { CategoryForm } from './CategoryForm';
 import { CategoryDetails } from './CategoryDetails';
 import { DeleteModal } from '@/components/common/DeleteModal';
 import { Filter, type FilterCategory } from '@/components/common/Filter';
-import { cn } from '@/utils/cn';
-import { Trash2, Edit2, Plus } from 'lucide-react';
+import { StatusBadge } from '@/components/common/StatusBadge';
+import { RowActions } from '@/components/common/RowActions';
+import { CrudPageLayout } from '@/components/common/CrudPageLayout';
+import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import * as types from '@/features/category/store/action-types';
 
@@ -219,76 +220,66 @@ const Category = ({
 
 
     return (
-        <div className='category-page-container'>
-            <div className='px-6 pt-4 pb-4 shrink-0'>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
-                    <Filter
-                        categories={filterCategories}
-                        onFilterChange={handleFilterChange}
-                    />
-                    <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
-                        <Plus size={2} />Add Category
-                    </Button>
-                </div>
-            </div>
+        <CrudPageLayout
+            className='category-page-container'
+            filterSlot={
+                <Filter
+                    categories={filterCategories}
+                    onFilterChange={handleFilterChange}
+                />
+            }
+            addButton={
+                <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
+                    <Plus size={2} />Add Category
+                </Button>
+            }
+            tableSlot={
+                <DataTable
+                    data={categories}
+                    columns={[
+                        {
+                            header: 'Name',
+                            accessorKey: 'name',
+                            className: 'w-[25%] min-w-[150px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
+                        },
+                        {
+                            header: 'Description',
+                            accessorKey: 'description',
+                            className: 'w-[30%] min-w-[200px] py-3 px-4 text-left',
+                            render: (category) => (
+                                <div className="truncate max-w-[300px]" title={category.description}>
+                                    {category.description || '-'}
+                                </div>
+                            )
+                        },
 
-            <div className="flex flex-1 min-h-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-                <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-                    <DataTable
-                        data={categories}
-                        columns={[
-                            {
-                                header: 'Name',
-                                accessorKey: 'name',
-                                className: 'w-[25%] min-w-[150px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
-                            },
-                            {
-                                header: 'Description',
-                                accessorKey: 'description',
-                                className: 'w-[30%] min-w-[200px] py-3 px-4 text-left',
-                                render: (category) => (
-                                    <div className="truncate max-w-[300px]" title={category.description}>
-                                        {category.description || '-'}
-                                    </div>
-                                )
-                            },
-
-                            {
-                                header: 'Status',
-                                className: 'w-[15%] min-w-[120px] py-3 px-4 text-left',
-                                render: (category) => (
-                                    <span className={cn(
-                                        'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
-                                        category.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-                                    )}>
-                                        {category.isActive ? 'Active' : 'Inactive'}
-                                    </span>
-                                )
-                            },
-                            {
-                                header: 'Actions',
-                                className: 'w-[20%] min-w-[100px] py-3 px-4 text-right',
-                                render: (category) => (
-                                    <div className="flex justify-end gap-2">
-                                        <button onClick={(e) => { e.stopPropagation(); handleOpenModal(category); }} className='p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors'>
-                                            <Edit2 size={16} />
-                                        </button>
-                                        <button onClick={(e) => { e.stopPropagation(); handleDeleteClick(category.id); }} className='p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors'>
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                )
-                            }
-                        ]}
-                        keyExtractor={(item) => item.id}
-                        onRowClick={handleRowClick}
-                        selectedId={selectedCategory?.id}
-                        loading={loading && (!categories || categories.length === 0)}
-                        onReorder={handleDragReorder}
-                        draggable={true}
-                    />
-                </div>
-
+                        {
+                            header: 'Status',
+                            className: 'w-[15%] min-w-[120px] py-3 px-4 text-left',
+                            render: (category) => (
+                                <StatusBadge isActive={category.isActive} />
+                            )
+                        },
+                        {
+                            header: 'Actions',
+                            className: 'w-[20%] min-w-[100px] py-3 px-4 text-right',
+                            render: (category) => (
+                                <RowActions
+                                    onEdit={() => handleOpenModal(category)}
+                                    onDelete={() => handleDeleteClick(category.id)}
+                                />
+                            )
+                        }
+                    ]}
+                    keyExtractor={(item) => item.id}
+                    onRowClick={handleRowClick}
+                    selectedId={selectedCategory?.id}
+                    loading={loading && (!categories || categories.length === 0)}
+                    onReorder={handleDragReorder}
+                    draggable={true}
+                />
+            }
+            sidePanelSlot={
                 <SidePanel
                     isOpen={!!selectedCategory}
                     onClose={() => setSelectedCategory(null)}
@@ -303,30 +294,33 @@ const Category = ({
                         />
                     )}
                 </SidePanel>
-            </div>
-
-            <Modal
-                isOpen={isModalOpen}
-                onClose={handleCloseModal}
-                title={editingId ? 'Edit Category' : 'Add Category'}
-            >
-                <CategoryForm
-                    initialData={editingId ? formData : undefined}
-                    onSubmit={handleFormSubmit}
-                    onCancel={handleCloseModal}
-                    submitLabel={editingId ? 'Update' : 'Save'}
-                    isLoading={loading}
+            }
+            modalSlot={
+                <Modal
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    title={editingId ? 'Edit Category' : 'Add Category'}
+                >
+                    <CategoryForm
+                        initialData={editingId ? formData : undefined}
+                        onSubmit={handleFormSubmit}
+                        onCancel={handleCloseModal}
+                        submitLabel={editingId ? 'Update' : 'Save'}
+                        isLoading={loading}
+                    />
+                </Modal>
+            }
+            deleteModalSlot={
+                <DeleteModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => setIsDeleteModalOpen(false)}
+                    onConfirm={handleConfirmDelete}
+                    itemType="Category"
+                    title='Delete Category'
+                    description='This is will delete the category from the system.Are you sure?'
                 />
-            </Modal>
-            <DeleteModal
-                isOpen={isDeleteModalOpen}
-                onClose={() => setIsDeleteModalOpen(false)}
-                onConfirm={handleConfirmDelete}
-                itemType="Category"
-                title='Delete Category'
-                description='This is will delete the category from the system.Are you sure?'
-            />
-        </div>
+            }
+        />
     );
 };
 

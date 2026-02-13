@@ -6,8 +6,10 @@ import { SidePanel } from '@/components/common/SidePanel';
 import { UserForm } from './UserForm';
 import { DeleteModal } from '@/components/common/DeleteModal';
 import { Filter, type FilterCategory } from '@/components/common/Filter';
-import { cn } from '@/utils/cn';
-import { Trash2, Edit2, Plus } from 'lucide-react';
+import { StatusBadge } from '@/components/common/StatusBadge';
+import { RowActions } from '@/components/common/RowActions';
+import { CrudPageLayout } from '@/components/common/CrudPageLayout';
+import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import * as types from '@/features/users/store/action-types';
 
@@ -177,80 +179,68 @@ const Users = ({
 
 
     return (
-        <div className='user-page-container'>
-            <div className='px-6 pt-4 pb-4 shrink-0'>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
-                    <Filter
-                        categories={filterCategories}
-                        onFilterChange={handleFilterChange}
-                    />
-                    <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
-                        <Plus size={16} className="mr-2" /> Add User
-                    </Button>
-                </div>
-            </div>
-
-            <div className="flex flex-1 min-h-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-                <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-                    <DataTable
-                        data={filteredUsers}
-                        loading={loading && (!users || users.length === 0)}
-                        columns={[
-                            {
-                                header: 'Name',
-                                accessorKey: 'fullName' as const,
-                                className: 'w-[30%] min-w-[200px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
-                            },
-                            {
-                                header: 'Email',
-                                accessorKey: 'email' as const,
-                                className: 'w-[30%] min-w-[200px] py-3 px-4 text-left text-gray-500 dark:text-gray-400'
-                            },
-                            {
-                                header: 'Role',
-                                accessorKey: 'role' as const,
-                                className: 'w-[15%] min-w-[100px] py-3 px-4 text-left',
-                                render: (user) => (
-                                    <span className={cn(
-                                        'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-                                    )}>
-                                        {user.role || '-'}
-                                    </span>
-                                )
-                            },
-                            {
-                                header: 'Status',
-                                className: 'w-[15%] min-w-[100px] py-3 px-4 text-left',
-                                render: (user) => (
-                                    <span className={cn(
-                                        'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
-                                        user.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-                                    )}>
-                                        {user.status || '-'}
-                                    </span>
-                                )
-                            },
-                            {
-                                header: 'Actions',
-                                className: 'w-[10%] min-w-[100px] py-3 px-4 text-right',
-                                render: (user) => (
-                                    <div className="flex justify-end gap-2">
-                                        <button onClick={(e) => { e.stopPropagation(); handleOpenModal(user); }} className='p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors'>
-                                            <Edit2 size={16} />
-                                        </button>
-                                        <button onClick={(e) => { e.stopPropagation(); handleDeleteClick(user.id); }} className='p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors'>
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                )
-                            }
-                        ]}
-                        keyExtractor={(item) => item.id}
-                        onRowClick={handleRowClick}
-                        selectedId={selectedUser?.id}
-                    />
-                </div>
-
+        <CrudPageLayout
+            className='user-page-container'
+            filterSlot={
+                <Filter
+                    categories={filterCategories}
+                    onFilterChange={handleFilterChange}
+                />
+            }
+            addButton={
+                <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
+                    <Plus size={16} className="mr-2" /> Add User
+                </Button>
+            }
+            tableSlot={
+                <DataTable
+                    data={filteredUsers}
+                    loading={loading && (!users || users.length === 0)}
+                    columns={[
+                        {
+                            header: 'Name',
+                            accessorKey: 'fullName' as const,
+                            className: 'w-[30%] min-w-[200px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
+                        },
+                        {
+                            header: 'Email',
+                            accessorKey: 'email' as const,
+                            className: 'w-[30%] min-w-[200px] py-3 px-4 text-left text-gray-500 dark:text-gray-400'
+                        },
+                        {
+                            header: 'Role',
+                            accessorKey: 'role' as const,
+                            className: 'w-[15%] min-w-[100px] py-3 px-4 text-left',
+                            render: (user) => (
+                                <span className='inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'>
+                                    {user.role || '-'}
+                                </span>
+                            )
+                        },
+                        {
+                            header: 'Status',
+                            className: 'w-[15%] min-w-[100px] py-3 px-4 text-left',
+                            render: (user) => (
+                                <StatusBadge status={user.status} activeValue="Active" />
+                            )
+                        },
+                        {
+                            header: 'Actions',
+                            className: 'w-[10%] min-w-[100px] py-3 px-4 text-right',
+                            render: (user) => (
+                                <RowActions
+                                    onEdit={() => handleOpenModal(user)}
+                                    onDelete={() => handleDeleteClick(user.id)}
+                                />
+                            )
+                        }
+                    ]}
+                    keyExtractor={(item) => item.id}
+                    onRowClick={handleRowClick}
+                    selectedId={selectedUser?.id}
+                />
+            }
+            sidePanelSlot={
                 <SidePanel
                     isOpen={!!selectedUser}
                     onClose={() => setSelectedUser(null)}
@@ -276,30 +266,32 @@ const Users = ({
                         </div>
                     )}
                 </SidePanel>
-            </div>
-
-            <Modal
-                isOpen={isModalOpen}
-                onClose={handleCloseModal}
-                title={editingId ? 'Edit User' : 'Add User'}
-            >
-                <UserForm
-                    initialData={editingId ? { fullName: formData.fullName, email: formData.email, role: formData.role, status: formData.status } : undefined}
-                    onSubmit={handleFormSubmit}
-                    onCancel={handleCloseModal}
-                    submitLabel={editingId ? 'Save Changes' : 'Create User'}
-                    isLoading={loading}
+            }
+            modalSlot={
+                <Modal
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    title={editingId ? 'Edit User' : 'Add User'}
+                >
+                    <UserForm
+                        initialData={editingId ? { fullName: formData.fullName, email: formData.email, role: formData.role, status: formData.status } : undefined}
+                        onSubmit={handleFormSubmit}
+                        onCancel={handleCloseModal}
+                        submitLabel={editingId ? 'Save Changes' : 'Create User'}
+                        isLoading={loading}
+                    />
+                </Modal>
+            }
+            deleteModalSlot={
+                <DeleteModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => setIsDeleteModalOpen(false)}
+                    onConfirm={handleConfirmDelete}
+                    itemType="User"
+                    description="Are you sure you want to delete this user? This action cannot be undone."
                 />
-            </Modal>
-
-            <DeleteModal
-                isOpen={isDeleteModalOpen}
-                onClose={() => setIsDeleteModalOpen(false)}
-                onConfirm={handleConfirmDelete}
-                itemType="User"
-                description="Are you sure you want to delete this user? This action cannot be undone."
-            />
-        </div>
+            }
+        />
     );
 };
 
