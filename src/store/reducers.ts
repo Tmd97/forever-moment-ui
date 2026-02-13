@@ -11,6 +11,7 @@ import { dashboardReducer } from '@/features/dashboard/store/reducer';
 import { settingsReducer } from '@/features/settings/store/reducer';
 import { subCategoryReducer } from '@/features/subCategory/store/reducer';
 import { vendorReducer } from '@/features/vendor/store/reducer';
+import { userReducer } from '@/features/users/store/reducer';
 
 export const rootReducer = combineReducers({
     // Global config
@@ -24,4 +25,5 @@ export const rootReducer = combineReducers({
     settings: settingsReducer,
     subCategory: subCategoryReducer,
     vendor: vendorReducer,
+    user: userReducer,
 });

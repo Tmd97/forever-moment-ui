@@ -1,8 +1,17 @@
+import axios from '@/utils/Http';
+
 export const fetchUsersData = async () => {
-    // Mock API call
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({ message: 'User Data' });
-        }, 1000);
-    });
+    return await axios.get('/admin/user/profiles');
+};
+
+export const createUserApi = async (data: any) => {
+    return await axios.post('/admin/user/profile', data);
+};
+
+export const deleteUserApi = async (id: number) => {
+    return await axios.delete(`/admin/user/profile/${id}`);
+};
+
+export const updateUserApi = async (id: number, data: any) => {
+    return await axios.put(`/admin/user/profile/${id}`, data);
 };

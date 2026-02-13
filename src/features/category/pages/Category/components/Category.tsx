@@ -90,10 +90,14 @@ const Category = ({
             resetStatus();
             setIsDeleteModalOpen(false);
             setDeleteId(null);
-        } else if (status === 'FAILURE' && error) {
-            toast.error(error || 'An error occurred');
         }
-    }, [status, error, resetStatus]);
+    }, [status, resetStatus]);
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+        }
+    }, [error]);
 
 
     const handleDragReorder = async (newOrder: CategoryType[], activeId: string | number, _overId: string | number) => {
@@ -211,13 +215,7 @@ const Category = ({
         }
     };
 
-    if (error) {
-        return (
-            <div className='flex items-center justify-center h-64'>
-                <p className='text-red-500'>Error: {error}</p>
-            </div>
-        );
-    }
+
 
 
     return (

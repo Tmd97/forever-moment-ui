@@ -83,10 +83,15 @@ const SubCategory = ({
             resetStatus();
             setIsDeleteModalOpen(false);
             setDeleteId(null);
-        } else if (status === 'FAILURE' && error) {
-            console.error(error);
         }
-    }, [status, error, resetStatus]);
+    }, [status, resetStatus]);
+
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+        }
+    }, [error]);
 
 
 
@@ -177,13 +182,7 @@ const SubCategory = ({
         }
     };
 
-    if (error) {
-        return (
-            <div className='flex items-center justify-center h-64'>
-                <p className='text-red-500'>Error: {error}</p>
-            </div>
-        );
-    }
+
 
     return (
         <div className='subcategory-page-container'>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/common/Button';
-import { DataTable } from '@/components/common/DataTable'; // Refactored import
+import { DataTable } from '@/components/common/DataTable';
 import { Modal } from '@/components/common/Modal';
 import { SidePanel } from '@/components/common/SidePanel';
 import { UserForm } from './UserForm';
@@ -8,38 +8,52 @@ import { DeleteModal } from '@/components/common/DeleteModal';
 import { Filter, type FilterCategory } from '@/components/common/Filter';
 import { cn } from '@/utils/cn';
 import { Trash2, Edit2, Plus } from 'lucide-react';
+import toast from 'react-hot-toast';
+import * as types from '@/features/users/store/action-types';
 
 interface UsersProps {
     data: any;
     loading: boolean;
     error: string | null;
+    status: string;
     getUsersData: () => void;
+    createUser: (data: any) => void;
+    updateUser: (id: number, data: any) => void;
+    deleteUser: (id: number) => void;
+    resetStatus: () => void;
 }
 
 export interface UserType {
     id: number;
-    name: string;
+    fullName: string;
     email: string;
-    role: string;
-    status: string;
+    phoneNumber: string;
+    profilePictureUrl: string;
+    dateOfBirth: string;
+    preferredCity: string;
+    role?: string;
+    status?: string;
 }
 
-// Temporary mock data until store is fully connected/API exists
-const USERS_DATA: UserType[] = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Active' },
-    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'Manager', status: 'Inactive' },
-];
-
-const Users = ({ data, loading, error, getUsersData }: UsersProps) => {
+const Users = ({
+    data,
+    loading,
+    error,
+    status,
+    getUsersData,
+    createUser,
+    updateUser,
+    deleteUser,
+    resetStatus
+}: UsersProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [formData, setFormData] = useState({ name: '', email: '', role: 'User', status: 'Active' });
+    const [formData, setFormData] = useState({ fullName: '', email: '', role: 'User', status: 'Active' });
 
     // Local state for immediate interaction
-    const [users, setUsers] = useState<UserType[]>(USERS_DATA);
+    const [users, setUsers] = useState<UserType[]>([]);
     const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
 
@@ -56,6 +70,20 @@ const Users = ({ data, loading, error, getUsersData }: UsersProps) => {
             setUsers(data);
         }
     }, [data]);
+
+    useEffect(() => {
+        if (status === types.CREATE_USER_SUCCESS) {
+            resetStatus();
+            handleCloseModal();
+        } else if (status === types.UPDATE_USER_SUCCESS) {
+            resetStatus();
+            handleCloseModal();
+        } else if (status === types.DELETE_USER_SUCCESS) {
+            resetStatus();
+            setIsDeleteModalOpen(false);
+            setDeleteId(null);
+        }
+    }, [status, resetStatus]);
 
     // Filter configuration
     const filterCategories: FilterCategory[] = [
@@ -75,49 +103,64 @@ const Users = ({ data, loading, error, getUsersData }: UsersProps) => {
                 { id: '1', label: 'Active', value: 'Active' },
                 { id: '2', label: 'Inactive', value: 'Inactive' },
             ]
-        }
+        },
     ];
 
     const handleFilterChange = (filters: Record<string, string[]>) => {
         setActiveFilters(filters);
-        // Apply filters to users
-        let filtered = USERS_DATA;
-
-        if (filters.role && filters.role.length > 0) {
-            filtered = filtered.filter(user => filters.role.includes(user.role));
-        }
-
-        if (filters.status && filters.status.length > 0) {
-            filtered = filtered.filter(user => filters.status.includes(user.status));
-        }
-
-        setUsers(filtered);
     };
+
+    // Apply filters locally for now since API might not support it yet
+    let filteredUsers = users;
+    if (activeFilters.role && activeFilters.role.length > 0) {
+        filteredUsers = filteredUsers.filter(user => user.role && activeFilters.role.includes(user.role));
+    }
+    if (activeFilters.status && activeFilters.status.length > 0) {
+        filteredUsers = filteredUsers.filter(user => user.status && activeFilters.status.includes(user.status));
+    }
+
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+        }
+    }, [error]);
 
     const handleOpenModal = (user: UserType | null = null) => {
         if (user) {
             setEditingId(user.id);
-            setFormData({ name: user.name, email: user.email, role: user.role, status: user.status });
+            setFormData({ fullName: user.fullName, email: user.email, role: user.role || 'User', status: user.status || 'Active' });
         } else {
             setEditingId(null);
-            setFormData({ name: '', email: '', role: 'User', status: 'Active' });
+            setFormData({ fullName: '', email: '', role: 'User', status: 'Active' });
         }
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setFormData({ name: '', email: '', role: 'User', status: 'Active' });
+        setFormData({ fullName: '', email: '', role: 'User', status: 'Active' });
         setEditingId(null);
     };
 
-    const handleFormSubmit = (data: { name: string; email: string; role: string; status: string }) => {
+    const handleFormSubmit = (submitData: { fullName: string; email: string; role: string; status: string }) => {
+        // Construct payload as per requirement
+        const payload = {
+            fullName: submitData.fullName,
+            email: submitData.email,
+            phoneNumber: "1356203372506",
+            // Wait, looking at request again: "payload is { ... phoneNumber: "1356203372506" ... } do not add extra column in user form send that data as blank in payload"
+            // The instruction "send that data as blank in payload" likely refers to the "extra column" fields NOT in the form.
+            profilePictureUrl: "", // Blank as requested
+            dateOfBirth: "", // Blank as requested
+            preferredCity: "" // Blank as requested
+        };
+
         if (editingId) {
-            setUsers(users.map(u => u.id === editingId ? { ...u, ...data } : u));
+            updateUser(editingId, payload);
         } else {
-            setUsers([...users, { id: users.length + 1, ...data }]);
+            createUser(payload);
         }
-        handleCloseModal();
     };
 
     const handleDeleteClick = (id: number) => {
@@ -127,18 +170,11 @@ const Users = ({ data, loading, error, getUsersData }: UsersProps) => {
 
     const handleConfirmDelete = () => {
         if (deleteId) {
-            setUsers(users.filter(u => u.id !== deleteId));
-            setDeleteId(null);
+            deleteUser(deleteId);
         }
     };
 
-    if (error) {
-        return (
-            <div className='flex items-center justify-center h-64'>
-                <p className='text-red-500'>Error: {error}</p>
-            </div>
-        );
-    }
+
 
     return (
         <div className='user-page-container'>
@@ -157,12 +193,12 @@ const Users = ({ data, loading, error, getUsersData }: UsersProps) => {
             <div className="flex flex-1 min-h-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
                 <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
                     <DataTable
-                        data={users}
+                        data={filteredUsers}
                         loading={loading && (!users || users.length === 0)}
                         columns={[
                             {
                                 header: 'Name',
-                                accessorKey: 'name' as const,
+                                accessorKey: 'fullName' as const,
                                 className: 'w-[30%] min-w-[200px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
                             },
                             {
@@ -178,7 +214,7 @@ const Users = ({ data, loading, error, getUsersData }: UsersProps) => {
                                     <span className={cn(
                                         'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
                                     )}>
-                                        {user.role}
+                                        {user.role || '-'}
                                     </span>
                                 )
                             },
@@ -190,7 +226,7 @@ const Users = ({ data, loading, error, getUsersData }: UsersProps) => {
                                         'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
                                         user.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
                                     )}>
-                                        {user.status}
+                                        {user.status || '-'}
                                     </span>
                                 )
                             },
@@ -215,21 +251,20 @@ const Users = ({ data, loading, error, getUsersData }: UsersProps) => {
                     />
                 </div>
 
-                {/* SidePanel can be expanded later with UserDetails if needed */}
                 <SidePanel
                     isOpen={!!selectedUser}
                     onClose={() => setSelectedUser(null)}
-                    title={selectedUser?.name || 'User Details'}
+                    title={selectedUser?.fullName || 'User Details'}
                     variant="inline"
                     className="border-l border-gray-200 dark:border-gray-800"
                 >
                     {selectedUser && (
                         <div className="p-4">
-                            <h3 className="text-lg font-bold">{selectedUser.name}</h3>
+                            <h3 className="text-lg font-bold">{selectedUser.fullName}</h3>
                             <p className="text-gray-600">{selectedUser.email}</p>
                             <div className="mt-4">
-                                <p><strong>Role:</strong> {selectedUser.role}</p>
-                                <p><strong>Status:</strong> {selectedUser.status}</p>
+                                <p><strong>Role:</strong> {selectedUser.role || '-'}</p>
+                                <p><strong>Status:</strong> {selectedUser.status || '-'}</p>
                             </div>
                             <Button
                                 variant="outline"
@@ -249,7 +284,7 @@ const Users = ({ data, loading, error, getUsersData }: UsersProps) => {
                 title={editingId ? 'Edit User' : 'Add User'}
             >
                 <UserForm
-                    initialData={editingId ? { name: formData.name, email: formData.email, role: formData.role, status: formData.status } : undefined}
+                    initialData={editingId ? { fullName: formData.fullName, email: formData.email, role: formData.role, status: formData.status } : undefined}
                     onSubmit={handleFormSubmit}
                     onCancel={handleCloseModal}
                     submitLabel={editingId ? 'Save Changes' : 'Create User'}

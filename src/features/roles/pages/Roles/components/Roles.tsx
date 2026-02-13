@@ -81,10 +81,14 @@ const Roles = ({
             resetStatus();
             setIsDeleteModalOpen(false);
             setDeleteId(null);
-        } else if (status === 'FAILURE' && error) {
-            toast.error(error || 'An error occurred');
         }
-    }, [status, error, resetStatus]);
+    }, [status, resetStatus]);
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+        }
+    }, [error]);
 
     const filterCategories: FilterCategory[] = [
         {
@@ -164,13 +168,7 @@ const Roles = ({
         }
     };
 
-    if (error) {
-        return (
-            <div className='flex items-center justify-center h-64'>
-                <p className='text-red-500'>Error: {error}</p>
-            </div>
-        );
-    }
+
 
     return (
         <div className='role-page-container'>

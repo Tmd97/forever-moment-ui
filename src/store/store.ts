@@ -18,7 +18,7 @@ export const store = configureStore({
     settings: settingsReducer,
     subCategory: subCategoryReducer,
     vendor: vendorReducer,
-    users: userReducer,
+    user: userReducer,
     roles: roleReducer,
   },
 });
