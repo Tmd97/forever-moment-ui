@@ -172,6 +172,7 @@ const VendorPage = ({ data, loading, error, getVendors }: VendorProps) => {
                 <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
                     <DataTable
                         data={vendors}
+                        loading={loading && (!vendors || vendors.length === 0)}
                         columns={[
                             {
                                 header: 'Business Name',
@@ -253,6 +254,7 @@ const VendorPage = ({ data, loading, error, getVendors }: VendorProps) => {
                     onSubmit={handleFormSubmit}
                     onCancel={handleCloseModal}
                     submitLabel={editingId ? 'Save Changes' : 'Add Vendor'}
+                    isLoading={loading}
                 />
             </Modal>
 

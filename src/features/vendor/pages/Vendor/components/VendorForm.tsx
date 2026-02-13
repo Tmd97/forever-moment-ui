@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/common/Button';
-import type { Vendor } from '../../../store/types';
+import { Dropdown } from '@/components/common/Dropdown';
+import { Input } from '@/components/common/Input';
+import { Loader2 } from 'lucide-react';
+import type { Vendor } from '../../../store/action-types';
 
 interface VendorFormProps {
     initialData?: Partial<Vendor>;
     onSubmit: (data: Omit<Vendor, 'id' | 'rating'>) => void;
     onCancel: () => void;
     submitLabel: string;
+    isLoading?: boolean;
 }
 
-export const VendorForm = ({ initialData, onSubmit, onCancel, submitLabel }: VendorFormProps) => {
+export const VendorForm = ({ initialData, onSubmit, onCancel, submitLabel, isLoading }: VendorFormProps) => {
     const [formData, setFormData] = useState<Omit<Vendor, 'id' | 'rating'>>({
         name: '',
         contactPerson: '',
@@ -38,78 +42,91 @@ export const VendorForm = ({ initialData, onSubmit, onCancel, submitLabel }: Ven
     };
 
     return (
-        <form onSubmit={handleSubmit} className='space-y-4 pt-4'>
+        <form onSubmit={handleSubmit} className='space-y-4 pt-4 relative'>
+            {isLoading && (
+                <div className="absolute inset-0 dark:bg-gray-900/50 flex items-center justify-center z-50">
+                    <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
+                </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Business Name</label>
-                    <input
+                    <Input
+                        label="Business Name"
                         type='text'
-                        className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition'
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
+                        disabled={isLoading}
                     />
                 </div>
                 <div>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Contact Person</label>
-                    <input
+                    <Input
+                        label="Contact Person"
                         type='text'
-                        className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition'
                         value={formData.contactPerson}
                         onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
                         required
+                        disabled={isLoading}
                     />
                 </div>
                 <div>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Email</label>
-                    <input
+                    <Input
+                        label="Email"
                         type='email'
-                        className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition'
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         required
+                        disabled={isLoading}
                     />
                 </div>
                 <div>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Phone</label>
-                    <input
+                    <Input
+                        label="Phone"
                         type='tel'
-                        className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition'
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         required
+                        disabled={isLoading}
                     />
                 </div>
                 <div>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Category</label>
-                    <select
-                        className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition'
+                    <Dropdown
+                        label="Category"
+                        options={[
+                            { label: 'Photography', value: 'Photography' },
+                            { label: 'Catering', value: 'Catering' },
+                            { label: 'Decoration', value: 'Decoration' },
+                            { label: 'Venue', value: 'Venue' },
+                            { label: 'Music', value: 'Music' }
+                        ]}
                         value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    >
-                        <option value='Photography'>Photography</option>
-                        <option value='Catering'>Catering</option>
-                        <option value='Decoration'>Decoration</option>
-                        <option value='Venue'>Venue</option>
-                        <option value='Music'>Music</option>
-                    </select>
+                        onChange={(value) => setFormData({ ...formData, category: value })}
+                        placeholder="Select Category"
+                        searchable={false}
+                        disabled={isLoading}
+                    />
                 </div>
                 <div>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Status</label>
-                    <select
-                        className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition'
+                    <Dropdown
+                        label="Status"
+                        options={[
+                            { label: 'Active', value: 'Active' },
+                            { label: 'Inactive', value: 'Inactive' },
+                            { label: 'Pending', value: 'Pending' }
+                        ]}
                         value={formData.status}
-                        onChange={(e) => setFormData({ ...formData, status: e.target.value as Vendor['status'] })}
-                    >
-                        <option value='Active'>Active</option>
-                        <option value='Inactive'>Inactive</option>
-                        <option value='Pending'>Pending</option>
-                    </select>
+                        onChange={(value) => setFormData({ ...formData, status: value as Vendor['status'] })}
+                        placeholder="Select Status"
+                        searchable={false}
+                        disabled={isLoading}
+                    />
                 </div>
             </div>
             <div className='flex justify-end gap-3 mt-6'>
-                <Button type='button' variant='secondary' onClick={onCancel}>Cancel</Button>
-                <Button type='submit' variant='default'>{submitLabel}</Button>
+                <Button type='button' variant='secondary' onClick={onCancel} disabled={isLoading}>Cancel</Button>
+                <Button type='submit' variant='default' disabled={isLoading}>
+                    {isLoading ? 'Saving...' : submitLabel}
+                </Button>
             </div>
         </form>
     );

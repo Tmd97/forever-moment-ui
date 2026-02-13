@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/components/common/Button';
 import { Loader2 } from 'lucide-react';
 import { Dropdown } from '@/components/common/Dropdown';
+import { Input } from '@/components/common/Input';
+import { Textarea } from '@/components/common/Textarea';
 
 interface CategoryFormProps {
     initialData?: { name: string; description?: string; isActive: boolean };
@@ -27,10 +29,9 @@ export const CategoryForm = ({ initialData, onSubmit, onCancel, submitLabel, isL
                 </div>
             )}
             <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Category Name</label>
-                <input
+                <Input
+                    label="Category Name"
                     type='text'
-                    className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed'
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
@@ -38,9 +39,8 @@ export const CategoryForm = ({ initialData, onSubmit, onCancel, submitLabel, isL
                 />
             </div>
             <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Description</label>
-                <textarea
-                    className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed resize-none'
+                <Textarea
+                    label="Description"
                     rows={3}
                     value={formData.description || ''}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -48,8 +48,8 @@ export const CategoryForm = ({ initialData, onSubmit, onCancel, submitLabel, isL
                 />
             </div>
             <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Status</label>
                 <Dropdown
+                    label="Status"
                     options={[
                         { label: 'Active', value: 'true' },
                         { label: 'Inactive', value: 'false' }

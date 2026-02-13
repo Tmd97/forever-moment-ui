@@ -285,7 +285,7 @@ const Category = ({
                         keyExtractor={(item) => item.id}
                         onRowClick={handleRowClick}
                         selectedId={selectedCategory?.id}
-                        loading={loading}
+                        loading={loading && (!categories || categories.length === 0)}
                         onReorder={handleDragReorder}
                         draggable={true}
                     />
@@ -328,7 +328,7 @@ const Category = ({
                 title='Delete Category'
                 description='This is will delete the category from the system.Are you sure?'
             />
-        </div >
+        </div>
     );
 };
 

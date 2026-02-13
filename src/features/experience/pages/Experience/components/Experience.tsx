@@ -137,6 +137,7 @@ const Experience = ({ data, loading, error, getExperienceData }: ExperienceProps
                 <div className="flex-1 min-w-0 overflow-hidden">
                     <DataTable
                         data={experiences}
+                        loading={loading && (!experiences || experiences.length === 0)}
                         columns={[
                             {
                                 header: 'Title',
@@ -217,6 +218,7 @@ const Experience = ({ data, loading, error, getExperienceData }: ExperienceProps
                     onSubmit={handleFormSubmit}
                     onCancel={handleCloseModal}
                     submitLabel={editingId ? 'Save Changes' : 'Create Experience'}
+                    isLoading={loading}
                 />
             </Modal>
 

@@ -203,7 +203,7 @@ const SubCategory = ({
                 <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
                     <DataTable
                         data={filteredSubCategories}
-                        loading={loading}
+                        loading={loading && (!filteredSubCategories || filteredSubCategories.length === 0)}
                         columns={[
                             {
                                 header: 'Name',

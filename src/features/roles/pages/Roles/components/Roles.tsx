@@ -190,7 +190,7 @@ const Roles = ({
                 <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
                     <DataTable
                         data={roles}
-                        loading={loading}
+                        loading={loading && (!roles || roles.length === 0)}
                         columns={[
                             {
                                 header: 'Role Name',

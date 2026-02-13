@@ -158,6 +158,7 @@ const Users = ({ data, loading, error, getUsersData }: UsersProps) => {
                 <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
                     <DataTable
                         data={users}
+                        loading={loading && (!users || users.length === 0)}
                         columns={[
                             {
                                 header: 'Name',
@@ -252,6 +253,7 @@ const Users = ({ data, loading, error, getUsersData }: UsersProps) => {
                     onSubmit={handleFormSubmit}
                     onCancel={handleCloseModal}
                     submitLabel={editingId ? 'Save Changes' : 'Create User'}
+                    isLoading={loading}
                 />
             </Modal>
 

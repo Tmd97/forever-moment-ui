@@ -1,6 +1,5 @@
 import React from 'react';
 import { cn } from '@/utils/cn';
-import { Loader2 } from 'lucide-react';
 import {
     DndContext,
     closestCenter,
@@ -162,16 +161,24 @@ export const DataTable = <T,>({
         );
     };
 
+    const renderSkeleton = () => {
+        return Array.from({ length: 10 }).map((_, rowIndex) => (
+            <tr key={`skeleton-${rowIndex}`} className={ROW_CLASS}>
+                {columns.map((col, colIndex) => (
+                    <td key={`skeleton-cell-${rowIndex}-${colIndex}`} className={cn(BODY_CELL_CLASS, col.className)}>
+                        <div className="flex items-center">
+                            <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 animate-pulse rounded" />
+                        </div>
+                    </td>
+                ))}
+            </tr>
+        ));
+    };
+
     const renderTableBody = () => (
         <tbody className="[&_tr:last-child]:border-0">
             {loading ? (
-                <tr>
-                    <td colSpan={Math.max(columns.length, 1)} className="h-64 text-center align-middle">
-                        <div className="flex items-center justify-center h-full w-full">
-                            <Loader2 className="animate-spin h-8 w-8 text-blue-500" />
-                        </div>
-                    </td>
-                </tr>
+                renderSkeleton()
             ) : data.length ? (
                 data.map(renderRow)
             ) : (
