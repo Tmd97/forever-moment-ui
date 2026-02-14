@@ -3,7 +3,7 @@ import { Button } from '@/components/common/Button';
 import { Dropdown } from '@/components/common/Dropdown';
 import { Input } from '@/components/common/Input';
 import { Loader2 } from 'lucide-react';
-import type { Vendor } from '../../../store/action-types';
+import type { Vendor } from './Vendor';
 
 interface VendorFormProps {
     initialData?: Partial<Vendor>;

@@ -18,7 +18,9 @@ interface UsersProps {
     loading: boolean;
     error: string | null;
     status: string;
+    roles: any;
     getUsersData: () => void;
+    getRolesData: () => void;
     createUser: (data: any) => void;
     updateUser: (id: number, data: any) => void;
     deleteUser: (id: number) => void;
@@ -34,6 +36,7 @@ export interface UserType {
     dateOfBirth: string;
     preferredCity: string;
     role?: string;
+    roleId?: number;
     status?: string;
 }
 
@@ -42,7 +45,9 @@ const Users = ({
     loading,
     error,
     status,
+    roles,
     getUsersData,
+    getRolesData,
     createUser,
     updateUser,
     deleteUser,
@@ -52,7 +57,7 @@ const Users = ({
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [formData, setFormData] = useState({ fullName: '', email: '', role: 'User', status: 'Active' });
+    const [formData, setFormData] = useState({ fullName: '', email: '', phoneNumber: '', preferredCity: '', roleId: '', status: 'Active' });
 
     // Local state for immediate interaction
     const [users, setUsers] = useState<UserType[]>([]);
@@ -65,7 +70,8 @@ const Users = ({
 
     useEffect(() => {
         getUsersData();
-    }, [getUsersData]);
+        getRolesData();
+    }, [getUsersData, getRolesData]);
 
     useEffect(() => {
         if (data && Array.isArray(data)) {
@@ -75,17 +81,26 @@ const Users = ({
 
     useEffect(() => {
         if (status === types.CREATE_USER_SUCCESS) {
+            toast.success('User created successfully');
             resetStatus();
             handleCloseModal();
         } else if (status === types.UPDATE_USER_SUCCESS) {
+            toast.success('User updated successfully');
             resetStatus();
             handleCloseModal();
         } else if (status === types.DELETE_USER_SUCCESS) {
+            toast.success('User deleted successfully');
             resetStatus();
             setIsDeleteModalOpen(false);
             setDeleteId(null);
         }
     }, [status, resetStatus]);
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+        }
+    }, [error]);
 
     // Filter configuration
     const filterCategories: FilterCategory[] = [
@@ -112,7 +127,7 @@ const Users = ({
         setActiveFilters(filters);
     };
 
-    // Apply filters locally for now since API might not support it yet
+    // Apply filters locally
     let filteredUsers = users;
     if (activeFilters.role && activeFilters.role.length > 0) {
         filteredUsers = filteredUsers.filter(user => user.role && activeFilters.role.includes(user.role));
@@ -121,46 +136,52 @@ const Users = ({
         filteredUsers = filteredUsers.filter(user => user.status && activeFilters.status.includes(user.status));
     }
 
-
-    useEffect(() => {
-        if (error) {
-            toast.error(error);
-        }
-    }, [error]);
-
     const handleOpenModal = (user: UserType | null = null) => {
         if (user) {
             setEditingId(user.id);
-            setFormData({ fullName: user.fullName, email: user.email, role: user.role || 'User', status: user.status || 'Active' });
+            setFormData({
+                fullName: user.fullName,
+                email: user.email,
+                phoneNumber: user.phoneNumber || '',
+                preferredCity: user.preferredCity || '',
+                roleId: user.roleId ? String(user.roleId) : '',
+                status: user.status || 'Active'
+            });
         } else {
             setEditingId(null);
-            setFormData({ fullName: '', email: '', role: 'User', status: 'Active' });
+            setFormData({ fullName: '', email: '', phoneNumber: '', preferredCity: '', roleId: '', status: 'Active' });
         }
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setFormData({ fullName: '', email: '', role: 'User', status: 'Active' });
+        setFormData({ fullName: '', email: '', phoneNumber: '', preferredCity: '', roleId: '', status: 'Active' });
         setEditingId(null);
     };
 
-    const handleFormSubmit = (submitData: { fullName: string; email: string; role: string; status: string }) => {
-        // Construct payload as per requirement
-        const payload = {
-            fullName: submitData.fullName,
-            email: submitData.email,
-            phoneNumber: "1356203372506",
-            // Wait, looking at request again: "payload is { ... phoneNumber: "1356203372506" ... } do not add extra column in user form send that data as blank in payload"
-            // The instruction "send that data as blank in payload" likely refers to the "extra column" fields NOT in the form.
-            profilePictureUrl: "", // Blank as requested
-            dateOfBirth: "", // Blank as requested
-            preferredCity: "" // Blank as requested
-        };
-
+    const handleFormSubmit = (submitData: { fullName: string; email: string; phoneNumber: string; preferredCity: string; roleId: string; status: string }) => {
         if (editingId) {
+            // Update existing user
+            const payload = {
+                fullName: submitData.fullName,
+                email: submitData.email,
+                phoneNumber: submitData.phoneNumber,
+                preferredCity: submitData.preferredCity,
+                profilePictureUrl: '',
+                dateOfBirth: '',
+            };
             updateUser(editingId, payload);
         } else {
+            // Create new user via /auth/register
+            const payload = {
+                email: submitData.email,
+                password: '123456789', // TODO: Remove hardcoded password
+                fullName: submitData.fullName,
+                phoneNumber: submitData.phoneNumber,
+                preferredCity: submitData.preferredCity,
+                roleId: submitData.roleId ? Number(submitData.roleId) : 0,
+            };
             createUser(payload);
         }
     };
@@ -176,7 +197,8 @@ const Users = ({
         }
     };
 
-
+    // Roles list for dropdown
+    const rolesData = (roles && Array.isArray(roles)) ? roles : [];
 
     return (
         <CrudPageLayout
@@ -205,17 +227,24 @@ const Users = ({
                         {
                             header: 'Email',
                             accessorKey: 'email' as const,
-                            className: 'w-[30%] min-w-[200px] py-3 px-4 text-left text-gray-500 dark:text-gray-400'
+                            className: 'w-[25%] min-w-[200px] py-3 px-4 text-left text-gray-500 dark:text-gray-400'
+                        },
+                        {
+                            header: 'Phone',
+                            accessorKey: 'phoneNumber' as const,
+                            className: 'w-[15%] min-w-[130px] py-3 px-4 text-left text-gray-500 dark:text-gray-400'
                         },
                         {
                             header: 'Role',
-                            accessorKey: 'role' as const,
                             className: 'w-[15%] min-w-[100px] py-3 px-4 text-left',
-                            render: (user) => (
-                                <span className='inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'>
-                                    {user.role || '-'}
-                                </span>
-                            )
+                            render: (user) => {
+                                const roleName = rolesData.find((r: any) => r.id === user.roleId)?.roleName || user.role || '-';
+                                return (
+                                    <span className='inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'>
+                                        {roleName}
+                                    </span>
+                                );
+                            }
                         },
                         {
                             header: 'Status',
@@ -274,11 +303,20 @@ const Users = ({
                     title={editingId ? 'Edit User' : 'Add User'}
                 >
                     <UserForm
-                        initialData={editingId ? { fullName: formData.fullName, email: formData.email, role: formData.role, status: formData.status } : undefined}
+                        initialData={editingId ? {
+                            fullName: formData.fullName,
+                            email: formData.email,
+                            phoneNumber: formData.phoneNumber,
+                            preferredCity: formData.preferredCity,
+                            roleId: formData.roleId,
+                            status: formData.status
+                        } : undefined}
+                        roles={rolesData}
                         onSubmit={handleFormSubmit}
                         onCancel={handleCloseModal}
                         submitLabel={editingId ? 'Save Changes' : 'Create User'}
                         isLoading={loading}
+                        isEditing={!!editingId}
                     />
                 </Modal>
             }

@@ -1,7 +1,7 @@
 import { Button } from '@/components/common/Button';
-import { cn } from '@/utils/cn';
+import { StatusBadge } from '@/components/common/StatusBadge';
 import { Mail, Phone, Star, Calendar } from 'lucide-react';
-import type { Vendor } from '../../../store/types';
+import type { Vendor } from './Vendor';
 
 interface VendorDetailsProps {
     vendor: Vendor;
@@ -18,17 +18,8 @@ export const VendorDetails = ({ vendor, onEdit }: VendorDetailsProps) => {
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white">{vendor.name}</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">{vendor.category}</p>
                 </div>
-                <span className={cn(
-                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                    vendor.status === 'Active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                        vendor.status === 'Inactive' ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400' :
-                            'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                )}>
-                    {vendor.status}
-                </span>
+                <StatusBadge status={vendor.status} />
             </div>
-
-            {/* Quick Stats or Actions could act here */}
 
             <div className="border-t border-gray-200 dark:border-gray-800 pt-4">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Contact Information</h3>

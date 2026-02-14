@@ -1,13 +1,6 @@
 import { Button } from '@/components/common/Button';
-import { cn } from '@/utils/cn';
-
-export interface ExperienceType {
-    id: number;
-    title: string;
-    category: string;
-    price: string;
-    status: string;
-}
+import { StatusBadge } from '@/components/common/StatusBadge';
+import type { ExperienceType } from './Experience';
 
 interface ExperienceDetailsProps {
     experience: ExperienceType;
@@ -28,12 +21,7 @@ export const ExperienceDetails = ({ experience, onEdit }: ExperienceDetailsProps
                 </div>
                 <div>
                     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</h3>
-                    <span className={cn(
-                        'mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full',
-                        experience.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-                    )}>
-                        {experience.status}
-                    </span>
+                    <StatusBadge status={experience.status} className="mt-1" />
                 </div>
                 <div>
                     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">ID</h3>

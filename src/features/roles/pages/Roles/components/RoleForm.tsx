@@ -6,15 +6,15 @@ import { Input } from '@/components/common/Input';
 import { Textarea } from '@/components/common/Textarea';
 
 interface RoleFormProps {
-    initialData?: { roleName: string; description?: string; isActive: boolean };
-    onSubmit: (data: { roleName: string; description: string; isActive: boolean }) => void;
+    initialData?: { roleName: string; description?: string; active: boolean };
+    onSubmit: (data: { roleName: string; description: string; active: boolean }) => void;
     onCancel: () => void;
     submitLabel: string;
     isLoading?: boolean;
 }
 
 export const RoleForm = ({ initialData, onSubmit, onCancel, submitLabel, isLoading }: RoleFormProps) => {
-    const [formData, setFormData] = useState(initialData || { roleName: '', description: '', isActive: true });
+    const [formData, setFormData] = useState(initialData || { roleName: '', description: '', active: true });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -54,8 +54,8 @@ export const RoleForm = ({ initialData, onSubmit, onCancel, submitLabel, isLoadi
                         { label: 'Active', value: 'true' },
                         { label: 'Inactive', value: 'false' }
                     ]}
-                    value={formData.isActive ? 'true' : 'false'}
-                    onChange={(value) => setFormData({ ...formData, isActive: value === 'true' })}
+                    value={formData.active ? 'true' : 'false'}
+                    onChange={(value) => setFormData({ ...formData, active: value === 'true' })}
                     placeholder="Select Status"
                     searchable={false}
                     disabled={isLoading}
@@ -70,3 +70,4 @@ export const RoleForm = ({ initialData, onSubmit, onCancel, submitLabel, isLoadi
         </form>
     );
 };
+

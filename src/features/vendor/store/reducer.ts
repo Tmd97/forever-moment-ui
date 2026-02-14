@@ -1,7 +1,6 @@
 import * as types from './action-types';
-import type { VendorState } from './action-types';
 
-const initialState: VendorState = {
+const initialState = {
     data: null,
     loading: false,
     error: null,

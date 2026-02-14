@@ -1,17 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/common/Button';
-import { DataTable } from '@/components/common/DataTable'; // Refactored import
+import { DataTable } from '@/components/common/DataTable';
 import { Modal } from '@/components/common/Modal';
 import { SidePanel } from '@/components/common/SidePanel';
 import { VendorForm } from './VendorForm';
 import { VendorDetails } from './VendorDetails';
 import { DeleteModal } from '@/components/common/DeleteModal';
-import { cn } from '@/utils/cn';
 import { Filter, type FilterCategory } from '@/components/common/Filter';
-import { Trash2, Edit2, Plus, Eye } from 'lucide-react';
-import type { Vendor } from '../../../store/types';
-import { VENDORS_DATA } from '../../../../data/mockData';
-import '../../css/styles.scss';
+import { StatusBadge } from '@/components/common/StatusBadge';
+import { RowActions } from '@/components/common/RowActions';
+import { CrudPageLayout } from '@/components/common/CrudPageLayout';
+import { Plus } from 'lucide-react';
+import toast from 'react-hot-toast';
+
+export interface Vendor {
+    id: number;
+    name: string;
+    contactPerson: string;
+    email: string;
+    phone: string;
+    category: string;
+    status: 'Active' | 'Inactive' | 'Pending';
+    rating?: number;
+}
 
 interface VendorProps {
     data: Vendor[] | null;
@@ -21,19 +32,20 @@ interface VendorProps {
 }
 
 const VendorPage = ({ data, loading, error, getVendors }: VendorProps) => {
-    // Console log to avoid unused warning for now if not used in JSX
-    console.log(loading);
-
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingId, setEditingId] = useState<string | number | null>(null);
+    const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [deleteId, setDeleteId] = useState<string | number | null>(null);
+    const [deleteId, setDeleteId] = useState<number | null>(null);
 
-    // Local state for vendors to allow immediate UI updates (mocking API)
-    const [vendors, setVendors] = useState<Vendor[]>([]);
+    // TODO: Remove mock data once real API is integrated
+    const [vendors, setVendors] = useState<Vendor[]>([
+        { id: 1, name: 'Memorable Clicks', contactPerson: 'Rahul Gupta', email: 'rahul@memorableclicks.com', phone: '+91 9876543210', category: 'Photography', status: 'Active', rating: 4.8 },
+        { id: 2, name: 'Royal Catering Services', contactPerson: 'Amit Singh', email: 'info@royalcatering.com', phone: '+91 9988776655', category: 'Catering', status: 'Active', rating: 4.5 },
+        { id: 3, name: 'Dream Decorators', contactPerson: 'Sneha Patel', email: 'sneha@dreamdecorators.in', phone: '+91 8877665544', category: 'Decoration', status: 'Pending', rating: 0 },
+        { id: 4, name: 'City Venue Halls', contactPerson: 'Vikram Malhotra', email: 'vikram@cityvenues.com', phone: '+91 7766554433', category: 'Venue', status: 'Active', rating: 4.2 },
+        { id: 5, name: 'DJ Max Events', contactPerson: 'Max DSouza', email: 'max@djevents.com', phone: '+91 6655443322', category: 'Music', status: 'Inactive', rating: 4.9 },
+    ]);
     const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
-
-    // Edit form initialization
     const [editingVendorData, setEditingVendorData] = useState<Partial<Vendor> | undefined>(undefined);
     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
 
@@ -44,14 +56,14 @@ const VendorPage = ({ data, loading, error, getVendors }: VendorProps) => {
     useEffect(() => {
         if (data && Array.isArray(data)) {
             setVendors(data);
-        } else if (!data && !loading) {
-            // Fallback to mock data if no data and not loading (or initial render)
-            // However, typically we want to show something while loading if possible, or just wait.
-            // Given the requirement to "add mock data to show", ensuring it exists is key.
-            // Since API also returns this mock data, we can just defer to store, but to be instant:
-            setVendors(VENDORS_DATA as unknown as Vendor[]);
         }
-    }, [data, loading]);
+    }, [data]);
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+        }
+    }, [error]);
 
     const handleOpenModal = (vendor: Vendor | null = null) => {
         if (vendor) {
@@ -75,22 +87,20 @@ const VendorPage = ({ data, loading, error, getVendors }: VendorProps) => {
             setVendors(vendors.map(v => v.id === editingId ? { ...v, ...formData } : v));
         } else {
             const newVendor: Vendor = {
-                id: vendors.length + 1, // Simple ID generation
+                id: vendors.length + 1,
                 rating: 0,
                 ...formData
             };
             setVendors([...vendors, newVendor]);
         }
         handleCloseModal();
-        setIsModalOpen(false); // Ensure modal closes
 
-        // If we were editing the selected vendor, update selection too
         if (selectedVendor && editingId === selectedVendor.id) {
             setSelectedVendor(prev => prev ? { ...prev, ...formData } : null);
         }
     };
 
-    const handleDeleteClick = (id: string | number) => {
+    const handleDeleteClick = (id: number) => {
         setDeleteId(id);
         setIsDeleteModalOpen(true);
     };
@@ -133,100 +143,69 @@ const VendorPage = ({ data, loading, error, getVendors }: VendorProps) => {
 
     const handleFilterChange = (filters: Record<string, string[]>) => {
         setActiveFilters(filters);
-        let filtered = VENDORS_DATA as unknown as Vendor[];
-
-        if (filters.status && filters.status.length > 0) {
-            filtered = filtered.filter(vendor => filters.status.includes(vendor.status));
-        }
-
-        if (filters.category && filters.category.length > 0) {
-            filtered = filtered.filter(vendor => filters.category.includes(vendor.category));
-        }
-
-        setVendors(filtered);
     };
 
-    if (error) {
-        return (
-            <div className='flex items-center justify-center h-64'>
-                <p className='text-red-500'>Error: {error}</p>
-            </div>
-        );
+    // Apply filters locally
+    let filteredVendors = vendors;
+    if (activeFilters.status && activeFilters.status.length > 0) {
+        filteredVendors = filteredVendors.filter(vendor => activeFilters.status.includes(vendor.status));
+    }
+    if (activeFilters.category && activeFilters.category.length > 0) {
+        filteredVendors = filteredVendors.filter(vendor => activeFilters.category.includes(vendor.category));
     }
 
     return (
-        <div className='vendor-page-container'>
-            <div className='px-6 pt-4 pb-4 shrink-0'>
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
-                    <Filter
-                        categories={filterCategories}
-                        onFilterChange={handleFilterChange}
-                    />
-                    <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
-                        <Plus size={16} className="mr-2" /> Add Vendor
-                    </Button>
-                </div>
-            </div>
-
-            <div className="flex flex-1 min-h-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-                <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-                    <DataTable
-                        data={vendors}
-                        loading={loading && (!vendors || vendors.length === 0)}
-                        columns={[
-                            {
-                                header: 'Business Name',
-                                accessorKey: 'name' as const,
-                                className: 'col-vendor-name py-3 px-4 text-left font-medium text-gray-900 dark:text-white'
-                            },
-                            {
-                                header: 'Category',
-                                accessorKey: 'category' as const,
-                                className: 'col-vendor-category py-3 px-4 text-left text-gray-600 dark:text-gray-300'
-                            },
-                            {
-                                header: 'Contact',
-                                accessorKey: 'contactPerson' as const,
-                                className: 'col-vendor-contact py-3 px-4 text-left text-gray-600 dark:text-gray-300'
-                            },
-                            {
-                                header: 'Status',
-                                className: 'col-vendor-status py-3 px-4 text-left',
-                                render: (vendor) => (
-                                    <span className={cn(
-                                        'inline-flex items-center px-2 py-1 text-xs font-medium rounded-full',
-                                        vendor.status === 'Active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                                            vendor.status === 'Inactive' ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400' :
-                                                'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                                    )}>
-                                        {vendor.status}
-                                    </span>
-                                )
-                            },
-                            {
-                                header: 'Actions',
-                                className: 'col-vendor-actions py-3 px-4 text-right',
-                                render: (vendor) => (
-                                    <div className="flex justify-end gap-2">
-                                        <button onClick={(e) => { e.stopPropagation(); handleRowClick(vendor); }} className='p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors'>
-                                            <Eye size={16} />
-                                        </button>
-                                        <button onClick={(e) => { e.stopPropagation(); handleOpenModal(vendor); }} className='p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors'>
-                                            <Edit2 size={16} />
-                                        </button>
-                                        <button onClick={(e) => { e.stopPropagation(); handleDeleteClick(vendor.id); }} className='p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors'>
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                )
-                            }
-                        ]}
-                        keyExtractor={(item) => item.id}
-                        onRowClick={handleRowClick}
-                        selectedId={selectedVendor?.id}
-                    />
-                </div>
-
+        <CrudPageLayout
+            filterSlot={
+                <Filter
+                    categories={filterCategories}
+                    onFilterChange={handleFilterChange}
+                />
+            }
+            addButton={
+                <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
+                    <Plus size={16} className="mr-2" /> Add Vendor
+                </Button>
+            }
+            tableSlot={
+                <DataTable
+                    data={filteredVendors}
+                    loading={loading && (!vendors || vendors.length === 0)}
+                    columns={[
+                        {
+                            header: 'Business Name',
+                            accessorKey: 'name' as const,
+                        },
+                        {
+                            header: 'Category',
+                            accessorKey: 'category' as const,
+                        },
+                        {
+                            header: 'Contact',
+                            accessorKey: 'contactPerson' as const,
+                        },
+                        {
+                            header: 'Status',
+                            render: (vendor) => (
+                                <StatusBadge status={vendor.status} />
+                            )
+                        },
+                        {
+                            header: 'Actions',
+                            render: (vendor) => (
+                                <RowActions
+                                    onEdit={() => handleOpenModal(vendor)}
+                                    onDelete={() => handleDeleteClick(vendor.id)}
+                                />
+                            )
+                        }
+                    ]}
+                    keyExtractor={(item) => item.id}
+                    onRowClick={handleRowClick}
+                    selectedId={selectedVendor?.id}
+                />
+            }
+            sidePanelSlot={
                 <SidePanel
                     isOpen={!!selectedVendor}
                     onClose={() => setSelectedVendor(null)}
@@ -242,29 +221,31 @@ const VendorPage = ({ data, loading, error, getVendors }: VendorProps) => {
                         />
                     )}
                 </SidePanel>
-            </div>
-
-            <Modal
-                isOpen={isModalOpen}
-                onClose={handleCloseModal}
-                title={editingId ? 'Edit Vendor' : 'Add Vendor'}
-            >
-                <VendorForm
-                    initialData={editingVendorData}
-                    onSubmit={handleFormSubmit}
-                    onCancel={handleCloseModal}
-                    submitLabel={editingId ? 'Save Changes' : 'Add Vendor'}
-                    isLoading={loading}
+            }
+            modalSlot={
+                <Modal
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    title={editingId ? 'Edit Vendor' : 'Add Vendor'}
+                >
+                    <VendorForm
+                        initialData={editingVendorData}
+                        onSubmit={handleFormSubmit}
+                        onCancel={handleCloseModal}
+                        submitLabel={editingId ? 'Save Changes' : 'Add Vendor'}
+                        isLoading={loading}
+                    />
+                </Modal>
+            }
+            deleteModalSlot={
+                <DeleteModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => setIsDeleteModalOpen(false)}
+                    onConfirm={handleConfirmDelete}
+                    itemType="Vendor"
                 />
-            </Modal>
-
-            <DeleteModal
-                isOpen={isDeleteModalOpen}
-                onClose={() => setIsDeleteModalOpen(false)}
-                onConfirm={handleConfirmDelete}
-                itemType="Vendor"
-            />
-        </div >
+            }
+        />
     );
 };
 

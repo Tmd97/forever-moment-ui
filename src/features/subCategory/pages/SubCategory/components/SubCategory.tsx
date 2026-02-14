@@ -50,8 +50,7 @@ const SubCategory = ({
     deleteSubCategory,
     resetStatus
 }: SubCategoryProps) => {
-    // Keep loading for potential future use or debugging
-    console.log(loading);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -121,7 +120,7 @@ const SubCategory = ({
     ];
 
     const handleFilterChange = (filters: Record<string, string[]>) => {
-        console.log('Filters changed:', filters);
+
         setActiveFilters(filters);
     };
 

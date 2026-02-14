@@ -29,7 +29,7 @@ export interface RoleType {
     id: number;
     roleName: string;
     description: string;
-    isActive: boolean;
+    active: boolean;
     permissionLevel?: number;
     systemRole?: boolean;
 }
@@ -49,7 +49,7 @@ const Roles = ({
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [formData, setFormData] = useState({ roleName: '', description: '', isActive: true });
+    const [formData, setFormData] = useState({ roleName: '', description: '', active: true });
 
     const [roles, setRoles] = useState<RoleType[]>([]);
     const [selectedRole, setSelectedRole] = useState<RoleType | null>(null);
@@ -106,10 +106,9 @@ const Roles = ({
     const handleFilterChange = (filters: Record<string, string[]>) => {
         setActiveFilters(filters);
         let filtered = data || [];
-
         if (filters.status && filters.status.length > 0) {
             filtered = filtered.filter((role: RoleType) => {
-                const isActiveString = role.isActive ? 'true' : 'false';
+                const isActiveString = role.active ? 'true' : 'false';
                 return filters.status.includes(isActiveString);
             });
         }
@@ -123,27 +122,26 @@ const Roles = ({
             setFormData({
                 roleName: role.roleName,
                 description: role.description,
-                isActive: role.isActive,
+                active: role.active,
             });
         } else {
             setEditingId(null);
-            setFormData({ roleName: '', description: '', isActive: true });
+            setFormData({ roleName: '', description: '', active: true });
         }
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setFormData({ roleName: '', description: '', isActive: true });
+        setFormData({ roleName: '', description: '', active: true });
         setEditingId(null);
     };
 
-    const handleFormSubmit = (submittedData: { roleName: string; description: string; isActive: boolean }) => {
+    const handleFormSubmit = (submittedData: { roleName: string; description: string; active: boolean }) => {
         if (editingId) {
             const existingRole = roles.find(r => r.id === editingId);
             const payload = {
                 ...submittedData,
-                active: submittedData.isActive,
                 permissionLevel: existingRole?.permissionLevel || 0,
                 systemRole: existingRole?.systemRole || false
             };
@@ -151,7 +149,6 @@ const Roles = ({
         } else {
             const payload = {
                 ...submittedData,
-                active: submittedData.isActive,
                 permissionLevel: 0,
                 systemRole: true
             };
@@ -210,7 +207,7 @@ const Roles = ({
                             header: 'Status',
                             className: 'w-[20%] min-w-[100px] py-3 px-4 text-left',
                             render: (role) => (
-                                <StatusBadge isActive={role.isActive} />
+                                <StatusBadge isActive={role.active} />
                             )
                         },
                         {
@@ -242,7 +239,7 @@ const Roles = ({
                             <h3 className="text-lg font-bold">{selectedRole.roleName}</h3>
                             <p className="text-gray-600 mt-2">{selectedRole.description}</p>
                             <div className="mt-4">
-                                <p><strong>Status:</strong> {selectedRole.isActive ? 'Active' : 'Inactive'}</p>
+                                <p><strong>Status:</strong> {selectedRole.active ? 'Active' : 'Inactive'}</p>
                             </div>
                             <Button
                                 variant="outline"
@@ -265,7 +262,7 @@ const Roles = ({
                         initialData={editingId ? {
                             roleName: formData.roleName,
                             description: formData.description,
-                            isActive: formData.isActive
+                            active: formData.active
                         } : undefined}
                         onSubmit={handleFormSubmit}
                         onCancel={handleCloseModal}
