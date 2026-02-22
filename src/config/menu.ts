@@ -7,7 +7,10 @@ import {
     Users,
     Briefcase,
     UserCog,
-    Store
+    Store,
+    MapPin,
+    Clock,
+    Settings
 } from 'lucide-react';
 
 export interface SidebarItem {
@@ -25,26 +28,29 @@ export const sidebarItems: SidebarItem[] = [
     },
     {
         name: 'Event Management',
-        icon: Calendar,
+        icon: Sparkles,
         children: [
+            { name: 'Experience', path: '/admin/experience', icon: Sparkles },
             { name: 'Category', path: '/admin/category', icon: Layers },
             { name: 'Sub Category', path: '/admin/subCategory', icon: Tag },
-            { name: 'Experience', path: '/admin/experience', icon: Sparkles },
         ]
     },
     {
-        name: 'Service Providers',
-        icon: Briefcase,
+        name: 'Operations',
+        icon: Calendar,
         children: [
+            { name: 'Locations', path: '/admin/locations', icon: MapPin },
+            { name: 'Slots', path: '/admin/slots', icon: Clock },
             { name: 'Vendors', path: '/admin/vendors', icon: Store },
         ]
     },
     {
-        name: 'User Management',
+        name: 'Administration',
         icon: UserCog,
         children: [
             { name: 'Users', path: '/admin/users', icon: Users },
-            { name: 'Roles', path: '/admin/roles', icon: Layers },
+            { name: 'Roles', path: '/admin/roles', icon: Briefcase },
+            { name: 'Settings', path: '/admin/settings', icon: Settings },
         ]
     },
 ];

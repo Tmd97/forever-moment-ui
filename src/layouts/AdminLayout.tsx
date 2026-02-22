@@ -1,11 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import Sidebar from '@/components/navigation/Sidebar';
 import Header from '@/components/navigation/Header';
 import Footer from '@/components/navigation/footer';
+import { getUserProfile } from '@/features/profile/store/actions';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getUserProfile() as any);
+  }, [dispatch]);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 

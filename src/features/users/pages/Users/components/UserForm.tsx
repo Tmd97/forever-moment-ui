@@ -19,7 +19,7 @@ interface UserFormProps {
         status: string;
     };
     roles: RoleOption[];
-    onSubmit: (data: { fullName: string; email: string; phoneNumber: string; preferredCity: string; roleId: string; status: string }) => void;
+    onSubmit: (data: { fullName: string; email: string; password?: string; phoneNumber: string; preferredCity: string; roleId: string; status: string }) => void;
     onCancel: () => void;
     submitLabel: string;
     isLoading?: boolean;
@@ -30,6 +30,7 @@ export const UserForm = ({ initialData, roles, onSubmit, onCancel, submitLabel, 
     const [formData, setFormData] = useState({
         fullName: initialData?.fullName || '',
         email: initialData?.email || '',
+        password: '',
         phoneNumber: initialData?.phoneNumber || '',
         preferredCity: initialData?.preferredCity || '',
         roleId: initialData?.roleId || '',
@@ -41,6 +42,7 @@ export const UserForm = ({ initialData, roles, onSubmit, onCancel, submitLabel, 
             setFormData({
                 fullName: initialData.fullName || '',
                 email: initialData.email || '',
+                password: '',
                 phoneNumber: initialData.phoneNumber || '',
                 preferredCity: initialData.preferredCity || '',
                 roleId: initialData.roleId || '',
@@ -87,6 +89,18 @@ export const UserForm = ({ initialData, roles, onSubmit, onCancel, submitLabel, 
                     disabled={isLoading}
                 />
             </div>
+            {!isEditing && (
+                <div>
+                    <Input
+                        label="Password"
+                        type='password'
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        required
+                        disabled={isLoading}
+                    />
+                </div>
+            )}
             <div>
                 <Input
                     label="Phone Number"

@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { Bell, Settings, User, LogOut, Menu, ChevronRight } from 'lucide-react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/features/auth/store/actions';
+import type { RootState } from '@/store/store';
 import { cn } from '@/utils/cn';
 import { LogoutModal } from '@/features/auth/pages/Login/components/LogoutModal';
 import { sidebarItems } from '@/config/menu';
@@ -15,6 +16,9 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { user } = useSelector((state: RootState) => state.auth);
+    const { data: profileData } = useSelector((state: RootState) => state.profile);
+
     const [showDropdown, setShowDropdown] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -112,7 +116,6 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
                     {/* Breadcrumbs */}
                     <nav className="flex items-center text-xs text-gray-500 dark:text-gray-400 leading-tight mt-0.5">
                         {breadcrumbs.map((crumb, index) => {
-                            const isLast = index === breadcrumbs.length - 1;
                             return (
                                 <div key={crumb.label} className="flex items-center">
                                     {index > 0 && <ChevronRight size={10} className="mx-1 text-gray-400" />}
@@ -144,9 +147,10 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
                 <div className='relative' ref={dropdownRef}>
                     <button
                         onClick={() => setShowDropdown(!showDropdown)}
-                        className='h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold hover:bg-blue-600 transition-colors'
+                        className='h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold hover:bg-blue-600 transition-colors uppercase'
+                        title={profileData?.fullName || user?.name || 'User'}
                     >
-                        A
+                        {(profileData?.fullName || user?.name || 'A').charAt(0)}
                     </button>
 
                     {/* Dropdown Menu */}

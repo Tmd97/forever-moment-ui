@@ -7,6 +7,12 @@ export interface User {
     id: string;
     email: string;
     name: string;
+    fullName?: string;
+    phoneNumber?: string;
+    profilePictureUrl?: string;
+    dateOfBirth?: string;
+    preferredCity?: string;
+    roleId?: number;
     role: 'admin' | 'user';
 }
 

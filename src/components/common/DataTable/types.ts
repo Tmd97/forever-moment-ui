@@ -19,6 +19,7 @@ export interface DataTableProps<T> {
     onReorder?: (newOrder: T[], activeId: RowId, overId: RowId) => void;
     draggable?: boolean;
     emptyMessage?: string;
+    tableClassName?: string;
 }
 
 export interface SortableRowProps extends Omit<React.HTMLAttributes<HTMLTableRowElement>, 'id'> {

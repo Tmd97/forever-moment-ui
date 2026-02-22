@@ -37,6 +37,7 @@ export interface UserType {
     preferredCity: string;
     role?: string;
     roleId?: number;
+    roleIds?: number[];
     status?: string;
 }
 
@@ -57,7 +58,7 @@ const Users = ({
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [formData, setFormData] = useState({ fullName: '', email: '', phoneNumber: '', preferredCity: '', roleId: '', status: 'Active' });
+    const [formData, setFormData] = useState({ fullName: '', email: '', password: '', phoneNumber: '', preferredCity: '', roleId: '', status: 'Active' });
 
     // Local state for immediate interaction
     const [users, setUsers] = useState<UserType[]>([]);
@@ -139,28 +140,32 @@ const Users = ({
     const handleOpenModal = (user: UserType | null = null) => {
         if (user) {
             setEditingId(user.id);
+            const activeRoleIds = user.roleIds && user.roleIds.length > 0 ? user.roleIds : (user.roleId != null ? [user.roleId] : []);
+            const firstRoleId = activeRoleIds.length > 0 ? String(activeRoleIds[0]) : '';
+
             setFormData({
                 fullName: user.fullName,
                 email: user.email,
+                password: '', // Add empty password for type matching
                 phoneNumber: user.phoneNumber || '',
                 preferredCity: user.preferredCity || '',
-                roleId: user.roleId ? String(user.roleId) : '',
+                roleId: firstRoleId,
                 status: user.status || 'Active'
             });
         } else {
             setEditingId(null);
-            setFormData({ fullName: '', email: '', phoneNumber: '', preferredCity: '', roleId: '', status: 'Active' });
+            setFormData({ fullName: '', email: '', password: '', phoneNumber: '', preferredCity: '', roleId: '', status: 'Active' });
         }
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setFormData({ fullName: '', email: '', phoneNumber: '', preferredCity: '', roleId: '', status: 'Active' });
+        setFormData({ fullName: '', email: '', password: '', phoneNumber: '', preferredCity: '', roleId: '', status: 'Active' });
         setEditingId(null);
     };
 
-    const handleFormSubmit = (submitData: { fullName: string; email: string; phoneNumber: string; preferredCity: string; roleId: string; status: string }) => {
+    const handleFormSubmit = (submitData: { fullName: string; email: string; password?: string; phoneNumber: string; preferredCity: string; roleId: string; status: string }) => {
         if (editingId) {
             // Update existing user
             const payload = {
@@ -173,10 +178,10 @@ const Users = ({
             };
             updateUser(editingId, payload);
         } else {
-            // Create new user via /auth/register
+            // Create new user via /admin/user/create
             const payload = {
                 email: submitData.email,
-                password: '123456789', // TODO: Remove hardcoded password
+                password: submitData.password || '',
                 fullName: submitData.fullName,
                 phoneNumber: submitData.phoneNumber,
                 preferredCity: submitData.preferredCity,
@@ -238,10 +243,12 @@ const Users = ({
                             header: 'Role',
                             className: 'w-[15%] min-w-[100px] py-3 px-4 text-left',
                             render: (user) => {
-                                const roleName = rolesData.find((r: any) => r.id === user.roleId)?.roleName || user.role || '-';
+                                const activeRoleIds = user.roleIds && user.roleIds.length > 0 ? user.roleIds : (user.roleId != null ? [user.roleId] : []);
+                                const roleNames = activeRoleIds.map((id: number) => rolesData.find((r: any) => r.id === id)?.roleName).filter(Boolean).join(', ');
+                                const roleNameStr = roleNames || user.role || '-';
                                 return (
                                     <span className='inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'>
-                                        {roleName}
+                                        {roleNameStr}
                                     </span>
                                 );
                             }
@@ -282,7 +289,11 @@ const Users = ({
                             <h3 className="text-lg font-bold">{selectedUser.fullName}</h3>
                             <p className="text-gray-600">{selectedUser.email}</p>
                             <div className="mt-4">
-                                <p><strong>Role:</strong> {selectedUser.role || '-'}</p>
+                                <p><strong>Role:</strong> {(() => {
+                                    const activeRoleIds = selectedUser.roleIds && selectedUser.roleIds.length > 0 ? selectedUser.roleIds : (selectedUser.roleId != null ? [selectedUser.roleId] : []);
+                                    const roleNames = activeRoleIds.map((id: number) => rolesData.find((r: any) => r.id === id)?.roleName).filter(Boolean).join(', ');
+                                    return roleNames || selectedUser.role || '-';
+                                })()}</p>
                                 <p><strong>Status:</strong> {selectedUser.status || '-'}</p>
                             </div>
                             <Button

@@ -5,7 +5,7 @@ export const fetchUsersData = async () => {
 };
 
 export const createUserApi = async (data: any) => {
-    return await axios.post('/auth/register', data);
+    return await axios.post('/admin/user/create', data);
 };
 
 export const deleteUserApi = async (id: number) => {

@@ -6,6 +6,9 @@ import { subCategoryRoutes } from '@/features/subCategory/pages/routes';
 import { vendorRoutes } from '@/features/vendor/pages/routes';
 import { userRoutes } from '@/features/users/pages/routes';
 import { roleRoutes } from '@/features/roles/pages/routes';
+import { locationRoutes } from '@/features/location/pages/routes';
+import { slotRoutes } from '@/features/slot/pages/routes';
+import { profileRoutes } from '@/features/profile/pages/routes';
 
 export const adminRoutes = [
     ...dashboardRoutes,
@@ -16,4 +19,7 @@ export const adminRoutes = [
     ...vendorRoutes,
     ...userRoutes,
     ...roleRoutes,
+    ...locationRoutes,
+    ...slotRoutes,
+    ...profileRoutes,
 ];

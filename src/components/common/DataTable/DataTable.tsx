@@ -34,6 +34,7 @@ export const DataTable = <T,>({
     onReorder,
     draggable,
     emptyMessage = 'No Data available.',
+    tableClassName = 'table-fixed min-w-[800px] w-full caption-bottom text-sm',
 }: DataTableProps<T>) => {
     const isDragEnabled = Boolean(onReorder && draggable);
 
@@ -192,7 +193,7 @@ export const DataTable = <T,>({
     );
 
     const tableContent = (
-        <table className="table-fixed min-w-[800px] w-full caption-bottom text-sm">
+        <table className={tableClassName}>
             {renderTableHead()}
             {isDragEnabled ? (
                 <SortableContext items={rowIds} strategy={verticalListSortingStrategy}>

@@ -8,6 +8,9 @@ import { subCategoryReducer } from '@/features/subCategory/store/reducer';
 import { vendorReducer } from '@/features/vendor/store/reducer';
 import { userReducer } from '@/features/users/store/reducer';
 import { roleReducer } from '@/features/roles/store/reducer';
+import { locationReducer } from '@/features/location/store/reducer';
+import { slotReducer } from '@/features/slot/store/reducer';
+import { profileReducer } from '@/features/profile/store/reducer';
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +23,9 @@ export const store = configureStore({
     vendor: vendorReducer,
     user: userReducer,
     roles: roleReducer,
+    location: locationReducer,
+    slot: slotReducer,
+    profile: profileReducer,
   },
 });
 
