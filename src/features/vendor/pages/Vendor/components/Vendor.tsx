@@ -12,6 +12,7 @@ import { RowActions } from '@/components/common/RowActions';
 import { CrudPageLayout } from '@/components/common/CrudPageLayout';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
+import '../../css/styles.scss';
 
 export interface Vendor {
     id: number;
@@ -156,6 +157,7 @@ const VendorPage = ({ data, loading, error, getVendors }: VendorProps) => {
 
     return (
         <CrudPageLayout
+            className='vendor-page-container'
             filterSlot={
                 <Filter
                     categories={filterCategories}

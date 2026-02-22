@@ -13,6 +13,7 @@ import { CrudPageLayout } from '@/components/common/CrudPageLayout';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import * as types from '@/features/experience/store/action-types';
+import '../../css/styles.scss';
 
 export interface ExperienceType extends ExperiencePayload {
     id: number;
@@ -208,6 +209,7 @@ const Experience = ({
 
     return (
         <CrudPageLayout
+            className='experience-page-container'
             filterSlot={
                 <Filter
                     categories={filterCategories}

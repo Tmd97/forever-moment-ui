@@ -13,6 +13,7 @@ import { CrudPageLayout } from '@/components/common/CrudPageLayout';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import * as types from '@/features/cancellationPolicy/store/action-types';
+import '../../css/styles.scss';
 
 interface CancellationPolicyProps {
     data: any;
