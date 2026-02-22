@@ -11,6 +11,8 @@ import { roleReducer } from '@/features/roles/store/reducer';
 import { locationReducer } from '@/features/location/store/reducer';
 import { slotReducer } from '@/features/slot/store/reducer';
 import { profileReducer } from '@/features/profile/store/reducer';
+import { inclusionReducer } from '@/features/inclusion/store/reducer';
+import { cancellationPolicyReducer } from '@/features/cancellationPolicy/store/reducer';
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +28,8 @@ export const store = configureStore({
     location: locationReducer,
     slot: slotReducer,
     profile: profileReducer,
+    inclusion: inclusionReducer,
+    cancellationPolicy: cancellationPolicyReducer,
   },
 });
 

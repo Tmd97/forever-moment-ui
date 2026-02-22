@@ -1,17 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/common/Button';
-import { DataTable } from '@/components/common/DataTable';
 import { Modal } from '@/components/common/Modal';
-import { SidePanel } from '@/components/common/SidePanel';
 import { LocationForm } from './LocationForm';
 import { LocationDetails } from './LocationDetails';
 import { Pincode } from './Pincode';
 import { DeleteModal } from '@/components/common/DeleteModal';
-import { Filter, type FilterCategory } from '@/components/common/Filter';
-import { StatusBadge } from '@/components/common/StatusBadge';
-import { RowActions } from '@/components/common/RowActions';
-import { CrudPageLayout } from '@/components/common/CrudPageLayout';
-import { Plus } from 'lucide-react';
+import { LocationSplitView } from './LocationSplitView';
+import type { FilterCategory } from '@/components/common/Filter';
 import toast from 'react-hot-toast';
 import * as types from '@/features/location/store/action-types';
 
@@ -175,122 +169,44 @@ const Location = ({
     };
 
     return (
-        <CrudPageLayout
-            className='location-page-container'
-            filterSlot={
-                <Filter
-                    categories={filterCategories}
-                    onFilterChange={handleFilterChange}
+        <div className="location-page-container">
+            <LocationSplitView
+                locations={locations}
+                handleOpenModal={handleOpenModal}
+                handleDeleteClick={handleDeleteClick}
+                selectedLocation={selectedLocation}
+                setSelectedLocation={setSelectedLocation}
+                loading={loading}
+                filterCategories={filterCategories} // Added filterCategories
+                onFilterChange={handleFilterChange} // Added onFilterChange
+                handleRowClick={handleRowClick} // Added handleRowClick
+                LocationDetails={LocationDetails} // Added LocationDetails
+                Pincode={Pincode} // Added Pincode
+            />
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title={editingId ? 'Edit Location' : 'Add Location'}
+            >
+                <LocationForm
+                    initialData={editingId ? formData : undefined}
+                    onSubmit={handleFormSubmit}
+                    onCancel={handleCloseModal}
+                    submitLabel={editingId ? 'Update' : 'Save'}
+                    isLoading={loading}
                 />
-            }
-            addButton={
-                <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
-                    <Plus size={16} />Add Location
-                </Button>
-            }
-            tableSlot={
-                <DataTable
-                    data={locations}
-                    columns={[
-                        {
-                            header: 'Name',
-                            accessorKey: 'name',
-                            className: 'w-[25%] min-w-[150px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
-                        },
-                        {
-                            header: 'City',
-                            accessorKey: 'city',
-                            className: 'w-[20%] min-w-[120px] py-3 px-4 text-left',
-                            render: (loc) => <span>{loc.city || '-'}</span>
-                        },
-                        {
-                            header: 'State',
-                            accessorKey: 'state',
-                            className: 'w-[20%] min-w-[120px] py-3 px-4 text-left',
-                            render: (loc) => <span>{loc.state || '-'}</span>
-                        },
-                        {
-                            header: 'Country',
-                            accessorKey: 'country',
-                            className: 'w-[15%] min-w-[100px] py-3 px-4 text-left',
-                            render: (loc) => <span>{loc.country || '-'}</span>
-                        },
-                        {
-                            header: 'Status',
-                            className: 'w-[10%] min-w-[100px] py-3 px-4 text-left',
-                            render: (loc) => <StatusBadge isActive={loc.isActive} />
-                        },
-                        {
-                            header: 'Actions',
-                            className: 'w-[10%] min-w-[80px] py-3 px-4 text-right',
-                            render: (loc) => (
-                                <RowActions
-                                    onEdit={() => handleOpenModal(loc)}
-                                    onDelete={() => handleDeleteClick(loc.id)}
-                                />
-                            )
-                        }
-                    ]}
-                    keyExtractor={(item) => item.id}
-                    onRowClick={handleRowClick}
-                    selectedId={selectedLocation?.id}
-                    loading={loading && (!locations || locations.length === 0)}
-                />
-            }
-            sidePanelSlot={
-                <SidePanel
-                    isOpen={!!selectedLocation}
-                    onClose={() => setSelectedLocation(null)}
-                    title={selectedLocation?.name || 'Location Details'}
-                    variant="inline"
-                    className="w-full sm:w-[800px] border-l border-gray-200 dark:border-gray-800"
-                    tabs={selectedLocation ? [
-                        {
-                            id: 'general',
-                            label: 'General Information',
-                            content: (
-                                <LocationDetails
-                                    location={selectedLocation}
-                                    onEdit={() => handleOpenModal(selectedLocation)}
-                                />
-                            )
-                        },
-                        {
-                            id: 'pincodes',
-                            label: 'Pincodes',
-                            content: (
-                                <Pincode locationId={selectedLocation.id} />
-                            )
-                        }
-                    ] : undefined}
-                />
-            }
-            modalSlot={
-                <Modal
-                    isOpen={isModalOpen}
-                    onClose={handleCloseModal}
-                    title={editingId ? 'Edit Location' : 'Add Location'}
-                >
-                    <LocationForm
-                        initialData={editingId ? formData : undefined}
-                        onSubmit={handleFormSubmit}
-                        onCancel={handleCloseModal}
-                        submitLabel={editingId ? 'Update' : 'Save'}
-                        isLoading={loading}
-                    />
-                </Modal>
-            }
-            deleteModalSlot={
-                <DeleteModal
-                    isOpen={isDeleteModalOpen}
-                    onClose={() => setIsDeleteModalOpen(false)}
-                    onConfirm={handleConfirmDelete}
-                    itemType="Location"
-                    title='Delete Location'
-                    description='This will permanently delete the location. Are you sure?'
-                />
-            }
-        />
+            </Modal>
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+                itemType="Location"
+                title='Delete Location'
+                description='This will permanently delete the location. Are you sure?'
+            />
+        </div>
     );
 };
 

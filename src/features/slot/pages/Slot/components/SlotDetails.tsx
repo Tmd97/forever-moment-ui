@@ -10,25 +10,20 @@ export const SlotDetails = ({ slot }: SlotDetailsProps) => {
     return (
         <div className="space-y-6">
             <div className="space-y-4">
-                {slot.date && (
+                {slot.startTime && (
                     <div>
-                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Date</h3>
+                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Start Time</h3>
                         <p className="mt-1 text-base text-gray-900 dark:text-gray-100">
-                            {new Date(slot.date).toLocaleDateString()}
+                            {slot.startTime}
                         </p>
                     </div>
                 )}
-                {slot.city && (
+                {slot.endTime && (
                     <div>
-                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">City</h3>
-                        <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{slot.city}</p>
-                    </div>
-                )}
-
-                {slot.country && (
-                    <div>
-                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Country</h3>
-                        <p className="mt-1 text-base text-gray-900 dark:text-gray-100">{slot.country}</p>
+                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">End Time</h3>
+                        <p className="mt-1 text-base text-gray-900 dark:text-gray-100">
+                            {slot.endTime}
+                        </p>
                     </div>
                 )}
                 <div>

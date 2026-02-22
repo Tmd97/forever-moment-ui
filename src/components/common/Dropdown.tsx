@@ -85,7 +85,7 @@ export function Dropdown({
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </button>
                 </PopoverPrimitive.Trigger>
-                <PopoverPrimitive.Content className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover text-popover-foreground shadow-md rounded-md border" align="start">
+                <PopoverPrimitive.Content className="w-[var(--radix-popover-trigger-width)] p-0 bg-popover text-popover-foreground shadow-md rounded-md border z-[60]" align="start">
                     {searchable && (
                         <div className="flex items-center px-2 py-2 sticky top-0 bg-popover z-10">
                             {/* <Search className="mr-2 h-3.5 w-3.5 shrink-0 opacity-50" /> */}

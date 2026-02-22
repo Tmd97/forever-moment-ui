@@ -14,6 +14,8 @@ import { vendorReducer } from '@/features/vendor/store/reducer';
 import { userReducer } from '@/features/users/store/reducer';
 import { roleReducer } from '@/features/roles/store/reducer';
 import { locationReducer } from '@/features/location/store/reducer';
+import { inclusionReducer } from '@/features/inclusion/store/reducer';
+import { cancellationPolicyReducer } from '@/features/cancellationPolicy/store/reducer';
 
 export const rootReducer = combineReducers({
     // Global config
@@ -30,4 +32,6 @@ export const rootReducer = combineReducers({
     user: userReducer,
     roles: roleReducer,
     location: locationReducer,
+    inclusion: inclusionReducer,
+    cancellationPolicy: cancellationPolicyReducer,
 });

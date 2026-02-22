@@ -10,7 +10,9 @@ import {
     Store,
     MapPin,
     Clock,
-    Settings
+    Settings,
+    Gift,
+    ShieldAlert
 } from 'lucide-react';
 
 export interface SidebarItem {
@@ -33,6 +35,8 @@ export const sidebarItems: SidebarItem[] = [
             { name: 'Experience', path: '/admin/experience', icon: Sparkles },
             { name: 'Category', path: '/admin/category', icon: Layers },
             { name: 'Sub Category', path: '/admin/subCategory', icon: Tag },
+            { name: 'Inclusions', path: '/admin/inclusions', icon: Gift },
+            { name: 'Cancellation Policies', path: '/admin/cancellation-policies', icon: ShieldAlert },
         ]
     },
     {
@@ -40,7 +44,7 @@ export const sidebarItems: SidebarItem[] = [
         icon: Calendar,
         children: [
             { name: 'Locations', path: '/admin/locations', icon: MapPin },
-            { name: 'Slots', path: '/admin/slots', icon: Clock },
+            { name: 'Time Slots', path: '/admin/slots', icon: Clock },
             { name: 'Vendors', path: '/admin/vendors', icon: Store },
         ]
     },

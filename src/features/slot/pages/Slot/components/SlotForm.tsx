@@ -7,10 +7,9 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 interface SlotFormData {
-    name: string;
-    date: Date | null;
-    city: string;
-    country: string;
+    label: string;
+    startTime: Date | null;
+    endTime: Date | null;
     isActive: boolean;
 }
 
@@ -24,7 +23,7 @@ interface SlotFormProps {
 
 export const SlotForm = ({ initialData, onSubmit, onCancel, submitLabel, isLoading }: SlotFormProps) => {
     const [formData, setFormData] = useState<SlotFormData>(
-        initialData || { name: '', date: null, city: '', country: '', isActive: true }
+        initialData || { label: '', startTime: null, endTime: null, isActive: true }
     );
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -41,35 +40,53 @@ export const SlotForm = ({ initialData, onSubmit, onCancel, submitLabel, isLoadi
             )}
             <div>
                 <Input
-                    label="Slot Name"
+                    label="Label"
                     type='text'
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    value={formData.label}
+                    onChange={(e) => setFormData({ ...formData, label: e.target.value })}
                     required
                     disabled={isLoading}
                 />
             </div>
-            <div>
-                <Input
-                    label="City"
-                    type='text'
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    disabled={isLoading}
-                />
-            </div>
-            <div>
-                <Input
-                    label="Country"
-                    type='text'
-                    value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    disabled={isLoading}
-                />
+            <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1 flex flex-col gap-1.5">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Start Time
+                    </label>
+                    <DatePicker
+                        selected={formData.startTime}
+                        onChange={(date: Date | null) => setFormData({ ...formData, startTime: date })}
+                        showTimeSelect
+                        showTimeSelectOnly
+                        timeIntervals={15}
+                        timeCaption="Time"
+                        dateFormat="h:mm aa"
+                        className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white"
+                        disabled={isLoading}
+                        required
+                    />
+                </div>
+                <div className="flex-1 flex flex-col gap-1.5">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        End Time
+                    </label>
+                    <DatePicker
+                        selected={formData.endTime}
+                        onChange={(date: Date | null) => setFormData({ ...formData, endTime: date })}
+                        showTimeSelect
+                        showTimeSelectOnly
+                        timeIntervals={15}
+                        timeCaption="Time"
+                        dateFormat="h:mm aa"
+                        className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white"
+                        disabled={isLoading}
+                        required
+                    />
+                </div>
             </div>
             <div>
                 <Dropdown
-                    label="Status"
+                    label="Active"
                     options={[
                         { label: 'Active', value: 'true' },
                         { label: 'Inactive', value: 'false' }

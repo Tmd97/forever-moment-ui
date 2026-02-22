@@ -3,8 +3,8 @@ import { Button } from '@/components/common/Button';
 import { DataTable } from '@/components/common/DataTable';
 import { Modal } from '@/components/common/Modal';
 import { SidePanel } from '@/components/common/SidePanel';
-import { ExperienceForm } from './ExperienceForm';
-import { ExperienceDetails } from './ExperienceDetails';
+import { ExperienceForm, type ExperiencePayload } from './ExperienceForm';
+import { getExperienceTabs } from './ExperienceDetails';
 import { DeleteModal } from '@/components/common/DeleteModal';
 import { Filter, type FilterCategory } from '@/components/common/Filter';
 import { StatusBadge } from '@/components/common/StatusBadge';
@@ -12,42 +12,74 @@ import { RowActions } from '@/components/common/RowActions';
 import { CrudPageLayout } from '@/components/common/CrudPageLayout';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
+import * as types from '@/features/experience/store/action-types';
 
-export interface ExperienceType {
+export interface ExperienceType extends ExperiencePayload {
     id: number;
-    title: string;
-    category: string;
-    price: string;
-    status: string;
+    title?: string;
+    category?: string;
+    price?: string;
+    status?: string;
 }
 
 interface ExperienceProps {
     data: ExperienceType[] | null;
+    selectedExperienceDetail: any;
     loading: boolean;
     error: string | null;
+    status: string;
+    subCategories: any[];
+    inclusions: any[];
+    cancellationPolicies: any[];
     getExperienceData: () => void;
+    getExperienceById: (id: number) => Promise<any>;
+    getSubCategoryData: () => void;
+    getInclusionData: () => void;
+    getCancellationPolicyData: () => void;
+    createExperience: (data: ExperiencePayload) => Promise<any>;
+    updateExperience: (id: number, data: ExperiencePayload) => Promise<any>;
+    deleteExperience: (id: number) => Promise<any>;
+    resetStatus: () => void;
+    toggleCancellationPolicy: (experienceId: number, policyId: number, isAssociate: boolean) => Promise<any>;
+    toggleInclusion: (experienceId: number, inclusionId: number, isAssociate: boolean) => Promise<any>;
 }
 
-const Experience = ({ data, loading, error, getExperienceData }: ExperienceProps) => {
-    // TODO: Remove mock data once real API is integrated
-    const [experiences, setExperiences] = useState<ExperienceType[]>([
-        { id: 1, title: 'Luxury Wedding Package', category: 'Wedding', price: '₹5,000', status: 'Active' },
-        { id: 2, title: 'Corporate Gala Setup', category: 'Corporate', price: '₹12,000', status: 'Active' },
-        { id: 3, title: 'Intimate Birthday Bash', category: 'Birthday', price: '₹2,500', status: 'Active' },
-        { id: 4, title: 'Anniversary Celebration', category: 'Anniversary', price: '₹8,000', status: 'Inactive' },
-        { id: 5, title: 'Baby Shower Delight', category: 'Baby Shower', price: '₹4,500', status: 'Active' },
-    ]);
+const Experience = ({
+    data,
+    selectedExperienceDetail,
+    loading,
+    error,
+    status,
+    subCategories,
+    inclusions,
+    cancellationPolicies,
+    getExperienceData,
+    getExperienceById,
+    getSubCategoryData,
+    getInclusionData,
+    getCancellationPolicyData,
+    createExperience,
+    updateExperience,
+    deleteExperience,
+    resetStatus,
+    toggleCancellationPolicy,
+    toggleInclusion,
+}: ExperienceProps) => {
+
+    const [experiences, setExperiences] = useState<ExperienceType[]>([]);
     const [selectedExperience, setSelectedExperience] = useState<ExperienceType | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<number | null>(null);
-    const [formData, setFormData] = useState({ title: '', category: '', price: '', status: 'Active' });
     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
 
     useEffect(() => {
         getExperienceData();
-    }, [getExperienceData]);
+        getSubCategoryData();
+        getInclusionData();
+        getCancellationPolicyData();
+    }, [getExperienceData, getSubCategoryData, getInclusionData, getCancellationPolicyData]);
 
     useEffect(() => {
         if (data && Array.isArray(data)) {
@@ -58,37 +90,64 @@ const Experience = ({ data, loading, error, getExperienceData }: ExperienceProps
     useEffect(() => {
         if (error) {
             toast.error(error);
+            resetStatus();
         }
-    }, [error]);
+        if (status === types.CREATE_EXPERIENCE_SUCCESS) {
+            toast.success('Experience created successfully');
+            resetStatus();
+            handleCloseModal();
+        }
+        if (status === types.UPDATE_EXPERIENCE_SUCCESS) {
+            toast.success('Experience updated successfully');
+            resetStatus();
+            handleCloseModal();
+        }
+        if (status === types.DELETE_EXPERIENCE_SUCCESS) {
+            toast.success('Experience deleted successfully');
+            resetStatus();
+            setIsDeleteModalOpen(false);
+            if (selectedExperience?.id === deleteId) setSelectedExperience(null);
+        }
+    }, [error, status, resetStatus, selectedExperience, deleteId]);
 
-    const handleRowClick = (exp: ExperienceType) => {
+    const handleRowClick = async (exp: ExperienceType) => {
         setSelectedExperience(exp);
+        try {
+            await getExperienceById(exp.id);
+        } catch (err) {
+            console.error("Failed to load full experience details", err);
+        }
     };
 
-    const handleOpenModal = (exp: ExperienceType | null = null) => {
+    const handleOpenModal = async (exp: ExperienceType | null = null) => {
         if (exp) {
             setEditingId(exp.id);
-            setFormData({ title: exp.title, category: exp.category, price: exp.price, status: exp.status });
+            try {
+                await getExperienceById(exp.id);
+            } catch (err) {
+                return;
+            }
         } else {
             setEditingId(null);
-            setFormData({ title: '', category: '', price: '', status: 'Active' });
         }
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setFormData({ title: '', category: '', price: '', status: 'Active' });
         setEditingId(null);
     };
 
-    const handleFormSubmit = (submitData: { title: string; category: string; price: string; status: string }) => {
+    const handleFormSubmit = async (submitData: ExperiencePayload) => {
         if (editingId) {
-            setExperiences(experiences.map(e => e.id === editingId ? { ...e, ...submitData } : e));
+            await updateExperience(editingId, submitData);
         } else {
-            setExperiences([...experiences, { id: experiences.length + 1, ...submitData }]);
+            const maxOrder = experiences.length > 0
+                ? Math.max(...experiences.map((e: ExperienceType) => e.displayOrder || 0))
+                : -1;
+            const newDisplayOrder = Math.max(0, maxOrder + 1);
+            await createExperience({ ...submitData, displayOrder: newDisplayOrder });
         }
-        handleCloseModal();
     };
 
     const handleDeleteClick = (id: number) => {
@@ -98,8 +157,7 @@ const Experience = ({ data, loading, error, getExperienceData }: ExperienceProps
 
     const handleConfirmDelete = () => {
         if (deleteId) {
-            setExperiences(experiences.filter(e => e.id !== deleteId));
-            setDeleteId(null);
+            deleteExperience(deleteId);
         }
     };
 
@@ -129,13 +187,16 @@ const Experience = ({ data, loading, error, getExperienceData }: ExperienceProps
     };
 
     // Apply filters locally
-    let filteredExperiences = experiences;
+    let filteredExperiences = experiences || [];
     if (activeFilters.status && activeFilters.status.length > 0) {
-        filteredExperiences = filteredExperiences.filter(exp => activeFilters.status.includes(exp.status));
+        filteredExperiences = filteredExperiences.filter((exp: ExperienceType) => {
+            const expStatus = exp.isActive ? 'Active' : 'Inactive';
+            return activeFilters.status.includes(expStatus);
+        });
     }
     if (activeFilters.price && activeFilters.price.length > 0) {
-        filteredExperiences = filteredExperiences.filter(exp => {
-            const price = parseFloat(exp.price.replace(/[^0-9.]/g, ''));
+        filteredExperiences = filteredExperiences.filter((exp: ExperienceType) => {
+            const price = exp.basePrice || 0;
             return activeFilters.price.some(range => {
                 if (range === '0-10000') return price < 10000;
                 if (range === '10000-25000') return price >= 10000 && price <= 25000;
@@ -165,20 +226,16 @@ const Experience = ({ data, loading, error, getExperienceData }: ExperienceProps
                     columns={[
                         {
                             header: 'Title',
-                            accessorKey: 'title' as const,
-                        },
-                        {
-                            header: 'Category',
-                            accessorKey: 'category' as const,
+                            accessorKey: 'name' as const,
                         },
                         {
                             header: 'Price',
-                            accessorKey: 'price' as const,
+                            render: (exp) => `₹${exp.basePrice || 0}`
                         },
                         {
                             header: 'Status',
                             render: (exp) => (
-                                <StatusBadge status={exp.status} />
+                                <StatusBadge status={exp.isActive ? 'Active' : 'Inactive'} />
                             )
                         },
                         {
@@ -200,35 +257,61 @@ const Experience = ({ data, loading, error, getExperienceData }: ExperienceProps
                 <SidePanel
                     isOpen={!!selectedExperience}
                     onClose={() => setSelectedExperience(null)}
-                    title={selectedExperience?.title || 'Experience Details'}
+                    title={selectedExperience?.name || 'Experience Details'}
                     variant="inline"
-                    className="border-l border-gray-200 dark:border-gray-800"
-                >
-                    {selectedExperience && (
-                        <ExperienceDetails
-                            experience={selectedExperience}
-                            onEdit={() => handleOpenModal(selectedExperience)}
-                        />
-                    )}
-                </SidePanel>
+                    className="border-l border-gray-200 dark:border-gray-800 w-[500px]"
+                    tabs={selectedExperience ? getExperienceTabs({
+                        experience: {
+                            ...selectedExperience,
+                            title: selectedExperience.name,
+                            price: `₹${selectedExperience.basePrice}`,
+                            status: selectedExperience.isActive ? 'Active' : 'Inactive'
+                        },
+                        experienceDetail: selectedExperienceDetail,
+                        inclusions,
+                        cancellationPolicies,
+                        onEdit: () => handleOpenModal(selectedExperience),
+                        onToggleCancellationPolicy: (policyId, isAssociate) => {
+                            toggleCancellationPolicy(selectedExperience.id, policyId, isAssociate);
+                        },
+                        onToggleInclusion: (inclusionId, isAssociate) => {
+                            toggleInclusion(selectedExperience.id, inclusionId, isAssociate);
+                        }
+                    }) : undefined}
+                />
             }
             modalSlot={
                 <Modal
                     isOpen={isModalOpen}
                     onClose={handleCloseModal}
                     title={editingId ? 'Edit Experience' : 'Add Experience'}
+                    className="sm:max-w-5xl w-[95vw]"
                 >
                     <ExperienceForm
-                        initialData={editingId ? {
-                            title: formData.title,
-                            category: formData.category,
-                            price: formData.price,
-                            status: formData.status
+                        initialData={editingId && selectedExperienceDetail ? {
+                            name: selectedExperienceDetail.name || '',
+                            slug: selectedExperienceDetail.slug || '',
+                            tagName: selectedExperienceDetail.tagName || '',
+                            basePrice: selectedExperienceDetail.basePrice || 0,
+                            displayOrder: selectedExperienceDetail.displayOrder || 0,
+                            isFeatured: selectedExperienceDetail.isFeatured || false,
+                            isActive: selectedExperienceDetail.isActive ?? true,
+                            subCategoryId: selectedExperienceDetail.subCategoryId || 0,
+                            shortDescription: selectedExperienceDetail.detail?.shortDescription || '',
+                            description: selectedExperienceDetail.detail?.description || '',
+                            durationMinutes: selectedExperienceDetail.detail?.durationMinutes || 0,
+                            maxCapacity: selectedExperienceDetail.detail?.maxCapacity || 0,
+                            minAge: selectedExperienceDetail.detail?.minAge || 0,
+                            completionTime: selectedExperienceDetail.detail?.completionTime || 0,
+                            minHours: selectedExperienceDetail.detail?.minHours || 0,
+                            termsConditions: selectedExperienceDetail.detail?.termsConditions || '',
+                            whatToBring: selectedExperienceDetail.detail?.whatToBring || '',
                         } : undefined}
                         onSubmit={handleFormSubmit}
                         onCancel={handleCloseModal}
                         submitLabel={editingId ? 'Save Changes' : 'Create Experience'}
                         isLoading={loading}
+                        subCategories={subCategories}
                     />
                 </Modal>
             }

@@ -28,22 +28,20 @@ interface SlotProps {
 
 export interface SlotType {
     id: number;
-    name: string;
-    date?: string;
-    city: string;
-    country: string;
+    label: string;
+    startTime: string;
+    endTime: string;
     isActive: boolean;
 }
 
 type SlotFormData = {
-    name: string;
-    date: Date | null;
-    city: string;
-    country: string;
+    label: string;
+    startTime: Date | null;
+    endTime: Date | null;
     isActive: boolean;
 };
 
-const emptyForm: SlotFormData = { name: '', date: null, city: '', country: '', isActive: true };
+const emptyForm: SlotFormData = { label: '', startTime: null, endTime: null, isActive: true };
 
 const Slot = ({
     data,
@@ -77,15 +75,15 @@ const Slot = ({
 
     useEffect(() => {
         if (status === types.CREATE_SLOT_SUCCESS) {
-            toast.success('Slot created successfully');
+            toast.success('Time Slot created successfully');
             resetStatus();
             handleCloseModal();
         } else if (status === types.UPDATE_SLOT_SUCCESS) {
-            toast.success('Slot updated successfully');
+            toast.success('Time Slot updated successfully');
             resetStatus();
             handleCloseModal();
         } else if (status === types.DELETE_SLOT_SUCCESS) {
-            toast.success('Slot deleted successfully');
+            toast.success('Time Slot deleted successfully');
             resetStatus();
             setIsDeleteModalOpen(false);
             setDeleteId(null);
@@ -124,14 +122,25 @@ const Slot = ({
         setSelectedSlot(slot);
     };
 
+    // Helper to parse "HH:mm" straight into today's Date for React-Timepicker
+    const parseTimeStr = (timeStr?: string) => {
+        if (!timeStr) return null;
+        const [hours, minutes] = timeStr.split(':');
+        const d = new Date();
+        d.setHours(parseInt(hours, 10));
+        d.setMinutes(parseInt(minutes, 10));
+        d.setSeconds(0);
+        d.setMilliseconds(0);
+        return d;
+    };
+
     const handleOpenModal = (slot: SlotType | null = null) => {
         if (slot) {
             setEditingId(slot.id);
             setFormData({
-                name: slot.name,
-                date: slot.date ? new Date(slot.date) : null,
-                city: slot.city || '',
-                country: slot.country || '',
+                label: slot.label,
+                startTime: parseTimeStr(slot.startTime),
+                endTime: parseTimeStr(slot.endTime),
                 isActive: slot.isActive,
             });
         } else {
@@ -147,10 +156,19 @@ const Slot = ({
         setEditingId(null);
     };
 
+    // Helper to extract format like "HH:mm" strings back out of local time Date objects
+    const formatTimeStr = (d: Date | null) => {
+        if (!d) return null;
+        const hours = d.getHours().toString().padStart(2, '0');
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    };
+
     const handleFormSubmit = async (submittedData: SlotFormData) => {
         const payload = {
             ...submittedData,
-            date: submittedData.date ? submittedData.date.toISOString().split('T')[0] : null,
+            startTime: formatTimeStr(submittedData.startTime),
+            endTime: formatTimeStr(submittedData.endTime),
         };
 
         if (editingId) {
@@ -182,7 +200,7 @@ const Slot = ({
             }
             addButton={
                 <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
-                    <Plus size={16} />Add Slot
+                    <Plus size={16} />Add Time Slot
                 </Button>
             }
             tableSlot={
@@ -190,31 +208,25 @@ const Slot = ({
                     data={slots}
                     columns={[
                         {
-                            header: 'Name',
-                            accessorKey: 'name',
+                            header: 'Label',
+                            accessorKey: 'label',
                             className: 'w-[25%] min-w-[150px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
                         },
                         {
-                            header: 'Date',
-                            accessorKey: 'date',
-                            className: 'w-[20%] min-w-[120px] py-3 px-4 text-left',
-                            render: (loc) => <span>{loc.date ? new Date(loc.date).toLocaleDateString() : '-'}</span>
+                            header: 'Start Time',
+                            accessorKey: 'startTime',
+                            className: 'w-[25%] min-w-[150px] py-3 px-4 text-left',
+                            render: (loc) => <span>{loc.startTime || '-'}</span>
                         },
                         {
-                            header: 'City',
-                            accessorKey: 'city',
-                            className: 'w-[20%] min-w-[120px] py-3 px-4 text-left',
-                            render: (loc) => <span>{loc.city || '-'}</span>
-                        },
-                        {
-                            header: 'Country',
-                            accessorKey: 'country',
-                            className: 'w-[15%] min-w-[100px] py-3 px-4 text-left',
-                            render: (loc) => <span>{loc.country || '-'}</span>
+                            header: 'End Time',
+                            accessorKey: 'endTime',
+                            className: 'w-[25%] min-w-[150px] py-3 px-4 text-left',
+                            render: (loc) => <span>{loc.endTime || '-'}</span>
                         },
                         {
                             header: 'Status',
-                            className: 'w-[10%] min-w-[100px] py-3 px-4 text-left',
+                            className: 'w-[15%] min-w-[100px] py-3 px-4 text-left',
                             render: (loc) => <StatusBadge isActive={loc.isActive} />
                         },
                         {
@@ -238,7 +250,7 @@ const Slot = ({
                 <SidePanel
                     isOpen={!!selectedSlot}
                     onClose={() => setSelectedSlot(null)}
-                    title={selectedSlot?.name || 'Slot Details'}
+                    title={selectedSlot?.label || 'Time Slot Details'}
                     variant="inline"
                     className="border-l border-gray-200 dark:border-gray-800"
                 >
@@ -254,7 +266,7 @@ const Slot = ({
                 <Modal
                     isOpen={isModalOpen}
                     onClose={handleCloseModal}
-                    title={editingId ? 'Edit Slot' : 'Add Slot'}
+                    title={editingId ? 'Edit Time Slot' : 'Add Time Slot'}
                 >
                     <SlotForm
                         initialData={editingId ? formData : undefined}
@@ -270,9 +282,9 @@ const Slot = ({
                     isOpen={isDeleteModalOpen}
                     onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleConfirmDelete}
-                    itemType="Slot"
-                    title='Delete Slot'
-                    description='This will permanently delete the slot. Are you sure?'
+                    itemType="Time Slot"
+                    title='Delete Time Slot'
+                    description='This will permanently delete the time slot. Are you sure?'
                 />
             }
         />

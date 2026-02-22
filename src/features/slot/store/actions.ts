@@ -12,7 +12,7 @@ export const getSlotData = () => async (dispatch: Dispatch) => {
             payload: response?.data?.response || [],
         });
     } catch (error: any) {
-        const message = error.response?.data?.message || 'Failed to fetch slots';
+        const message = error.response?.data?.message || 'Failed to fetch time slots';
         dispatch({
             type: 'FAILURE',
             payload: message,
@@ -29,7 +29,7 @@ export const createSlot = (data: any) => async (dispatch: Dispatch) => {
         // Refresh data after successful creation
         await (getSlotData() as any)(dispatch);
     } catch (error: any) {
-        const message = error.response?.data?.message || 'Failed to create slot';
+        const message = error.response?.data?.message || 'Failed to create time slot';
         dispatch({
             type: 'FAILURE',
             payload: message,
@@ -46,7 +46,7 @@ export const updateSlot = (id: number, data: any) => async (dispatch: Dispatch) 
         // Refresh data after successful update
         await (getSlotData() as any)(dispatch);
     } catch (error: any) {
-        const message = error.response?.data?.message || 'Failed to update slot';
+        const message = error.response?.data?.message || 'Failed to update time slot';
         dispatch({
             type: 'FAILURE',
             payload: message,
@@ -63,7 +63,7 @@ export const deleteSlot = (id: number) => async (dispatch: Dispatch) => {
         // Refresh data after successful deletion
         await (getSlotData() as any)(dispatch);
     } catch (error: any) {
-        const message = error.response?.data?.message || 'Failed to delete slot';
+        const message = error.response?.data?.message || 'Failed to delete time slot';
         dispatch({
             type: 'FAILURE',
             payload: message,
