@@ -8,6 +8,7 @@ import { LocationSplitView } from './LocationSplitView';
 import type { FilterCategory } from '@/components/common/Filter';
 import toast from 'react-hot-toast';
 import * as types from '@/features/location/store/action-types';
+import '../../css/styles.scss';
 
 interface LocationProps {
     data: any;

@@ -29,20 +29,20 @@ interface SlotProps {
 
 export interface SlotType {
     id: number;
-    label: string;
+    name: string;
     startTime: string;
     endTime: string;
     isActive: boolean;
 }
 
 type SlotFormData = {
-    label: string;
+    name: string;
     startTime: Date | null;
     endTime: Date | null;
     isActive: boolean;
 };
 
-const emptyForm: SlotFormData = { label: '', startTime: null, endTime: null, isActive: true };
+const emptyForm: SlotFormData = { name: '', startTime: null, endTime: null, isActive: true };
 
 const Slot = ({
     data,
@@ -139,7 +139,7 @@ const Slot = ({
         if (slot) {
             setEditingId(slot.id);
             setFormData({
-                label: slot.label,
+                name: slot.name,
                 startTime: parseTimeStr(slot.startTime),
                 endTime: parseTimeStr(slot.endTime),
                 isActive: slot.isActive,
@@ -209,8 +209,8 @@ const Slot = ({
                     data={slots}
                     columns={[
                         {
-                            header: 'Label',
-                            accessorKey: 'label',
+                            header: 'Name',
+                            accessorKey: 'name',
                             className: 'w-[25%] min-w-[150px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
                         },
                         {
@@ -251,7 +251,7 @@ const Slot = ({
                 <SidePanel
                     isOpen={!!selectedSlot}
                     onClose={() => setSelectedSlot(null)}
-                    title={selectedSlot?.label || 'Time Slot Details'}
+                    title={selectedSlot?.name || 'Time Slot Details'}
                     variant="inline"
                     className="border-l border-gray-200 dark:border-gray-800"
                 >

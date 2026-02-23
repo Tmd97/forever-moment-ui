@@ -38,7 +38,7 @@ export const LocationSplitView = ({
 
     const renderFullTable = () => {
         return (
-            <div className="flex flex-col h-[calc(100vh-140px)] font-sans bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 shadow-sm mx-6 mb-6 overflow-hidden">
+            <div className="flex flex-col flex-1 h-full">
                 {/* Top Bar */}
                 <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-gray-800">
                     <span className="font-bold text-xl text-slate-900 dark:text-white tracking-tight">Locations</span>
@@ -146,7 +146,7 @@ export const LocationSplitView = ({
 
     const renderSplitView = () => {
         return (
-            <div className="flex h-[calc(100vh-140px)] font-sans bg-slate-50 dark:bg-gray-900 overflow-hidden rounded-xl border border-slate-200 dark:border-gray-800 shadow-sm mx-6 mb-6">
+            <div className="flex flex-1 h-full overflow-hidden">
                 {/* Left Panel */}
                 <div className="w-[320px] min-w-[320px] bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-800 flex flex-col overflow-hidden">
                     {/* Top Bar */}

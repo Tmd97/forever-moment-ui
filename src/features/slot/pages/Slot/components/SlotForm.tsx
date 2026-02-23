@@ -7,7 +7,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 interface SlotFormData {
-    label: string;
+    name: string;
     startTime: Date | null;
     endTime: Date | null;
     isActive: boolean;
@@ -23,7 +23,7 @@ interface SlotFormProps {
 
 export const SlotForm = ({ initialData, onSubmit, onCancel, submitLabel, isLoading }: SlotFormProps) => {
     const [formData, setFormData] = useState<SlotFormData>(
-        initialData || { label: '', startTime: null, endTime: null, isActive: true }
+        initialData || { name: '', startTime: null, endTime: null, isActive: true }
     );
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -40,10 +40,10 @@ export const SlotForm = ({ initialData, onSubmit, onCancel, submitLabel, isLoadi
             )}
             <div>
                 <Input
-                    label="Label"
+                    label="Name"
                     type='text'
-                    value={formData.label}
-                    onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
                     disabled={isLoading}
                 />
