@@ -7,6 +7,7 @@ import { StatusBadge } from '@/components/common/StatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { Search, Plus, MapPin, X, Edit2, Trash2 } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { Filter } from '@/components/common/Filter';
 
 const cityInitials = (name: string) => name ? name.slice(0, 2).toUpperCase() : 'LO';
 
@@ -27,53 +28,53 @@ export const LocationSplitView = ({
 }: any) => {
     const [tab, setTab] = useState("general");
     const [search, setSearch] = useState("");
-    const [filterStatus, setFilterStatus] = useState("All");
+    const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
 
     const filtered = useMemo(() => locations.filter((l: any) => {
         const matchSearch = l.name.toLowerCase().includes(search.toLowerCase()) ||
             (l.city && l.city.toLowerCase().includes(search.toLowerCase()));
-        const matchStatus = filterStatus === "All" || (filterStatus === "Active" ? l.isActive : !l.isActive);
+
+        let matchStatus = true;
+        if (activeFilters.status && activeFilters.status.length > 0) {
+            const isActiveString = l.isActive ? 'true' : 'false';
+            matchStatus = activeFilters.status.includes(isActiveString);
+        }
+
         return matchSearch && matchStatus;
-    }), [locations, search, filterStatus]);
+    }), [locations, search, activeFilters]);
 
     const renderFullTable = () => {
         return (
             <div className="flex flex-col flex-1 h-full">
-                {/* Top Bar */}
-                <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-gray-800">
-                    <span className="font-bold text-xl text-slate-900 dark:text-white tracking-tight">Locations</span>
-                    <Button onClick={() => handleOpenModal()} className="h-10 px-4 text-sm gap-2 shadow-sm">
-                        <Plus size={16} /> Add Location
-                    </Button>
-                </div>
-
                 {/* Filter & Search Bar */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 bg-slate-50/50 dark:bg-gray-900/50 border-b border-slate-100 dark:border-gray-800">
-                    <div className="flex gap-2">
-                        {["All", "Active", "Inactive"].map((f) => (
-                            <button
-                                key={f}
-                                onClick={() => setFilterStatus(f)}
-                                className={cn(
-                                    "border-none rounded-full px-4 py-2 text-sm transition-all duration-200",
-                                    filterStatus === f
-                                        ? "bg-blue-600 text-white font-medium shadow-sm"
-                                        : "bg-white dark:bg-gray-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700 font-normal shadow-sm"
-                                )}
-                            >
-                                {f}
-                            </button>
-                        ))}
-                    </div>
+                    <Filter
+                        categories={[
+                            {
+                                id: 'status',
+                                name: 'Status',
+                                options: [
+                                    { id: '1', label: 'Active', value: 'true' },
+                                    { id: '2', label: 'Inactive', value: 'false' },
+                                ]
+                            }
+                        ]}
+                        onFilterChange={setActiveFilters}
+                    />
 
-                    <div className="relative w-full sm:w-72">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                        <input
-                            className="w-full bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 shadow-sm"
-                            placeholder="Search locations..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <div className="relative w-full sm:w-72">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                            <input
+                                className="w-full bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 shadow-sm"
+                                placeholder="Search locations..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
+                        <Button onClick={() => handleOpenModal()} className="h-10 px-4 text-sm gap-2 shadow-sm shrink-0">
+                            <Plus size={16} /> Add Location
+                        </Button>
                     </div>
                 </div>
 
@@ -152,38 +153,39 @@ export const LocationSplitView = ({
                     {/* Top Bar */}
                     <div className="flex items-center justify-between p-5 pb-3">
                         <span className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Locations</span>
-                        <Button onClick={() => handleOpenModal()} className="h-8 px-3 text-xs gap-1.5 shadow-sm">
+                    </div>
+
+                    {/* Search */}
+                    <div className="flex items-center gap-2 mx-4 mb-3">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                            <input
+                                className="w-full bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2 pl-9 pr-3 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
+                                placeholder="Search locations..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
+                        <Button onClick={() => handleOpenModal()} className="h-[38px] px-3 text-xs gap-1.5 shadow-sm shrink-0">
                             <Plus size={14} /> Add
                         </Button>
                     </div>
 
-                    {/* Search */}
-                    <div className="relative mx-4 mb-3">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                        <input
-                            className="w-full bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2 pl-9 pr-3 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
-                            placeholder="Search locations..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
-
                     {/* Filter Pills */}
-                    <div className="flex gap-1.5 px-4 mb-3">
-                        {["All", "Active", "Inactive"].map((f) => (
-                            <button
-                                key={f}
-                                onClick={() => setFilterStatus(f)}
-                                className={cn(
-                                    "border-none rounded-full px-3.5 py-1.5 text-xs transition-all duration-200",
-                                    filterStatus === f
-                                        ? "bg-blue-600 text-white font-medium shadow-sm"
-                                        : "bg-slate-100 dark:bg-gray-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-gray-700 font-normal"
-                                )}
-                            >
-                                {f}
-                            </button>
-                        ))}
+                    <div className="px-4 mb-3">
+                        <Filter
+                            categories={[
+                                {
+                                    id: 'status',
+                                    name: 'Status',
+                                    options: [
+                                        { id: '1', label: 'Active', value: 'true' },
+                                        { id: '2', label: 'Inactive', value: 'false' },
+                                    ]
+                                }
+                            ]}
+                            onFilterChange={setActiveFilters}
+                        />
                     </div>
 
                     {/* Count Row */}
