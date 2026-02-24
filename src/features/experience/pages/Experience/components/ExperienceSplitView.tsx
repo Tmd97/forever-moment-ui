@@ -4,7 +4,7 @@ import { getExperienceTabs } from './ExperienceDetails';
 import { DataTable } from '@/components/common/DataTable';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { RowActions } from '@/components/common/RowActions';
-import { Search, Plus, X, Edit2, Trash2, Tag } from 'lucide-react';
+import { Search, Plus, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Filter } from '@/components/common/Filter';
 
@@ -62,7 +62,6 @@ export const ExperienceSplitView = ({
             experienceDetail,
             inclusions,
             cancellationPolicies,
-            onEdit: () => handleOpenModal(selectedExperience),
             onToggleCancellationPolicy: (policyId: number, isAssociate: boolean) => {
                 toggleCancellationPolicy(selectedExperience.id, policyId, isAssociate);
             },
@@ -167,7 +166,6 @@ export const ExperienceSplitView = ({
 
     const renderSplitView = () => {
         const activeTabContent = tabsData.find(t => t.id === tab)?.content;
-        const colorInfo = getColorForExp(selectedExperience.id);
 
         return (
             <div className="flex flex-1 h-full overflow-hidden">
@@ -264,63 +262,49 @@ export const ExperienceSplitView = ({
                     </div>
                 </div>
 
-                {/* Detail Panel */}
-                <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-900">
-                    {/* Detail Header */}
-                    <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 dark:border-gray-800 bg-white dark:bg-gray-900">
-                        <div className="flex items-center gap-5">
-                            <div className={cn(
-                                "w-[60px] h-[60px] rounded-2xl flex items-center justify-center font-extrabold text-xl shadow-sm",
-                                colorInfo.bg,
-                                colorInfo.text
-                            )}>
-                                {expInitials(selectedExperience.name)}
-                            </div>
-                            <div>
-                                <div className="font-bold text-2xl text-slate-900 dark:text-white tracking-tight leading-tight flex items-center gap-2">
-                                    {selectedExperience.name}
-                                </div>
-                                <div className="text-[13px] text-slate-500 font-medium mt-1 flex items-center gap-1.5">
-                                    <Tag className="w-3.5 h-3.5 text-slate-400" />
-                                    ₹{selectedExperience.basePrice || 0} <span className="opacity-50 mx-1">•</span> ID #{selectedExperience.id}
-                                </div>
-                            </div>
+                {/* Detail Panel Container */}
+                <div className="flex-1 flex bg-slate-50 dark:bg-gray-900/40 p-3 h-full overflow-hidden">
+                    <div className="flex-1 flex bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm relative">
+                        {/* Vertical Tab Nav (Left) */}
+                        <div className="w-[180px] min-w-[180px] border-r border-slate-100 dark:border-gray-800 p-3 flex flex-col gap-1 bg-white dark:bg-gray-900/50">
+                            {tabsData.map((t) => (
+                                <button
+                                    key={t.id}
+                                    onClick={() => setTab(t.id)}
+                                    className={cn(
+                                        "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all text-left w-full",
+                                        tab === t.id
+                                            ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 font-semibold"
+                                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:hover:bg-gray-800/50 dark:hover:text-slate-300"
+                                    )}
+                                >
+                                    {t.label}
+                                </button>
+                            ))}
                         </div>
-                        <div className="flex items-center gap-2.5">
-                            <button onClick={() => handleOpenModal(selectedExperience)} className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 border-none rounded-lg px-4 py-2 text-[13px] font-semibold transition-colors">
-                                <Edit2 className="w-3.5 h-3.5" /> Edit
-                            </button>
-                            <button onClick={() => handleDeleteClick(selectedExperience.id)} className="flex items-center gap-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 border-none rounded-lg px-4 py-2 text-[13px] font-semibold transition-colors">
-                                <Trash2 className="w-3.5 h-3.5" /> Delete
-                            </button>
-                            <div className="w-px h-6 bg-slate-200 dark:bg-gray-700 mx-1"></div>
-                            <button onClick={() => setSelectedExperience(null)} className="bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg w-9 h-9 flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors">
+
+                        {/* Detail Content (Right) */}
+                        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+                            {/* Detail Header (Inside Content) */}
+                            {/* Close Button Only */}
+                            <button
+                                onClick={() => setSelectedExperience(null)}
+                                className="absolute top-3 right-3 z-10 p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                title="Close"
+                            >
                                 <X className="w-4 h-4" />
                             </button>
-                        </div>
-                    </div>
 
-                    {/* Tabs */}
-                    <div className="flex px-8 gap-6 border-b border-slate-100 dark:border-gray-800">
-                        {tabsData.map((t) => (
-                            <button
-                                key={t.id}
-                                onClick={() => setTab(t.id)}
-                                className={cn(
-                                    "bg-transparent border-none border-b-2 py-4 text-[13.5px] cursor-pointer transition-all tracking-wide -mb-[1px]",
-                                    tab === t.id
-                                        ? "border-blue-600 text-blue-600 dark:text-blue-400 font-semibold"
-                                        : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium"
+                            {/* Tab Content Area */}
+                            <div className="flex-1 overflow-y-auto p-8 pt-4">
+                                {activeTabContent && (
+                                    <div className="max-w-4xl">
+
+                                        {activeTabContent}
+                                    </div>
                                 )}
-                            >
-                                {t.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Tab Content */}
-                    <div className="flex-1 overflow-y-auto p-8 bg-slate-50/50 dark:bg-gray-900/50">
-                        {activeTabContent}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
