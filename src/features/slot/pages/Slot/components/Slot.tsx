@@ -1,16 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/common/Button';
-import { DataTable } from '@/components/common/DataTable';
 import { Modal } from '@/components/common/Modal';
-import { SidePanel } from '@/components/common/SidePanel';
 import { SlotForm } from './SlotForm';
-import { SlotDetails } from './SlotDetails';
 import { DeleteModal } from '@/components/common/DeleteModal';
-import { Filter, type FilterCategory } from '@/components/common/Filter';
-import { StatusBadge } from '@/components/common/StatusBadge';
-import { RowActions } from '@/components/common/RowActions';
-import { CrudPageLayout } from '@/components/common/CrudPageLayout';
-import { Plus } from 'lucide-react';
+import { SlotSplitView } from './SlotSplitView';
 import toast from 'react-hot-toast';
 import * as types from '@/features/slot/store/action-types';
 import '../../css/styles.scss';
@@ -97,31 +89,7 @@ const Slot = ({
         }
     }, [error]);
 
-    const filterCategories: FilterCategory[] = [
-        {
-            id: 'status',
-            name: 'Status',
-            options: [
-                { id: '1', label: 'Active', value: 'true' },
-                { id: '2', label: 'Inactive', value: 'false' },
-            ]
-        }
-    ];
-
-    const handleFilterChange = (filters: Record<string, string[]>) => {
-        let filtered = data || [];
-        if (filters.status && filters.status.length > 0) {
-            filtered = filtered.filter((loc: SlotType) => {
-                const isActiveString = loc.isActive ? 'true' : 'false';
-                return filters.status.includes(isActiveString);
-            });
-        }
-        setSlots(filtered);
-    };
-
-    const handleRowClick = (slot: SlotType) => {
-        setSelectedSlot(slot);
-    };
+    // Filter array logic Handle in SplitView
 
     // Helper to parse "HH:mm" straight into today's Date for React-Timepicker
     const parseTimeStr = (timeStr?: string) => {
@@ -191,104 +159,39 @@ const Slot = ({
     };
 
     return (
-        <CrudPageLayout
-            className='slot-page-container'
-            filterSlot={
-                <Filter
-                    categories={filterCategories}
-                    onFilterChange={handleFilterChange}
+        <div className="slot-page-container w-full h-full flex flex-col">
+            <SlotSplitView
+                slots={slots}
+                handleOpenModal={handleOpenModal}
+                handleDeleteClick={handleDeleteClick}
+                selectedSlot={selectedSlot}
+                setSelectedSlot={setSelectedSlot}
+                loading={loading}
+            />
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title={editingId ? 'Edit Time Slot' : 'Add Time Slot'}
+            >
+                <SlotForm
+                    initialData={editingId ? formData : undefined}
+                    onSubmit={handleFormSubmit}
+                    onCancel={handleCloseModal}
+                    submitLabel={editingId ? 'Update' : 'Save'}
+                    isLoading={loading}
                 />
-            }
-            addButton={
-                <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
-                    <Plus size={16} />Add Time Slot
-                </Button>
-            }
-            tableSlot={
-                <DataTable
-                    data={slots}
-                    columns={[
-                        {
-                            header: 'Name',
-                            accessorKey: 'name',
-                            className: 'w-[25%] min-w-[150px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
-                        },
-                        {
-                            header: 'Start Time',
-                            accessorKey: 'startTime',
-                            className: 'w-[25%] min-w-[150px] py-3 px-4 text-left',
-                            render: (loc) => <span>{loc.startTime || '-'}</span>
-                        },
-                        {
-                            header: 'End Time',
-                            accessorKey: 'endTime',
-                            className: 'w-[25%] min-w-[150px] py-3 px-4 text-left',
-                            render: (loc) => <span>{loc.endTime || '-'}</span>
-                        },
-                        {
-                            header: 'Status',
-                            className: 'w-[15%] min-w-[100px] py-3 px-4 text-left',
-                            render: (loc) => <StatusBadge isActive={loc.isActive} />
-                        },
-                        {
-                            header: 'Actions',
-                            className: 'w-[10%] min-w-[80px] py-3 px-4 text-right',
-                            render: (loc) => (
-                                <RowActions
-                                    onEdit={() => handleOpenModal(loc)}
-                                    onDelete={() => handleDeleteClick(loc.id)}
-                                />
-                            )
-                        }
-                    ]}
-                    keyExtractor={(item) => item.id}
-                    onRowClick={handleRowClick}
-                    selectedId={selectedSlot?.id}
-                    loading={loading && (!slots || slots.length === 0)}
-                />
-            }
-            sidePanelSlot={
-                <SidePanel
-                    isOpen={!!selectedSlot}
-                    onClose={() => setSelectedSlot(null)}
-                    title={selectedSlot?.name || 'Time Slot Details'}
-                    variant="inline"
-                    className="border-l border-gray-200 dark:border-gray-800"
-                >
-                    {selectedSlot && (
-                        <SlotDetails
-                            slot={selectedSlot}
-                            onEdit={() => handleOpenModal(selectedSlot)}
-                        />
-                    )}
-                </SidePanel>
-            }
-            modalSlot={
-                <Modal
-                    isOpen={isModalOpen}
-                    onClose={handleCloseModal}
-                    title={editingId ? 'Edit Time Slot' : 'Add Time Slot'}
-                >
-                    <SlotForm
-                        initialData={editingId ? formData : undefined}
-                        onSubmit={handleFormSubmit}
-                        onCancel={handleCloseModal}
-                        submitLabel={editingId ? 'Update' : 'Save'}
-                        isLoading={loading}
-                    />
-                </Modal>
-            }
-            deleteModalSlot={
-                <DeleteModal
-                    isOpen={isDeleteModalOpen}
-                    onClose={() => setIsDeleteModalOpen(false)}
-                    onConfirm={handleConfirmDelete}
-                    itemType="Time Slot"
-                    title='Delete Time Slot'
-                    description='This will permanently delete the time slot. Are you sure?'
-                />
-            }
-        />
+            </Modal>
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+                itemType="Time Slot"
+                title='Delete Time Slot'
+                description='This will permanently delete the time slot. Are you sure?'
+            />
+        </div>
     );
 };
 

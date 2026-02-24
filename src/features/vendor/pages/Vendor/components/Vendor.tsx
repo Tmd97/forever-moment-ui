@@ -1,16 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/common/Button';
-import { DataTable } from '@/components/common/DataTable';
 import { Modal } from '@/components/common/Modal';
-import { SidePanel } from '@/components/common/SidePanel';
 import { VendorForm } from './VendorForm';
-import { VendorDetails } from './VendorDetails';
 import { DeleteModal } from '@/components/common/DeleteModal';
-import { Filter, type FilterCategory } from '@/components/common/Filter';
-import { StatusBadge } from '@/components/common/StatusBadge';
-import { RowActions } from '@/components/common/RowActions';
-import { CrudPageLayout } from '@/components/common/CrudPageLayout';
-import { Plus } from 'lucide-react';
+import { VendorSplitView } from './VendorSplitView';
 import toast from 'react-hot-toast';
 import '../../css/styles.scss';
 
@@ -48,7 +40,6 @@ const VendorPage = ({ data, loading, error, getVendors }: VendorProps) => {
     ]);
     const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
     const [editingVendorData, setEditingVendorData] = useState<Partial<Vendor> | undefined>(undefined);
-    const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
 
     useEffect(() => {
         getVendors();
@@ -116,138 +107,40 @@ const VendorPage = ({ data, loading, error, getVendors }: VendorProps) => {
         }
     };
 
-    const handleRowClick = (vendor: Vendor) => {
-        setSelectedVendor(vendor);
-    };
-
-    // Filter configuration
-    const filterCategories: FilterCategory[] = [
-        {
-            id: 'status',
-            name: 'Status',
-            options: [
-                { id: '1', label: 'Active', value: 'Active' },
-                { id: '2', label: 'Inactive', value: 'Inactive' },
-            ]
-        },
-        {
-            id: 'category',
-            name: 'Category',
-            options: [
-                { id: '1', label: 'Photography', value: 'Photography' },
-                { id: '2', label: 'Catering', value: 'Catering' },
-                { id: '3', label: 'Decoration', value: 'Decoration' },
-                { id: '4', label: 'Entertainment', value: 'Entertainment' },
-            ]
-        },
-    ];
-
-    const handleFilterChange = (filters: Record<string, string[]>) => {
-        setActiveFilters(filters);
-    };
-
-    // Apply filters locally
-    let filteredVendors = vendors;
-    if (activeFilters.status && activeFilters.status.length > 0) {
-        filteredVendors = filteredVendors.filter(vendor => activeFilters.status.includes(vendor.status));
-    }
-    if (activeFilters.category && activeFilters.category.length > 0) {
-        filteredVendors = filteredVendors.filter(vendor => activeFilters.category.includes(vendor.category));
-    }
+    // Filter handles in VendorSplitView
 
     return (
-        <CrudPageLayout
-            className='vendor-page-container'
-            filterSlot={
-                <Filter
-                    categories={filterCategories}
-                    onFilterChange={handleFilterChange}
+        <div className="vendor-page-container w-full h-full flex flex-col">
+            <VendorSplitView
+                vendors={vendors}
+                handleOpenModal={handleOpenModal}
+                handleDeleteClick={handleDeleteClick}
+                selectedVendor={selectedVendor}
+                setSelectedVendor={setSelectedVendor}
+                loading={loading}
+            />
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title={editingId ? 'Edit Vendor' : 'Add Vendor'}
+            >
+                <VendorForm
+                    initialData={editingVendorData}
+                    onSubmit={handleFormSubmit}
+                    onCancel={handleCloseModal}
+                    submitLabel={editingId ? 'Save Changes' : 'Add Vendor'}
+                    isLoading={loading}
                 />
-            }
-            addButton={
-                <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
-                    <Plus size={16} className="mr-2" /> Add Vendor
-                </Button>
-            }
-            tableSlot={
-                <DataTable
-                    data={filteredVendors}
-                    loading={loading && (!vendors || vendors.length === 0)}
-                    columns={[
-                        {
-                            header: 'Business Name',
-                            accessorKey: 'name' as const,
-                        },
-                        {
-                            header: 'Category',
-                            accessorKey: 'category' as const,
-                        },
-                        {
-                            header: 'Contact',
-                            accessorKey: 'contactPerson' as const,
-                        },
-                        {
-                            header: 'Status',
-                            render: (vendor) => (
-                                <StatusBadge status={vendor.status} />
-                            )
-                        },
-                        {
-                            header: 'Actions',
-                            render: (vendor) => (
-                                <RowActions
-                                    onEdit={() => handleOpenModal(vendor)}
-                                    onDelete={() => handleDeleteClick(vendor.id)}
-                                />
-                            )
-                        }
-                    ]}
-                    keyExtractor={(item) => item.id}
-                    onRowClick={handleRowClick}
-                    selectedId={selectedVendor?.id}
-                />
-            }
-            sidePanelSlot={
-                <SidePanel
-                    isOpen={!!selectedVendor}
-                    onClose={() => setSelectedVendor(null)}
-                    title="Vendor Details"
-                    variant="inline"
-                    className="border-l border-gray-200 dark:border-gray-800"
-                >
-                    {selectedVendor && (
-                        <VendorDetails
-                            vendor={selectedVendor}
-                            onEdit={() => handleOpenModal(selectedVendor)}
-                            onClose={() => setSelectedVendor(null)}
-                        />
-                    )}
-                </SidePanel>
-            }
-            modalSlot={
-                <Modal
-                    isOpen={isModalOpen}
-                    onClose={handleCloseModal}
-                    title={editingId ? 'Edit Vendor' : 'Add Vendor'}
-                >
-                    <VendorForm
-                        initialData={editingVendorData}
-                        onSubmit={handleFormSubmit}
-                        onCancel={handleCloseModal}
-                        submitLabel={editingId ? 'Save Changes' : 'Add Vendor'}
-                        isLoading={loading}
-                    />
-                </Modal>
-            }
-            deleteModalSlot={
-                <DeleteModal
-                    isOpen={isDeleteModalOpen}
-                    onClose={() => setIsDeleteModalOpen(false)}
-                    onConfirm={handleConfirmDelete}
-                    itemType="Vendor"
-                />
-            }
-        />
+            </Modal>
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+                itemType="Vendor"
+            />
+        </div>
     );
 };
 

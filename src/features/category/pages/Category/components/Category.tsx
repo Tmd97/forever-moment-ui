@@ -1,16 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/common/Button';
-import { DataTable } from '@/components/common/DataTable';
 import { Modal } from '@/components/common/Modal';
-import { SidePanel } from '@/components/common/SidePanel';
 import { CategoryForm } from './CategoryForm';
-import { CategoryDetails } from './CategoryDetails';
 import { DeleteModal } from '@/components/common/DeleteModal';
-import { Filter, type FilterCategory } from '@/components/common/Filter';
-import { StatusBadge } from '@/components/common/StatusBadge';
-import { RowActions } from '@/components/common/RowActions';
-import { CrudPageLayout } from '@/components/common/CrudPageLayout';
-import { Plus } from 'lucide-react';
+import { CategorySplitView } from './CategorySplitView';
 import toast from 'react-hot-toast';
 import * as types from '@/features/category/store/action-types';
 
@@ -58,11 +50,6 @@ const Category = ({
 
     const [categories, setCategories] = useState<CategoryType[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(null);
-    const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
-
-    const handleRowClick = (category: CategoryType) => {
-        setSelectedCategory(category);
-    };
 
     useEffect(() => {
         getCategoryData();
@@ -136,32 +123,7 @@ const Category = ({
         }
     };
 
-    const filterCategories: FilterCategory[] = [
-        {
-            id: 'status',
-            name: 'Status',
-            options: [
-                { id: '1', label: 'Active', value: 'true' },
-                { id: '2', label: 'Inactive', value: 'false' },
-            ]
-        }
-    ];
-
-    const handleFilterChange = (filters: Record<string, string[]>) => {
-        setActiveFilters(filters);
-        let filtered = data || [];
-
-        if (filters.status && filters.status.length > 0) {
-            filtered = filtered.filter((cat: CategoryType) => {
-                const isActiveString = cat.isActive ? 'true' : 'false';
-                return filters.status.includes(isActiveString);
-            });
-        }
-
-
-
-        setCategories(filtered);
-    };
+    // Removed filter logic from parent as it is handled by the split view inline
 
     const handleOpenModal = (category: CategoryType | null = null) => {
         if (category) {
@@ -220,107 +182,40 @@ const Category = ({
 
 
     return (
-        <CrudPageLayout
-            className='category-page-container'
-            filterSlot={
-                <Filter
-                    categories={filterCategories}
-                    onFilterChange={handleFilterChange}
-                />
-            }
-            addButton={
-                <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
-                    <Plus size={2} />Add Category
-                </Button>
-            }
-            tableSlot={
-                <DataTable
-                    data={categories}
-                    columns={[
-                        {
-                            header: 'Name',
-                            accessorKey: 'name',
-                            className: 'w-[25%] min-w-[150px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white whitespace-nowrap'
-                        },
-                        {
-                            header: 'Description',
-                            accessorKey: 'description',
-                            className: 'w-[30%] min-w-[200px] py-3 px-4 text-left',
-                            render: (category) => (
-                                <div className="truncate max-w-[300px]" title={category.description}>
-                                    {category.description || '-'}
-                                </div>
-                            )
-                        },
+        <div className="category-page-container w-full h-full flex flex-col">
+            <CategorySplitView
+                categories={categories}
+                handleOpenModal={handleOpenModal}
+                handleDeleteClick={handleDeleteClick}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                loading={loading}
+                handleDragReorder={handleDragReorder}
+            />
 
-                        {
-                            header: 'Status',
-                            className: 'w-[15%] min-w-[120px] py-3 px-4 text-left',
-                            render: (category) => (
-                                <StatusBadge isActive={category.isActive} />
-                            )
-                        },
-                        {
-                            header: 'Actions',
-                            className: 'w-[20%] min-w-[100px] py-3 px-4 text-right',
-                            render: (category) => (
-                                <RowActions
-                                    onEdit={() => handleOpenModal(category)}
-                                    onDelete={() => handleDeleteClick(category.id)}
-                                />
-                            )
-                        }
-                    ]}
-                    keyExtractor={(item) => item.id}
-                    onRowClick={handleRowClick}
-                    selectedId={selectedCategory?.id}
-                    loading={loading && (!categories || categories.length === 0)}
-                    onReorder={handleDragReorder}
-                    draggable={true}
+            <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title={editingId ? 'Edit Category' : 'Add Category'}
+            >
+                <CategoryForm
+                    initialData={editingId ? formData : undefined}
+                    onSubmit={handleFormSubmit}
+                    onCancel={handleCloseModal}
+                    submitLabel={editingId ? 'Update' : 'Save'}
+                    isLoading={loading}
                 />
-            }
-            sidePanelSlot={
-                <SidePanel
-                    isOpen={!!selectedCategory}
-                    onClose={() => setSelectedCategory(null)}
-                    title={selectedCategory?.name || 'Category Details'}
-                    variant="inline"
-                    className="border-l border-gray-200 dark:border-gray-800"
-                >
-                    {selectedCategory && (
-                        <CategoryDetails
-                            category={selectedCategory}
-                            onEdit={() => handleOpenModal(selectedCategory)}
-                        />
-                    )}
-                </SidePanel>
-            }
-            modalSlot={
-                <Modal
-                    isOpen={isModalOpen}
-                    onClose={handleCloseModal}
-                    title={editingId ? 'Edit Category' : 'Add Category'}
-                >
-                    <CategoryForm
-                        initialData={editingId ? formData : undefined}
-                        onSubmit={handleFormSubmit}
-                        onCancel={handleCloseModal}
-                        submitLabel={editingId ? 'Update' : 'Save'}
-                        isLoading={loading}
-                    />
-                </Modal>
-            }
-            deleteModalSlot={
-                <DeleteModal
-                    isOpen={isDeleteModalOpen}
-                    onClose={() => setIsDeleteModalOpen(false)}
-                    onConfirm={handleConfirmDelete}
-                    itemType="Category"
-                    title='Delete Category'
-                    description='This is will delete the category from the system.Are you sure?'
-                />
-            }
-        />
+            </Modal>
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+                itemType="Category"
+                title='Delete Category'
+                description='This is will delete the category from the system.Are you sure?'
+            />
+        </div>
     );
 };
 

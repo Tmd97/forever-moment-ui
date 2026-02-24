@@ -1,16 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/common/Button';
-import { DataTable } from '@/components/common/DataTable';
 import { Modal } from '@/components/common/Modal';
-import { SidePanel } from '@/components/common/SidePanel';
 import { InclusionForm } from './InclusionForm';
-import { InclusionDetails } from './InclusionDetails';
 import { DeleteModal } from '@/components/common/DeleteModal';
-import { Filter, type FilterCategory } from '@/components/common/Filter';
-import { StatusBadge } from '@/components/common/StatusBadge';
-import { RowActions } from '@/components/common/RowActions';
-import { CrudPageLayout } from '@/components/common/CrudPageLayout';
-import { Plus } from 'lucide-react';
+import { InclusionSplitView } from './InclusionSplitView';
 import toast from 'react-hot-toast';
 import * as types from '@/features/inclusion/store/action-types';
 import '../../css/styles.scss';
@@ -56,11 +48,6 @@ const Inclusion = ({
 
     const [inclusions, setInclusions] = useState<InclusionType[]>([]);
     const [selectedInclusion, setSelectedInclusion] = useState<InclusionType | null>(null);
-    // const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
-
-    const handleRowClick = (inclusion: InclusionType) => {
-        setSelectedInclusion(inclusion);
-    };
 
     useEffect(() => {
         getInclusionData();
@@ -128,44 +115,7 @@ const Inclusion = ({
         }
     };
 
-    const filterCategories: FilterCategory[] = [
-        {
-            id: 'status',
-            name: 'Status',
-            options: [
-                { id: '1', label: 'Active', value: 'true' },
-                { id: '2', label: 'Inactive', value: 'false' },
-            ]
-        },
-        {
-            id: 'isIncluded',
-            name: 'Included Types',
-            options: [
-                { id: '3', label: 'Yes', value: 'true' },
-                { id: '4', label: 'No', value: 'false' },
-            ]
-        }
-    ];
-
-    const handleFilterChange = (filters: Record<string, string[]>) => {
-        let filtered = data || [];
-
-        if (filters.status && filters.status.length > 0) {
-            filtered = filtered.filter((inc: InclusionType) => {
-                const isActiveString = inc.isActive ? 'true' : 'false';
-                return filters.status.includes(isActiveString);
-            });
-        }
-
-        if (filters.isIncluded && filters.isIncluded.length > 0) {
-            filtered = filtered.filter((inc: InclusionType) => {
-                const isIncludedString = inc.isIncluded ? 'true' : 'false';
-                return filters.isIncluded.includes(isIncludedString);
-            });
-        }
-
-        setInclusions(filtered);
-    };
+    // Filter handled in InclusionSplitView
 
     const handleOpenModal = (inclusion: InclusionType | null = null) => {
         if (inclusion) {
@@ -219,112 +169,40 @@ const Inclusion = ({
     };
 
     return (
-        <CrudPageLayout
-            className='inclusion-page-container'
-            filterSlot={
-                <Filter
-                    categories={filterCategories}
-                    onFilterChange={handleFilterChange}
+        <div className="inclusion-page-container w-full h-full flex flex-col">
+            <InclusionSplitView
+                inclusions={inclusions}
+                handleOpenModal={handleOpenModal}
+                handleDeleteClick={handleDeleteClick}
+                selectedInclusion={selectedInclusion}
+                setSelectedInclusion={setSelectedInclusion}
+                loading={loading}
+                handleDragReorder={handleDragReorder}
+            />
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title={editingId ? 'Edit Inclusion' : 'Add Inclusion'}
+            >
+                <InclusionForm
+                    initialData={editingId ? formData : undefined}
+                    onSubmit={handleFormSubmit}
+                    onCancel={handleCloseModal}
+                    submitLabel={editingId ? 'Update' : 'Save'}
+                    isLoading={loading}
                 />
-            }
-            addButton={
-                <Button variant='default' onClick={() => handleOpenModal()} className="w-full sm:w-auto">
-                    <Plus size={2} />Add Inclusion
-                </Button>
-            }
-            tableSlot={
-                <DataTable
-                    data={inclusions}
-                    columns={[
-                        {
-                            header: 'Description',
-                            accessorKey: 'description',
-                            className: 'w-[40%] min-w-[200px] py-3 px-4 text-left font-medium text-gray-900 dark:text-white',
-                            render: (inc) => (
-                                <div className="truncate max-w-[300px]" title={inc.description}>
-                                    {inc.description || '-'}
-                                </div>
-                            )
-                        },
-                        {
-                            header: 'Is Included?',
-                            className: 'w-[20%] min-w-[120px] py-3 px-4 text-left',
-                            render: (inc) => (
-                                <span className={
-                                    inc.isIncluded ? 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-                                }>
-                                    {inc.isIncluded ? 'Yes' : 'No'}
-                                </span>
-                            )
-                        },
-                        {
-                            header: 'Status',
-                            className: 'w-[15%] min-w-[120px] py-3 px-4 text-left',
-                            render: (inc) => (
-                                <StatusBadge isActive={inc.isActive} />
-                            )
-                        },
-                        {
-                            header: 'Actions',
-                            className: 'w-[25%] min-w-[100px] py-3 px-4 text-right',
-                            render: (inc) => (
-                                <RowActions
-                                    onEdit={() => handleOpenModal(inc)}
-                                    onDelete={() => handleDeleteClick(inc.id)}
-                                />
-                            )
-                        }
-                    ]}
-                    keyExtractor={(item) => item.id}
-                    onRowClick={handleRowClick}
-                    selectedId={selectedInclusion?.id}
-                    loading={loading && (!inclusions || inclusions.length === 0)}
-                    onReorder={handleDragReorder}
-                    draggable={true}
-                />
-            }
-            sidePanelSlot={
-                <SidePanel
-                    isOpen={!!selectedInclusion}
-                    onClose={() => setSelectedInclusion(null)}
-                    title="Inclusion Details"
-                    variant="inline"
-                    className="border-l border-gray-200 dark:border-gray-800"
-                >
-                    {selectedInclusion && (
-                        <InclusionDetails
-                            inclusion={selectedInclusion}
-                            onEdit={() => handleOpenModal(selectedInclusion)}
-                        />
-                    )}
-                </SidePanel>
-            }
-            modalSlot={
-                <Modal
-                    isOpen={isModalOpen}
-                    onClose={handleCloseModal}
-                    title={editingId ? 'Edit Inclusion' : 'Add Inclusion'}
-                >
-                    <InclusionForm
-                        initialData={editingId ? formData : undefined}
-                        onSubmit={handleFormSubmit}
-                        onCancel={handleCloseModal}
-                        submitLabel={editingId ? 'Update' : 'Save'}
-                        isLoading={loading}
-                    />
-                </Modal>
-            }
-            deleteModalSlot={
-                <DeleteModal
-                    isOpen={isDeleteModalOpen}
-                    onClose={() => setIsDeleteModalOpen(false)}
-                    onConfirm={handleConfirmDelete}
-                    itemType="Inclusion"
-                    title='Delete Inclusion'
-                    description='This is will delete the inclusion from the system. Are you sure?'
-                />
-            }
-        />
+            </Modal>
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+                itemType="Inclusion"
+                title='Delete Inclusion'
+                description='This is will delete the inclusion from the system. Are you sure?'
+            />
+        </div>
     );
 };
 
