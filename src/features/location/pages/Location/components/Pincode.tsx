@@ -4,6 +4,8 @@ import { Modal } from '@/components/common/Modal';
 import { DeleteModal } from '@/components/common/DeleteModal';
 import { SearchBar } from '@/components/common/SearchBar';
 import { PincodeForm } from './PincodeForm';
+import { PincodeList } from './PincodeList';
+import { PincodeCardView } from './PincodeCardView';
 import { Plus, LayoutGrid, List } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { connect } from 'react-redux';
@@ -160,46 +162,41 @@ const PincodeComponent = ({
 
     return (
         <div className="flex flex-col h-full">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <h3 className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest min-w-max">
-                    Service Areas ({filteredPincodes.length})
-                </h3>
-
-                <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex justify-end mb-6">
+                <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
                     <SearchBar
-                        className="w-full sm:w-64"
+                        className="w-full sm:w-64 min-w-[200px]"
                         placeholder="Search pincodes or areas..."
                         value={searchQuery}
                         onChange={setSearchQuery}
                     />
-                    <Button variant="default" onClick={() => handleOpenModal()} className="h-9 px-3 text-xs gap-1.5 shadow-sm shrink-0">
+
+                    <div className="flex bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-700 p-1 rounded-xl shrink-0 gap-1">
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={cn(
+                                "p-1.5 rounded-lg transition-all flex items-center justify-center",
+                                viewMode === 'list' ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-slate-400 hover:bg-slate-50 hover:text-slate-600 dark:hover:bg-gray-800 dark:hover:text-slate-300"
+                            )}
+                            title="List View"
+                        >
+                            <List size={18} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('card')}
+                            className={cn(
+                                "p-1.5 rounded-lg transition-all flex items-center justify-center",
+                                viewMode === 'card' ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-slate-400 hover:bg-slate-50 hover:text-slate-600 dark:hover:bg-gray-800 dark:hover:text-slate-300"
+                            )}
+                            title="Grid View"
+                        >
+                            <LayoutGrid size={18} />
+                        </button>
+                    </div>
+
+                    <Button variant="default" onClick={() => handleOpenModal()} className="h-9 px-3 text-xs gap-1.5 shadow-sm shrink-0 whitespace-nowrap">
                         <Plus size={14} /> Add Pincode
                     </Button>
-                </div>
-            </div>
-
-            <div className="flex justify-end mb-4">
-                <div className="flex bg-slate-100 dark:bg-gray-800 p-1 rounded-lg shrink-0">
-                    <button
-                        onClick={() => setViewMode('list')}
-                        className={cn(
-                            "p-1.5 rounded-md transition-all",
-                            viewMode === 'list' ? "bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                        )}
-                        title="List View"
-                    >
-                        <List size={16} />
-                    </button>
-                    <button
-                        onClick={() => setViewMode('card')}
-                        className={cn(
-                            "p-1.5 rounded-md transition-all",
-                            viewMode === 'card' ? "bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                        )}
-                        title="Grid View"
-                    >
-                        <LayoutGrid size={16} />
-                    </button>
                 </div>
             </div>
 
@@ -213,78 +210,18 @@ const PincodeComponent = ({
                         <div className="text-slate-400 text-xs mt-1">Try a different search query or add a new pincode</div>
                     </div>
                 ) : viewMode === 'card' ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 pb-4">
-                        {filteredPincodes.map((pin) => (
-                            <div key={pin.id} className="relative group bg-white dark:bg-gray-800 rounded-xl p-4 border border-slate-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all flex flex-col justify-between min-h-[110px]">
-                                <div className="flex items-start justify-between mb-2">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-lg opacity-70">📮</span>
-                                        <span className="font-bold text-slate-900 dark:text-white text-base tracking-tight">{pin.pincodeCode}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
-                                        <button onClick={(e) => { e.stopPropagation(); handleOpenModal(pin); }} className="w-7 h-7 flex items-center justify-center rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                                        </button>
-                                        <button onClick={(e) => { e.stopPropagation(); handleDeleteClick(pin.id); }} className="w-7 h-7 flex items-center justify-center rounded-md bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="mt-auto flex items-end justify-between">
-                                    <div className="min-w-0 pr-2">
-                                        <div className="text-[13px] font-semibold text-slate-700 dark:text-slate-300 truncate">{pin.name || 'Unnamed'}</div>
-                                        <div className="text-[11px] text-slate-400 dark:text-slate-500 truncate mt-0.5">{pin.areaName || 'No area specified'}</div>
-                                    </div>
-                                    <div className={cn(
-                                        "shrink-0 w-2 h-2 rounded-full",
-                                        pin.isActive ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" : "bg-slate-300 dark:bg-slate-600"
-                                    )} title={pin.isActive ? "Active" : "Inactive"} />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <PincodeCardView
+                        pincodes={filteredPincodes}
+                        onEdit={handleOpenModal}
+                        onDelete={handleDeleteClick}
+                    />
                 ) : (
-                    <div className="flex flex-col gap-2 pb-4">
-                        {filteredPincodes.map((pin) => (
-                            <div key={pin.id} className="group bg-white dark:bg-gray-800 rounded-lg p-3 border border-slate-200 dark:border-gray-700 shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all flex items-center justify-between">
-                                <div className="flex items-center gap-4 min-w-0 flex-1">
-                                    <div className="flex items-center gap-3 w-[150px] shrink-0">
-                                        <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center shrink-0">
-                                            <span className="text-lg">📮</span>
-                                        </div>
-                                        <span className="font-bold text-slate-900 dark:text-white text-sm tracking-tight">{pin.pincodeCode}</span>
-                                    </div>
-
-                                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                                        <div className="flex-1 min-w-0 border-l border-slate-100 dark:border-gray-700 pl-4">
-                                            <div className="text-[13px] font-semibold text-slate-700 dark:text-slate-300 truncate">{pin.name || 'Unnamed'}</div>
-                                            <div className="text-[11px] text-slate-400 dark:text-slate-500 truncate mt-0.5 max-w-[200px]">{pin.areaName || 'No area specified'}</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-4 shrink-0 px-4 border-l border-slate-100 dark:border-gray-700">
-                                        <div className="flex items-center gap-1.5 w-[80px]">
-                                            <div className={cn(
-                                                "shrink-0 w-2 h-2 rounded-full",
-                                                pin.isActive ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" : "bg-slate-300 dark:bg-slate-600"
-                                            )} />
-                                            <span className="text-xs text-slate-500 font-medium">{pin.isActive ? 'Active' : 'Inactive'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2 relative z-10">
-                                    <button onClick={(e) => { e.stopPropagation(); handleOpenModal(pin); }} className="w-8 h-8 flex items-center justify-center rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                                    </button>
-                                    <button onClick={(e) => { e.stopPropagation(); handleDeleteClick(pin.id); }} className="w-8 h-8 flex items-center justify-center rounded-md bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <PincodeList
+                        pincodes={filteredPincodes}
+                        loading={loadingPincodes}
+                        onEdit={handleOpenModal}
+                        onDelete={handleDeleteClick}
+                    />
                 )
             }
 

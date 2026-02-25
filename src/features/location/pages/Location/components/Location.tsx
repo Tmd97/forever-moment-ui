@@ -19,6 +19,7 @@ interface LocationProps {
     createLocation: (data: any) => Promise<any>;
     deleteLocation: (id: number) => Promise<any>;
     updateLocation: (id: number, data: any) => Promise<any>;
+    reorderLocation: (data: { id: number; newPosition: number }) => Promise<any>;
     resetStatus: () => void;
 }
 
@@ -50,6 +51,7 @@ const Location = ({
     createLocation,
     deleteLocation,
     updateLocation,
+    reorderLocation,
     resetStatus,
 }: LocationProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,6 +70,15 @@ const Location = ({
     useEffect(() => {
         if (data && Array.isArray(data)) {
             setLocations(data);
+
+            // Sync selectedLocation with new data to reflect updates immediately in details panel
+            setSelectedLocation(prev => {
+                if (prev) {
+                    const updated = data.find((loc: LocationType) => loc.id === prev.id);
+                    return updated || prev;
+                }
+                return prev;
+            });
         }
     }, [data]);
 
@@ -169,6 +180,36 @@ const Location = ({
         }
     };
 
+    const handleDragReorder = async (newOrder: LocationType[], activeId: string | number, _overId: string | number) => {
+        setLocations(newOrder);
+
+        const movedItem = locations.find(loc => String(loc.id) === String(activeId));
+
+        if (!movedItem) {
+            console.error('Could not find moved item');
+            return;
+        }
+
+        const newIndex = newOrder.findIndex(loc => String(loc.id) === String(activeId));
+
+        if (newIndex === -1) {
+            console.error('Could not find item in new order');
+            return;
+        }
+
+        try {
+            await reorderLocation({
+                id: movedItem.id,
+                newPosition: newIndex + 1
+            });
+            toast.success('Location reordered successfully');
+        } catch (error) {
+            console.error('Failed to reorder', error);
+            toast.error('Failed to reorder location');
+            getLocationData(); // Revert on failure
+        }
+    };
+
     return (
         <div className="location-page-container">
             <LocationSplitView
@@ -183,6 +224,8 @@ const Location = ({
                 handleRowClick={handleRowClick} // Added handleRowClick
                 LocationDetails={LocationDetails} // Added LocationDetails
                 Pincode={Pincode} // Added Pincode
+                updateLocation={updateLocation}
+                handleDragReorder={handleDragReorder}
             />
 
             <Modal

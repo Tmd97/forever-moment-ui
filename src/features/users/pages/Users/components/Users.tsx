@@ -69,6 +69,18 @@ const Users = ({
         }
     }, [data]);
 
+    // Keep selectedUser up to date when data array changes
+    useEffect(() => {
+        if (selectedUser && data && Array.isArray(data)) {
+            const updatedSelected = data.find((u: UserType) => u.id === selectedUser.id);
+            if (updatedSelected) {
+                setSelectedUser(updatedSelected);
+            } else {
+                setSelectedUser(null); // Deselect if deleted remotely
+            }
+        }
+    }, [data, selectedUser]);
+
     useEffect(() => {
         if (status === types.CREATE_USER_SUCCESS) {
             toast.success('User created successfully');
@@ -172,6 +184,7 @@ const Users = ({
                 selectedUser={selectedUser}
                 setSelectedUser={setSelectedUser}
                 loading={loading}
+                updateUser={updateUser}
             />
 
             <Modal

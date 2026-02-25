@@ -7,7 +7,8 @@ import {
     deleteExperience,
     resetStatus,
     toggleCancellationPolicy,
-    toggleInclusion
+    toggleInclusion,
+    reorderExperience
 } from '@/features/experience/store/actions';
 import { getSubCategoryData } from '@/features/subCategory/store/actions';
 import { getInclusionData } from '@/features/inclusion/store/actions';
@@ -38,6 +39,7 @@ const mapDispatchToProps = {
     getCancellationPolicyData,
     toggleCancellationPolicy,
     toggleInclusion,
+    reorderExperience,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Experience);

@@ -64,6 +64,16 @@ const Category = ({
         }
     }, [data]);
 
+    // Keep selectedCategory up to date when categories array changes
+    useEffect(() => {
+        if (selectedCategory) {
+            const updated = categories.find(c => c.id === selectedCategory.id);
+            if (updated && JSON.stringify(updated) !== JSON.stringify(selectedCategory)) {
+                setSelectedCategory(updated);
+            }
+        }
+    }, [categories, selectedCategory]);
+
     useEffect(() => {
         if (status === types.CREATE_CATEGORY_SUCCESS) {
             toast.success('Category created successfully');
@@ -191,6 +201,7 @@ const Category = ({
                 setSelectedCategory={setSelectedCategory}
                 loading={loading}
                 handleDragReorder={handleDragReorder}
+                updateCategory={updateCategory}
             />
 
             <Modal

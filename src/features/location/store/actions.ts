@@ -1,6 +1,6 @@
 import * as types from './action-types';
 import {
-    fetchLocationData, createLocationApi, deleteLocationApi, updateLocationApi,
+    fetchLocationData, createLocationApi, deleteLocationApi, updateLocationApi, reorderLocationApi,
     fetchPincodeData, createPincodeApi, deletePincodeApi, updatePincodeApi
 } from './api';
 
@@ -75,6 +75,25 @@ export const updateLocation = (id: number, data: any) => async (dispatch: any) =
         dispatch({
             type: types.UPDATE_LOCATION_FAILURE,
             payload: error.response?.data?.message || 'Failed to update location',
+        });
+        throw error;
+    }
+};
+
+export const reorderLocation = (data: { id: number; newPosition: number }) => async (dispatch: any) => {
+    dispatch({ type: types.REORDER_LOCATION });
+    try {
+        const response = await reorderLocationApi(data);
+        dispatch({
+            type: types.REORDER_LOCATION_SUCCESS,
+            payload: response.data,
+        });
+        dispatch(getLocationData(true));
+        return response.data;
+    } catch (error: any) {
+        dispatch({
+            type: types.REORDER_LOCATION_FAILURE,
+            payload: error.response?.data?.message || 'Failed to reorder location',
         });
         throw error;
     }

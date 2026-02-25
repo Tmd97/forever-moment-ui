@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { getLocationData, createLocation, deleteLocation, updateLocation, resetStatus } from '@/features/location/store/actions';
+import { getLocationData, createLocation, deleteLocation, updateLocation, reorderLocation, resetStatus } from '@/features/location/store/actions';
 import Location from './components/Location';
 import type { RootState } from '@/store/store';
 
@@ -15,6 +15,7 @@ const mapDispatchToProps = {
     createLocation,
     deleteLocation,
     updateLocation,
+    reorderLocation,
     resetStatus,
 };
 

@@ -16,6 +16,10 @@ export const updateLocationApi = async (id: number, data: any) => {
     return await axios.put(`/admin/locations/${id}`, data);
 };
 
+export const reorderLocationApi = async (data: { id: number; newPosition: number }) => {
+    return await axios.patch('/admin/locations/reorder', data);
+};
+
 export const fetchPincodeData = async (locationId: number) => {
     return await axios.get(`/admin/locations/${locationId}/pincodes`);
 };

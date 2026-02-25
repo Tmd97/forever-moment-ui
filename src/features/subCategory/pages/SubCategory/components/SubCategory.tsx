@@ -57,6 +57,16 @@ const SubCategory = ({
         getCategoryData();
     }, [getSubCategoryData, getCategoryData]);
 
+    // Keep selectedSubCategory up to date when data array changes
+    useEffect(() => {
+        if (selectedSubCategory && data) {
+            const updated = data.find((sc: SubCategoryType) => sc.id === selectedSubCategory.id);
+            if (updated && JSON.stringify(updated) !== JSON.stringify(selectedSubCategory)) {
+                setSelectedSubCategory(updated);
+            }
+        }
+    }, [data, selectedSubCategory]);
+
     useEffect(() => {
         if (status === types.CREATE_SUB_CATEGORY_SUCCESS) {
             toast.success('Sub Category created successfully');
@@ -65,6 +75,7 @@ const SubCategory = ({
         } else if (status === types.UPDATE_SUB_CATEGORY_SUCCESS) {
             toast.success('Sub Category updated successfully');
             resetStatus();
+            getSubCategoryData();
             handleCloseModal();
         } else if (status === types.DELETE_SUB_CATEGORY_SUCCESS) {
             toast.success('Sub Category deleted successfully');
@@ -139,6 +150,7 @@ const SubCategory = ({
                 selectedSubCategory={selectedSubCategory}
                 setSelectedSubCategory={setSelectedSubCategory}
                 loading={loading}
+                updateSubCategory={updateSubCategory}
             />
 
             <Modal

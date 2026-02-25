@@ -7,7 +7,7 @@ import { DataTable } from '@/components/common/DataTable';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { SearchBar } from '@/components/common/SearchBar';
-import { Plus, MapPin } from 'lucide-react';
+import { Plus, MapPin, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Filter } from '@/components/common/Filter';
 
@@ -26,7 +26,9 @@ export const LocationSplitView = ({
     handleDeleteClick,
     selectedLocation,
     setSelectedLocation,
-    loading
+    loading,
+    updateLocation,
+    handleDragReorder
 }: any) => {
     const [tab, setTab] = useState("general");
     const [search, setSearch] = useState("");
@@ -139,6 +141,8 @@ export const LocationSplitView = ({
                         keyExtractor={(item: any) => item.id}
                         onRowClick={(loc: any) => { setSelectedLocation(loc); setTab("general"); }}
                         loading={loading}
+                        onReorder={search === "" && Object.keys(activeFilters).length === 0 ? handleDragReorder : undefined}
+                        draggable={true}
                     />
                 </div>
             </div>
@@ -243,6 +247,13 @@ export const LocationSplitView = ({
                 <div className="flex-1 flex flex-col min-w-0 bg-slate-50 dark:bg-gray-900/40 p-3 h-full overflow-hidden">
                     {selectedLocation ? (
                         <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl shadow-sm relative overflow-hidden">
+                            <button
+                                onClick={() => setSelectedLocation(null)}
+                                className="absolute top-1 right-1 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md hover:bg-slate-50/50 dark:hover:bg-gray-800/50 transition-all z-[60]"
+                                title="Close Detail View"
+                            >
+                                <X size={14} />
+                            </button>
                             {/* Tabs */}
                             <div className="flex-1 flex min-h-0">
                                 {/* Vertical Tabs Navi */}
@@ -257,10 +268,10 @@ export const LocationSplitView = ({
                                 />
 
                                 {/* Tab Content */}
-                                <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-50/30 dark:bg-gray-900/10">
-                                    <div className="max-w-4xl">
+                                <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-50/30 dark:bg-gray-900/10 relative">
+                                    <div className="max-w-4xl pt-2">
                                         {tab === "general" && (
-                                            <LocationDetails location={selectedLocation} />
+                                            <LocationDetails location={selectedLocation} updateLocation={updateLocation} />
                                         )}
                                         {tab === "pincodes" && (
                                             <div className="h-full">

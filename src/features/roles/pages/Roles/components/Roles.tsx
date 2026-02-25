@@ -58,6 +58,18 @@ const Roles = ({
         }
     }, [data]);
 
+    // Keep selectedRole up to date when data array changes
+    useEffect(() => {
+        if (selectedRole && data && Array.isArray(data)) {
+            const updatedSelected = data.find((r: RoleType) => r.id === selectedRole.id);
+            if (updatedSelected) {
+                setSelectedRole(updatedSelected);
+            } else {
+                setSelectedRole(null); // Deselect if deleted remotely
+            }
+        }
+    }, [data, selectedRole]);
+
     useEffect(() => {
         if (status === types.CREATE_ROLE_SUCCESS) {
             toast.success('Role created successfully');
@@ -144,6 +156,7 @@ const Roles = ({
                 selectedRole={selectedRole}
                 setSelectedRole={setSelectedRole}
                 loading={loading}
+                updateRole={updateRole}
             />
 
             <Modal

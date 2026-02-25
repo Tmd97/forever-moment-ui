@@ -35,6 +35,7 @@ interface ExperienceProps {
     resetStatus: () => void;
     toggleCancellationPolicy: (experienceId: number, policyId: number, isAssociate: boolean) => Promise<any>;
     toggleInclusion: (experienceId: number, inclusionId: number, isAssociate: boolean) => Promise<any>;
+    reorderExperience: (data: { id: number; newPosition: number }) => Promise<any>;
 }
 
 const Experience = ({
@@ -57,6 +58,7 @@ const Experience = ({
     resetStatus,
     toggleCancellationPolicy,
     toggleInclusion,
+    reorderExperience,
 }: ExperienceProps) => {
 
     const [experiences, setExperiences] = useState<ExperienceType[]>([]);
@@ -93,6 +95,10 @@ const Experience = ({
             toast.success('Experience updated successfully');
             resetStatus();
             handleCloseModal();
+            // Refresh currently selected experience details to reflect inline edits
+            if (selectedExperience) {
+                getExperienceById(selectedExperience.id).catch(err => console.error("Failed to refresh details", err));
+            }
         }
         if (status === types.DELETE_EXPERIENCE_SUCCESS) {
             toast.success('Experience deleted successfully');
@@ -144,6 +150,36 @@ const Experience = ({
         }
     };
 
+    const handleDragReorder = async (newOrder: ExperienceType[], activeId: string | number, _overId: string | number) => {
+        setExperiences(newOrder);
+
+        const movedItem = experiences.find(e => String(e.id) === String(activeId));
+
+        if (!movedItem) {
+            console.error('Could not find moved item');
+            return;
+        }
+
+        const newIndex = newOrder.findIndex(e => String(e.id) === String(activeId));
+
+        if (newIndex === -1) {
+            console.error('Could not find item in new order');
+            return;
+        }
+
+        try {
+            await reorderExperience({
+                id: movedItem.id,
+                newPosition: newIndex + 1
+            });
+            toast.success('Experience reordered successfully');
+        } catch (error) {
+            console.error('Failed to reorder', error);
+            toast.error('Failed to reorder experience');
+            getExperienceData(); // Revert on failure
+        }
+    };
+
     return (
         <div className="experience-page-container w-full h-full flex flex-col">
             <ExperienceSplitView
@@ -165,8 +201,11 @@ const Experience = ({
                 experienceDetail={selectedExperienceDetail}
                 inclusions={inclusions}
                 cancellationPolicies={cancellationPolicies}
+                subCategories={subCategories}
                 toggleCancellationPolicy={toggleCancellationPolicy}
                 toggleInclusion={toggleInclusion}
+                updateExperience={updateExperience}
+                handleDragReorder={handleDragReorder}
             />
 
             <Modal

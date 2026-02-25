@@ -32,8 +32,11 @@ export const ExperienceSplitView = ({
     experienceDetail,
     inclusions,
     cancellationPolicies,
+    subCategories,
     toggleCancellationPolicy,
     toggleInclusion,
+    updateExperience,
+    handleDragReorder,
 }: any) => {
     const [tab, setTab] = useState("general");
     const [search, setSearch] = useState("");
@@ -64,14 +67,16 @@ export const ExperienceSplitView = ({
             experienceDetail,
             inclusions,
             cancellationPolicies,
+            subCategories,
             onToggleCancellationPolicy: (policyId: number, isAssociate: boolean) => {
                 toggleCancellationPolicy(selectedExperience.id, policyId, isAssociate);
             },
             onToggleInclusion: (inclusionId: number, isAssociate: boolean) => {
                 toggleInclusion(selectedExperience.id, inclusionId, isAssociate);
-            }
+            },
+            updateExperience
         });
-    }, [selectedExperience, experienceDetail, inclusions, cancellationPolicies, handleOpenModal, toggleCancellationPolicy, toggleInclusion]);
+    }, [selectedExperience, experienceDetail, inclusions, cancellationPolicies, subCategories, handleOpenModal, toggleCancellationPolicy, toggleInclusion, updateExperience]);
 
     const renderFullTable = () => {
         return (
@@ -158,6 +163,8 @@ export const ExperienceSplitView = ({
                         keyExtractor={(item: any) => item.id}
                         onRowClick={(exp: any) => { setSelectedExperience(exp); setTab("general"); }}
                         loading={loading}
+                        onReorder={search === "" && Object.keys(activeFilters).length === 0 ? handleDragReorder : undefined}
+                        draggable={true}
                     />
                 </div>
             </div>
@@ -276,10 +283,10 @@ export const ExperienceSplitView = ({
                             {/* Close Button Only */}
                             <button
                                 onClick={() => setSelectedExperience(null)}
-                                className="absolute top-3 right-3 z-10 p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                                title="Close"
+                                className="absolute top-1 right-1 z-[60] p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md hover:bg-slate-50/50 dark:hover:bg-gray-800/50 transition-all"
+                                title="Close Detail View"
                             >
-                                <X className="w-4 h-4" />
+                                <X size={14} />
                             </button>
 
                             {/* Tab Content Area */}

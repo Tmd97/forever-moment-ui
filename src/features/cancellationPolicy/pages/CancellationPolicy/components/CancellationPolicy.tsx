@@ -62,6 +62,18 @@ const CancellationPolicy = ({
         }
     }, [data]);
 
+    // Keep selectedCancellationPolicy up to date when data array changes
+    useEffect(() => {
+        if (selectedCancellationPolicy && data && Array.isArray(data)) {
+            const updatedSelected = data.find((p: CancellationPolicyType) => p.id === selectedCancellationPolicy.id);
+            if (updatedSelected) {
+                setSelectedCancellationPolicy(updatedSelected);
+            } else {
+                setSelectedCancellationPolicy(null); // Deselect if deleted remotely
+            }
+        }
+    }, [data, selectedCancellationPolicy]);
+
     useEffect(() => {
         if (status === types.CREATE_CANCELLATION_POLICY_SUCCESS) {
             toast.success('Cancellation policy created successfully');
@@ -178,6 +190,7 @@ const CancellationPolicy = ({
                 setSelectedPolicy={setSelectedCancellationPolicy}
                 loading={loading}
                 handleDragReorder={handleDragReorder}
+                updateCancellationPolicy={updateCancellationPolicy}
             />
 
             <Modal
