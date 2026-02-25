@@ -8,11 +8,15 @@ import {
     resetStatus,
     toggleCancellationPolicy,
     toggleInclusion,
-    reorderExperience
+    reorderExperience,
+    associateLocation,
+    updateExperienceLocation,
+    disassociateLocation
 } from '@/features/experience/store/actions';
 import { getSubCategoryData } from '@/features/subCategory/store/actions';
 import { getInclusionData } from '@/features/inclusion/store/actions';
 import { getCancellationPolicyData } from '@/features/cancellationPolicy/store/actions';
+import { getLocationData } from '@/features/location/store/actions';
 import Experience from './components/Experience';
 import type { RootState } from '@/store/store';
 
@@ -25,6 +29,7 @@ const mapStateToProps = (state: RootState) => ({
     subCategories: state.subCategory?.data || [],
     inclusions: state.inclusion?.data || [],
     cancellationPolicies: state.cancellationPolicy?.data || [],
+    locations: state.location?.data || [],
 });
 
 const mapDispatchToProps = {
@@ -37,9 +42,13 @@ const mapDispatchToProps = {
     getSubCategoryData,
     getInclusionData,
     getCancellationPolicyData,
+    getLocationData,
     toggleCancellationPolicy,
     toggleInclusion,
     reorderExperience,
+    associateLocation,
+    updateExperienceLocation,
+    disassociateLocation,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Experience);

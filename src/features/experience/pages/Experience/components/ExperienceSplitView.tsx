@@ -37,6 +37,10 @@ export const ExperienceSplitView = ({
     toggleInclusion,
     updateExperience,
     handleDragReorder,
+    locations,
+    associateLocation,
+    updateExperienceLocation,
+    disassociateLocation,
 }: any) => {
     const [tab, setTab] = useState("general");
     const [search, setSearch] = useState("");
@@ -74,9 +78,19 @@ export const ExperienceSplitView = ({
             onToggleInclusion: (inclusionId: number, isAssociate: boolean) => {
                 toggleInclusion(selectedExperience.id, inclusionId, isAssociate);
             },
-            updateExperience
+            onAssociateLocation: (locationId: number, data: any) => {
+                associateLocation(selectedExperience.id, locationId, data);
+            },
+            onUpdateLocation: (locationId: number, data: any) => {
+                updateExperienceLocation(selectedExperience.id, locationId, data);
+            },
+            onDisassociateLocation: (locationId: number) => {
+                disassociateLocation(selectedExperience.id, locationId);
+            },
+            updateExperience,
+            locations
         });
-    }, [selectedExperience, experienceDetail, inclusions, cancellationPolicies, subCategories, handleOpenModal, toggleCancellationPolicy, toggleInclusion, updateExperience]);
+    }, [selectedExperience, experienceDetail, inclusions, cancellationPolicies, subCategories, locations, handleOpenModal, toggleCancellationPolicy, toggleInclusion, updateExperience, associateLocation, updateExperienceLocation, disassociateLocation]);
 
     const renderFullTable = () => {
         return (

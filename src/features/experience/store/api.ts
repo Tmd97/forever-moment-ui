@@ -39,3 +39,15 @@ export const associateInclusionApi = async (experienceId: number, inclusionId: n
 export const disassociateInclusionApi = async (experienceId: number, inclusionId: number) => {
     return await axios.delete(`/admin/experiences/${experienceId}/inclusions/${inclusionId}`);
 };
+
+export const associateLocationApi = async (locationId: number, experienceId: number, data: any) => {
+    return await axios.post(`/admin/locations/${locationId}/experiences/${experienceId}`, data);
+};
+
+export const updateExperienceLocationApi = async (locationId: number, experienceId: number, data: any) => {
+    return await axios.put(`/admin/locations/${locationId}/experiences/${experienceId}`, data);
+};
+
+export const disassociateLocationApi = async (locationId: number, experienceId: number) => {
+    return await axios.delete(`/admin/locations/${locationId}/experiences/${experienceId}`);
+};

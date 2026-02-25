@@ -1,5 +1,10 @@
 import * as types from './action-types';
-import { createExperienceApi, fetchExperienceData, fetchExperienceByIdApi, deleteExperienceApi, updateExperienceApi, reorderExperienceApi, associateCancellationPolicyApi, disassociateCancellationPolicyApi, associateInclusionApi, disassociateInclusionApi } from './api';
+import {
+    createExperienceApi, fetchExperienceData, fetchExperienceByIdApi, deleteExperienceApi, updateExperienceApi, reorderExperienceApi,
+    associateCancellationPolicyApi, disassociateCancellationPolicyApi,
+    associateInclusionApi, disassociateInclusionApi,
+    associateLocationApi, updateExperienceLocationApi, disassociateLocationApi
+} from './api';
 
 export const getExperienceData = (isBackground: boolean = false) => async (dispatch: any) => {
     if (!isBackground) {
@@ -168,6 +173,63 @@ export const toggleInclusion = (experienceId: number, inclusionId: number, isAss
         dispatch({
             type: types.TOGGLE_INCLUSION_FAILURE,
             payload: error.response?.data?.message || 'Failed to toggle inclusion',
+        });
+        throw error;
+    }
+};
+
+export const associateLocation = (experienceId: number, locationId: number, data: any) => async (dispatch: any) => {
+    dispatch({ type: types.ASSOCIATE_LOCATION });
+    try {
+        const response = await associateLocationApi(locationId, experienceId, data);
+        dispatch({
+            type: types.ASSOCIATE_LOCATION_SUCCESS,
+            payload: response.data,
+        });
+        dispatch(getExperienceById(experienceId));
+        return response.data;
+    } catch (error: any) {
+        dispatch({
+            type: types.ASSOCIATE_LOCATION_FAILURE,
+            payload: error.response?.data?.message || 'Failed to associate location',
+        });
+        throw error;
+    }
+};
+
+export const updateExperienceLocation = (experienceId: number, locationId: number, data: any) => async (dispatch: any) => {
+    dispatch({ type: types.UPDATE_EXPERIENCE_LOCATION });
+    try {
+        const response = await updateExperienceLocationApi(locationId, experienceId, data);
+        dispatch({
+            type: types.UPDATE_EXPERIENCE_LOCATION_SUCCESS,
+            payload: response.data,
+        });
+        dispatch(getExperienceById(experienceId));
+        return response.data;
+    } catch (error: any) {
+        dispatch({
+            type: types.UPDATE_EXPERIENCE_LOCATION_FAILURE,
+            payload: error.response?.data?.message || 'Failed to update associated location',
+        });
+        throw error;
+    }
+};
+
+export const disassociateLocation = (experienceId: number, locationId: number) => async (dispatch: any) => {
+    dispatch({ type: types.DISASSOCIATE_LOCATION });
+    try {
+        const response = await disassociateLocationApi(locationId, experienceId);
+        dispatch({
+            type: types.DISASSOCIATE_LOCATION_SUCCESS,
+            payload: response.data,
+        });
+        dispatch(getExperienceById(experienceId));
+        return response.data;
+    } catch (error: any) {
+        dispatch({
+            type: types.DISASSOCIATE_LOCATION_FAILURE,
+            payload: error.response?.data?.message || 'Failed to disassociate location',
         });
         throw error;
     }

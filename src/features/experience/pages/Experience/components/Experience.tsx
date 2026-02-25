@@ -24,6 +24,7 @@ interface ExperienceProps {
     subCategories: any[];
     inclusions: any[];
     cancellationPolicies: any[];
+    locations: any[];
     getExperienceData: () => void;
     getExperienceById: (id: number) => Promise<any>;
     getSubCategoryData: () => void;
@@ -36,6 +37,10 @@ interface ExperienceProps {
     toggleCancellationPolicy: (experienceId: number, policyId: number, isAssociate: boolean) => Promise<any>;
     toggleInclusion: (experienceId: number, inclusionId: number, isAssociate: boolean) => Promise<any>;
     reorderExperience: (data: { id: number; newPosition: number }) => Promise<any>;
+    getLocationData: () => void;
+    associateLocation: (experienceId: number, locationId: number, data: any) => Promise<any>;
+    updateExperienceLocation: (experienceId: number, locationId: number, data: any) => Promise<any>;
+    disassociateLocation: (experienceId: number, locationId: number) => Promise<any>;
 }
 
 const Experience = ({
@@ -59,6 +64,11 @@ const Experience = ({
     toggleCancellationPolicy,
     toggleInclusion,
     reorderExperience,
+    locations,
+    getLocationData,
+    associateLocation,
+    updateExperienceLocation,
+    disassociateLocation,
 }: ExperienceProps) => {
 
     const [experiences, setExperiences] = useState<ExperienceType[]>([]);
@@ -73,7 +83,8 @@ const Experience = ({
         getSubCategoryData();
         getInclusionData();
         getCancellationPolicyData();
-    }, [getExperienceData, getSubCategoryData, getInclusionData, getCancellationPolicyData]);
+        getLocationData();
+    }, [getExperienceData, getSubCategoryData, getInclusionData, getCancellationPolicyData, getLocationData]);
 
     useEffect(() => {
         if (data && Array.isArray(data)) {
@@ -206,6 +217,10 @@ const Experience = ({
                 toggleInclusion={toggleInclusion}
                 updateExperience={updateExperience}
                 handleDragReorder={handleDragReorder}
+                locations={locations}
+                associateLocation={associateLocation}
+                updateExperienceLocation={updateExperienceLocation}
+                disassociateLocation={disassociateLocation}
             />
 
             <Modal

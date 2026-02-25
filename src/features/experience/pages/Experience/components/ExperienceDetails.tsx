@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { InclusionsTab } from './InclusionsTab';
 import { CancellationPolicyTab } from './CancellationPolicyTab';
+import { LocationTab } from './LocationTab';
 import { Dropdown } from '@/components/common/Dropdown';
 import { cn } from '@/utils/cn';
 import type { ExperienceType } from './Experience';
@@ -12,8 +13,13 @@ interface ExperienceDetailsProps {
     experienceDetail: any;
     inclusions: any[];
     cancellationPolicies: any[];
-    onToggleCancellationPolicy: (policyId: number, isAssociate: boolean) => void;
-    onToggleInclusion: (inclusionId: number, isAssociate: boolean) => void;
+    subCategories: any[];
+    locations: any[];
+    onToggleCancellationPolicy: (id: number, checked: boolean) => void;
+    onToggleInclusion: (id: number, checked: boolean) => void;
+    onAssociateLocation: (id: number, data: any) => void;
+    onUpdateLocation: (id: number, data: any) => void;
+    onDisassociateLocation: (id: number) => void;
     updateExperience: (id: number, data: any) => Promise<any>;
 }
 
@@ -315,26 +321,17 @@ const GeneralInfoTab = ({ experience, experienceDetail, updateExperience, subCat
     );
 };
 
-export const getExperienceTabs = ({
-    experience,
-    experienceDetail,
-    inclusions,
-    cancellationPolicies,
-    subCategories,
-    onToggleCancellationPolicy,
-    onToggleInclusion,
-    updateExperience
-}: ExperienceDetailsProps & { subCategories: any[] }): SidePanelTab[] => {
+export const getExperienceTabs = (params: ExperienceDetailsProps): SidePanelTab[] => {
     return [
         {
             id: 'general',
             label: 'General Information',
             content: (
                 <GeneralInfoTab
-                    experience={experience}
-                    experienceDetail={experienceDetail}
-                    updateExperience={updateExperience}
-                    subCategories={subCategories}
+                    experience={params.experience}
+                    experienceDetail={params.experienceDetail}
+                    updateExperience={params.updateExperience}
+                    subCategories={params.subCategories}
                 />
             )
         },
@@ -343,9 +340,22 @@ export const getExperienceTabs = ({
             label: 'Inclusions',
             content: (
                 <InclusionsTab
-                    inclusions={inclusions}
-                    experienceDetail={experienceDetail}
-                    onToggleInclusion={onToggleInclusion}
+                    inclusions={params.inclusions}
+                    experienceDetail={params.experienceDetail}
+                    onToggleInclusion={params.onToggleInclusion}
+                />
+            )
+        },
+        {
+            id: 'locations',
+            label: 'Locations',
+            content: (
+                <LocationTab
+                    availableLocations={params.locations}
+                    experienceLocations={params.experienceDetail?.locations || []}
+                    onAssociateLocation={params.onAssociateLocation}
+                    onUpdateLocation={params.onUpdateLocation}
+                    onDisassociateLocation={params.onDisassociateLocation}
                 />
             )
         },
@@ -354,9 +364,9 @@ export const getExperienceTabs = ({
             label: 'Cancellation Policy',
             content: (
                 <CancellationPolicyTab
-                    cancellationPolicies={cancellationPolicies}
-                    experienceDetail={experienceDetail}
-                    onToggleCancellationPolicy={onToggleCancellationPolicy}
+                    cancellationPolicies={params.cancellationPolicies}
+                    experienceDetail={params.experienceDetail}
+                    onToggleCancellationPolicy={params.onToggleCancellationPolicy}
                 />
             )
         }
