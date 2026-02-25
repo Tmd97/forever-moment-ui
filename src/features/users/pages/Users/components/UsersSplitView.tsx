@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/common/Button';
+import { Tabs } from '@/components/common/Tabs';
 import { UserDetails } from './UserDetails';
 import { DataTable } from '@/components/common/DataTable';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { RowActions } from '@/components/common/RowActions';
-import { Search, Plus, X, Edit2, Trash2, User as UserIcon } from 'lucide-react';
+import { SearchBar } from '@/components/common/SearchBar';
+import { Plus, X, Edit2, Trash2, User as UserIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Filter } from '@/components/common/Filter';
 import type { UserType } from './Users';
@@ -84,15 +86,13 @@ export const UsersSplitView = ({
                     />
 
                     <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <div className="relative w-full sm:w-72">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                            <input
-                                className="w-full bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 shadow-sm"
-                                placeholder="Search users by name or email..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
+                        <SearchBar
+                            className="w-full sm:w-72"
+                            inputClassName="py-2.5 pl-10 pr-4"
+                            placeholder="Search users by name or email..."
+                            value={search}
+                            onChange={setSearch}
+                        />
                         <Button onClick={() => handleOpenModal()} className="h-10 px-4 text-sm gap-2 shadow-sm shrink-0">
                             <Plus size={16} /> Add User
                         </Button>
@@ -191,15 +191,13 @@ export const UsersSplitView = ({
 
                     {/* Search */}
                     <div className="flex items-center gap-2 mx-4 mb-3">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                            <input
-                                className="w-full bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2 pl-9 pr-3 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
-                                placeholder="Search users by name..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
+                        <SearchBar
+                            className="flex-1"
+                            inputClassName="bg-slate-50"
+                            placeholder="Search users by name..."
+                            value={search}
+                            onChange={setSearch}
+                        />
                         <Button onClick={() => handleOpenModal()} className="h-[38px] px-3 text-xs gap-1.5 shadow-sm shrink-0">
                             <Plus size={14} /> Add
                         </Button>
@@ -326,24 +324,14 @@ export const UsersSplitView = ({
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex px-8 gap-6 border-b border-slate-100 dark:border-gray-800">
-                        {[
+                    <Tabs
+                        variant="horizontal"
+                        tabs={[
                             { id: "general", label: "General Info" }
-                        ].map((t) => (
-                            <button
-                                key={t.id}
-                                onClick={() => setTab(t.id)}
-                                className={cn(
-                                    "bg-transparent border-none border-b-2 py-4 text-[13.5px] cursor-pointer transition-all tracking-wide -mb-[1px]",
-                                    tab === t.id
-                                        ? "border-blue-600 text-blue-600 dark:text-blue-400 font-semibold"
-                                        : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium"
-                                )}
-                            >
-                                {t.label}
-                            </button>
-                        ))}
-                    </div>
+                        ]}
+                        activeTab={tab}
+                        onTabChange={setTab}
+                    />
 
                     {/* Tab Content */}
                     <div className="flex-1 overflow-y-auto p-8 bg-slate-50/50 dark:bg-gray-900/50">

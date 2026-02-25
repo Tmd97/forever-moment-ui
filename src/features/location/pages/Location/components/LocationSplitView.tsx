@@ -1,11 +1,13 @@
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/common/Button';
+import { Tabs } from '@/components/common/Tabs';
 import { LocationDetails } from './LocationDetails';
 import { Pincode } from './Pincode';
 import { DataTable } from '@/components/common/DataTable';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { RowActions } from '@/components/common/RowActions';
-import { Search, Plus, MapPin, X, Edit2, Trash2 } from 'lucide-react';
+import { SearchBar } from '@/components/common/SearchBar';
+import { Plus, MapPin } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Filter } from '@/components/common/Filter';
 
@@ -63,15 +65,13 @@ export const LocationSplitView = ({
                     />
 
                     <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <div className="relative w-full sm:w-72">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                            <input
-                                className="w-full bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 shadow-sm"
-                                placeholder="Search locations..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
+                        <SearchBar
+                            className="w-full sm:w-72"
+                            inputClassName="py-2.5 pl-10 pr-4"
+                            placeholder="Search locations..."
+                            value={search}
+                            onChange={setSearch}
+                        />
                         <Button onClick={() => handleOpenModal()} className="h-10 px-4 text-sm gap-2 shadow-sm shrink-0">
                             <Plus size={16} /> Add Location
                         </Button>
@@ -157,15 +157,13 @@ export const LocationSplitView = ({
 
                     {/* Search */}
                     <div className="flex items-center gap-2 mx-4 mb-3">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                            <input
-                                className="w-full bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2 pl-9 pr-3 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
-                                placeholder="Search locations..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
+                        <SearchBar
+                            className="flex-1"
+                            inputClassName="bg-slate-50"
+                            placeholder="Search locations..."
+                            value={search}
+                            onChange={setSearch}
+                        />
                         <Button onClick={() => handleOpenModal()} className="h-[38px] px-3 text-xs gap-1.5 shadow-sm shrink-0">
                             <Plus size={14} /> Add
                         </Button>
@@ -242,79 +240,39 @@ export const LocationSplitView = ({
                 </div>
 
                 {/* Detail Panel */}
-                <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-900">
+                <div className="flex-1 flex flex-col min-w-0 bg-slate-50 dark:bg-gray-900/40 p-3 h-full overflow-hidden">
                     {selectedLocation ? (
-                        <>
-                            {/* Detail Header */}
-                            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 dark:border-gray-800 bg-white dark:bg-gray-900">
-                                <div className="flex items-center gap-5">
-                                    <div className={cn(
-                                        "w-[60px] h-[60px] rounded-2xl flex items-center justify-center font-extrabold text-xl shadow-sm",
-                                        (cityColors[selectedLocation.name] || { bg: "bg-slate-100 dark:bg-gray-800" }).bg,
-                                        (cityColors[selectedLocation.name] || { text: "text-slate-700 dark:text-gray-300" }).text
-                                    )}>
-                                        {cityInitials(selectedLocation.name)}
-                                    </div>
-                                    <div>
-                                        <div className="font-bold text-2xl text-slate-900 dark:text-white tracking-tight leading-tight flex items-center gap-2">
-                                            {selectedLocation.name}
-                                        </div>
-                                        <div className="text-[13px] text-slate-500 font-medium mt-1 flex items-center gap-1.5">
-                                            <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                                            {selectedLocation.city || 'No City'}, {selectedLocation.state || 'No State'} <span className="opacity-50 mx-1">•</span> ID #{selectedLocation.id}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2.5">
-                                    <button onClick={() => handleOpenModal(selectedLocation)} className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 border-none rounded-lg px-4 py-2 text-[13px] font-semibold transition-colors">
-                                        <Edit2 className="w-3.5 h-3.5" /> Edit
-                                    </button>
-                                    <button onClick={() => handleDeleteClick(selectedLocation.id)} className="flex items-center gap-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 border-none rounded-lg px-4 py-2 text-[13px] font-semibold transition-colors">
-                                        <Trash2 className="w-3.5 h-3.5" /> Delete
-                                    </button>
-                                    <div className="w-px h-6 bg-slate-200 dark:bg-gray-700 mx-1"></div>
-                                    <button onClick={() => setSelectedLocation(null)} className="bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg w-9 h-9 flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors">
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-
+                        <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl shadow-sm relative overflow-hidden">
                             {/* Tabs */}
-                            <div className="flex px-8 gap-6 border-b border-slate-100 dark:border-gray-800">
-                                {[
-                                    { id: "general", label: "General Info" },
-                                    { id: "pincodes", label: "Pincodes & Service Areas" }
-                                ].map((t) => (
-                                    <button
-                                        key={t.id}
-                                        onClick={() => setTab(t.id)}
-                                        className={cn(
-                                            "bg-transparent border-none border-b-2 py-4 text-[13.5px] cursor-pointer transition-all tracking-wide -mb-[1px]",
-                                            tab === t.id
-                                                ? "border-blue-600 text-blue-600 dark:text-blue-400 font-semibold"
-                                                : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium"
+                            <div className="flex-1 flex min-h-0">
+                                {/* Vertical Tabs Navi */}
+                                <Tabs
+                                    variant="vertical"
+                                    tabs={[
+                                        { id: "general", label: "General Info" },
+                                        { id: "pincodes", label: "Pincodes & Service Areas" }
+                                    ]}
+                                    activeTab={tab}
+                                    onTabChange={setTab}
+                                />
+
+                                {/* Tab Content */}
+                                <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-50/30 dark:bg-gray-900/10">
+                                    <div className="max-w-4xl">
+                                        {tab === "general" && (
+                                            <LocationDetails location={selectedLocation} />
                                         )}
-                                    >
-                                        {t.label}
-                                    </button>
-                                ))}
-                            </div>
-
-                            {/* Tab Content */}
-                            <div className="flex-1 overflow-y-auto p-8 bg-slate-50/50 dark:bg-gray-900/50">
-                                {tab === "general" && (
-                                    <LocationDetails location={selectedLocation} />
-                                )}
-
-                                {tab === "pincodes" && (
-                                    <div className="h-full">
-                                        <Pincode locationId={selectedLocation.id} />
+                                        {tab === "pincodes" && (
+                                            <div className="h-full">
+                                                <Pincode locationId={selectedLocation.id} />
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                </div>
                             </div>
-                        </>
+                        </div>
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-gray-900/50">
+                        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
                             <div className="w-20 h-20 bg-white dark:bg-gray-800 rounded-3xl flex items-center justify-center shadow-sm border border-slate-100 dark:border-gray-700 mb-6">
                                 <MapPin className="w-8 h-8 text-slate-300 dark:text-slate-600" />
                             </div>

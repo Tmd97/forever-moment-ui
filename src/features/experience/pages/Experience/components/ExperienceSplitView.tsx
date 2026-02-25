@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/common/Button';
+import { Tabs } from '@/components/common/Tabs';
 import { getExperienceTabs } from './ExperienceDetails';
 import { DataTable } from '@/components/common/DataTable';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { RowActions } from '@/components/common/RowActions';
-import { Search, Plus, X } from 'lucide-react';
+import { SearchBar } from '@/components/common/SearchBar';
+import { Plus, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Filter } from '@/components/common/Filter';
 
@@ -91,15 +93,13 @@ export const ExperienceSplitView = ({
                     />
 
                     <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <div className="relative w-full sm:w-72">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                            <input
-                                className="w-full bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 shadow-sm"
-                                placeholder="Search experiences..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
+                        <SearchBar
+                            className="w-full sm:w-72"
+                            inputClassName="py-2.5 pl-10 pr-4"
+                            placeholder="Search experiences..."
+                            value={search}
+                            onChange={setSearch}
+                        />
                         <Button onClick={() => handleOpenModal()} className="h-10 px-4 text-sm gap-2 shadow-sm shrink-0">
                             <Plus size={16} /> Add Experience
                         </Button>
@@ -178,15 +178,13 @@ export const ExperienceSplitView = ({
 
                     {/* Search */}
                     <div className="flex items-center gap-2 mx-4 mb-3">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                            <input
-                                className="w-full bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg py-2 pl-9 pr-3 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
-                                placeholder="Search experiences..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
+                        <SearchBar
+                            className="flex-1"
+                            inputClassName="bg-slate-50"
+                            placeholder="Search experiences..."
+                            value={search}
+                            onChange={setSearch}
+                        />
                         <Button onClick={() => handleOpenModal()} className="h-[38px] px-3 text-xs gap-1.5 shadow-sm shrink-0">
                             <Plus size={14} /> Add
                         </Button>
@@ -266,22 +264,11 @@ export const ExperienceSplitView = ({
                 <div className="flex-1 flex bg-slate-50 dark:bg-gray-900/40 p-3 h-full overflow-hidden">
                     <div className="flex-1 flex bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm relative">
                         {/* Vertical Tab Nav (Left) */}
-                        <div className="w-[180px] min-w-[180px] border-r border-slate-100 dark:border-gray-800 p-3 flex flex-col gap-1 bg-white dark:bg-gray-900/50">
-                            {tabsData.map((t) => (
-                                <button
-                                    key={t.id}
-                                    onClick={() => setTab(t.id)}
-                                    className={cn(
-                                        "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all text-left w-full",
-                                        tab === t.id
-                                            ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 font-semibold"
-                                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:hover:bg-gray-800/50 dark:hover:text-slate-300"
-                                    )}
-                                >
-                                    {t.label}
-                                </button>
-                            ))}
-                        </div>
+                        <Tabs
+                            tabs={tabsData.map(t => ({ id: t.id, label: t.label }))}
+                            activeTab={tab}
+                            onTabChange={setTab}
+                        />
 
                         {/* Detail Content (Right) */}
                         <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">

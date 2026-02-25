@@ -1,0 +1,209 @@
+.profile-page-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+
+    --ink: #1a1714;
+    --muted: #8c8479;
+    --accent: #c9622f;
+    --accent-light: #f5ede7;
+    --border: #e4dfd7;
+    --success: #3d7a5c;
+
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+
+    /* Header */
+    .header {
+        display: none; // Hide the large header to use the avatar section as the primary identifier
+    }
+
+    .headerText {
+        h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 2.8rem;
+            font-weight: 600;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+        }
+
+        p {
+            margin-top: 6px;
+            font-size: 0.875rem;
+            color: var(--muted);
+            font-weight: 300;
+            letter-spacing: 0.01em;
+        }
+    }
+
+    .headerBadge {
+        display: none;
+    }
+
+    /* Card */
+    .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    /* Avatar section */
+    .avatarSection {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #d37340, #ea9f4e);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Fraunces', serif;
+        font-size: 1.4rem;
+        color: white;
+        flex-shrink: 0;
+        position: relative;
+        overflow: visible;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+    }
+
+    .avatarChange {
+        position: absolute;
+        bottom: 0;
+        right: -4px;
+        width: 20px;
+        height: 20px;
+        background: var(--ink);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: 2px solid var(--card);
+
+        svg {
+            width: 10px;
+            height: 10px;
+            fill: white;
+        }
+    }
+
+    .avatarInfo {
+        h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin: 0;
+            color: #2c2c2c;
+        }
+
+        p {
+            font-size: 0.8rem;
+            color: #7b7b7b;
+            margin-top: 2px;
+            margin-bottom: 0;
+        }
+    }
+
+    .avatarBtn {
+        margin-top: 6px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--accent);
+        background: white;
+        border: 1px solid #f0d5c5;
+        border-radius: 6px;
+        padding: 3px 8px;
+        cursor: pointer;
+        transition: background 0.15s;
+
+        &:hover {
+            background: #fdfaf8;
+        }
+    }
+
+    /* Section label */
+    .sectionLabel {
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #9ca3af;
+        margin-bottom: 12px;
+    }
+
+    .section {
+        &+.section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+    }
+
+    /* Grid */
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+
+        /* For sections with 3 items, make the 3rd item span full width or let it wrap nicely */
+        &>.field:nth-child(3):last-child {
+            grid-column: span 2;
+        }
+
+        &.full {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Footer */
+    .footer {
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+
+
+    @media (max-width: 560px) {
+        .card {
+            padding: 24px;
+        }
+
+        .grid {
+            grid-template-columns: 1fr;
+        }
+
+        .header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+    }
+}
