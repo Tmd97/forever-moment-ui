@@ -13,6 +13,7 @@ import { slotReducer } from '@/features/slot/store/reducer';
 import { profileReducer } from '@/features/profile/store/reducer';
 import { inclusionReducer } from '@/features/inclusion/store/reducer';
 import { cancellationPolicyReducer } from '@/features/cancellationPolicy/store/reducer';
+import { addonReducer } from '@/features/addon/store/reducer';
 
 export const store = configureStore({
   reducer: {
@@ -30,6 +31,7 @@ export const store = configureStore({
     profile: profileReducer,
     inclusion: inclusionReducer,
     cancellationPolicy: cancellationPolicyReducer,
+    addon: addonReducer,
   },
 });
 

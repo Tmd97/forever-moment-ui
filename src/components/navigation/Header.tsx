@@ -150,7 +150,7 @@ const Header = ({ onToggleSidebar }: HeaderProps) => {
                         className='h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold hover:bg-blue-600 transition-colors uppercase'
                         title={profileData?.fullName || user?.name || 'User'}
                     >
-                        {(profileData?.fullName || user?.name || 'A').charAt(0)}
+                        {(profileData?.fullName || user?.name || 'A').trim().split(/\s+/).map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                     </button>
 
                     {/* Dropdown Menu */}

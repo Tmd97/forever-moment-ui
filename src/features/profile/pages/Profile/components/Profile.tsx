@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { ProfileForm } from './ProfileForm';
+import { ProfileSkeleton } from './ProfileSkeleton';
 import toast from 'react-hot-toast';
 import * as types from '@/features/profile/store/action-types';
 import '../../css/styles.scss';
@@ -50,9 +51,7 @@ const Profile = ({
                         isLoading={profileLoading}
                     />
                 ) : (
-                    <div className="flex justify-center p-12">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#c9622f]"></div>
-                    </div>
+                    <ProfileSkeleton />
                 )}
             </div>
         </div>

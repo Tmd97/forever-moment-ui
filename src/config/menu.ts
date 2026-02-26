@@ -37,6 +37,7 @@ export const sidebarItems: SidebarItem[] = [
             { name: 'Sub Category', path: '/admin/subCategory', icon: Tag },
             { name: 'Inclusions', path: '/admin/inclusions', icon: Gift },
             { name: 'Cancellation Policies', path: '/admin/cancellation-policies', icon: ShieldAlert },
+            { name: 'Addons', path: '/admin/addons', icon: Sparkles },
         ]
     },
     {
