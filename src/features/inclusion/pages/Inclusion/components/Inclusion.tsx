@@ -178,6 +178,7 @@ const Inclusion = ({
                 setSelectedInclusion={setSelectedInclusion}
                 loading={loading}
                 handleDragReorder={handleDragReorder}
+                updateInclusion={updateInclusion}
             />
 
             <Modal

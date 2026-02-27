@@ -167,6 +167,7 @@ const Slot = ({
                 selectedSlot={selectedSlot}
                 setSelectedSlot={setSelectedSlot}
                 loading={loading}
+                updateSlot={updateSlot}
             />
 
             <Modal

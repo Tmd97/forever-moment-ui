@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Dropdown } from '@/components/common/Dropdown';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import type { SubCategoryType } from './SubCategory';
 
 interface SubCategoryDetailsProps {
@@ -137,32 +137,13 @@ export const SubCategoryDetails = ({ subCategory, categories, updateSubCategory 
                     <div className="text-sm font-medium text-slate-500 dark:text-gray-400 mb-1 flex items-center gap-1.5 p-3 -mx-3 pb-0">
                         Status
                     </div>
-                    {editingField === 'isActive' ? (
-                        <div className="-ml-2">
-                            <Dropdown
-                                label=""
-                                options={[
-                                    { label: 'Active', value: 'true' },
-                                    { label: 'Inactive', value: 'false' }
-                                ]}
-                                value={subCategory.isActive ? 'true' : 'false'}
-                                onChange={(val) => {
-                                    setEditingField(null);
-                                    handleStatusChange(val);
-                                }}
-                                placeholder="Select Status"
-                                searchable={false}
-                            />
-                        </div>
-                    ) : (
-                        <div
-                            className="mt-1 px-2 py-1 rounded-md cursor-pointer hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-gray-700 w-max flex items-center"
-                            onClick={() => setEditingField('isActive')}
-                        >
-                            <StatusBadge isActive={subCategory.isActive} />
-                            <svg className="w-3.5 h-3.5 ml-2 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        </div>
-                    )}
+                    <div className="mt-1 flex items-center">
+                        <EditableStatusBadge
+                            status={subCategory.isActive ? 'Active' : 'Inactive'}
+                            options={['Active', 'Inactive']}
+                            onChange={(val) => handleStatusChange(val === 'Active' ? 'true' : 'false')}
+                        />
+                    </div>
                 </div>
             </div>
 

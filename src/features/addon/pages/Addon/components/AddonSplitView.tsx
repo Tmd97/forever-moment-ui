@@ -3,7 +3,8 @@ import { Button } from '@/components/common/Button';
 import { AddonDetails } from './AddonDetails';
 import { Tabs } from '@/components/common/Tabs';
 import { DataTable } from '@/components/common/DataTable';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { EditableTitle } from '@/components/common/EditableTitle';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { SearchBar } from '@/components/common/SearchBar';
 import { Plus, X, PackageOpen } from 'lucide-react';
@@ -86,10 +87,11 @@ export const AddonSplitView = ({
                                         <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
                                             {a.icon || <PackageOpen className="w-4 h-4" />}
                                         </div>
-                                        <div>
-                                            {a.name || '-'}
-                                            {a.description && <p className="text-xs text-slate-500 font-normal truncate mt-0.5 max-w-[250px]">{a.description}</p>}
-                                        </div>
+                                        <EditableTitle
+                                            value={a.name || '-'}
+                                            onChange={(val) => updateAddon({ id: a.id, name: val, description: a.description, basePrice: a.basePrice, isActive: a.isActive, icon: a.icon })}
+                                        />
+                                        {a.description && <p className="text-xs text-slate-500 font-normal truncate mt-0.5 max-w-[250px]">{a.description}</p>}
                                     </div>
                                 )
                             },
@@ -102,9 +104,14 @@ export const AddonSplitView = ({
                             },
                             {
                                 header: 'Status',
+                                preventRowClick: true,
                                 className: 'w-[15%] min-w-[120px] py-4 px-6 text-left',
                                 render: (a: any) => (
-                                    <StatusBadge isActive={a.isActive} />
+                                    <EditableStatusBadge
+                                        status={a.isActive ? 'Active' : 'Inactive'}
+                                        options={['Active', 'Inactive']}
+                                        onChange={(val) => updateAddon({ id: a.id, isActive: val === 'Active', name: a.name, description: a.description, basePrice: a.basePrice, icon: a.icon })}
+                                    />
                                 )
                             },
                             {
@@ -119,7 +126,7 @@ export const AddonSplitView = ({
                             }
                         ]}
                         loading={loading}
-                        onRowClick={(row) => setSelectedAddon(row)}
+                        onRowClick={(row: any) => setSelectedAddon(row)}
                         keyExtractor={(row: any) => row.id}
                     />
                 </div>

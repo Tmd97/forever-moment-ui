@@ -20,9 +20,9 @@ import type { DataTableProps, Column, RowId } from './types';
 import { SortableRow } from './SortableRow';
 import { DragHandle } from './DragHandle';
 
-const HEADER_CELL_CLASS = "text-gray-900 dark:text-gray-100 h-10 px-2 text-left align-middle font-semibold whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]";
-const BODY_CELL_CLASS = "p-2 align-middle whitespace-nowrap text-gray-600 dark:text-gray-400 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]";
-const ROW_CLASS = "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors bg-white dark:bg-gray-900";
+const HEADER_CELL_CLASS = "text-slate-400 dark:text-gray-400 h-10 px-4 text-left align-middle font-bold text-[11.5px] uppercase tracking-wider whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]";
+const BODY_CELL_CLASS = "p-4 align-middle whitespace-nowrap text-gray-700 dark:text-gray-300 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]";
+const ROW_CLASS = "group hover:bg-[#fafbff] dark:hover:bg-slate-800/50 data-[state=selected]:bg-muted border-b transition-colors bg-white dark:bg-gray-900";
 
 export const DataTable = <T,>({
     data,
@@ -93,8 +93,8 @@ export const DataTable = <T,>({
     };
 
     const renderTableHead = () => (
-        <thead className="sticky top-0 z-10 bg-gray-100 dark:bg-gray-800 shadow-sm [&_tr]:border-b">
-            <tr className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 border-b transition-colors border-none">
+        <thead className="sticky top-0 z-10 bg-[#f8fafc] dark:bg-gray-800 shadow-sm [&_tr]:border-b border-b border-[#f1f5f9] dark:border-gray-700">
+            <tr className="bg-[#f8fafc] dark:bg-gray-800 border-none">
                 {columns.map((col, index) => (
                     <th
                         key={getColumnKey(index, col)}
@@ -117,7 +117,7 @@ export const DataTable = <T,>({
         const rowClassName = cn(
             ROW_CLASS,
             rowClickHandler ? 'cursor-pointer relative' : '',
-            selected ? 'bg-blue-50/50 dark:bg-blue-900/10' : 'hover:bg-muted/50'
+            selected ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
         );
 
         const rowCells = columns.map((col, index) => (
@@ -128,6 +128,7 @@ export const DataTable = <T,>({
                     col.className,
                     index === 0 ? 'relative' : ''
                 )}
+                onClick={col.preventRowClick ? (e) => e.stopPropagation() : undefined}
             >
                 {index === 0 && selected ? (
                     <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-blue-600 rounded-r-sm" />
@@ -177,7 +178,7 @@ export const DataTable = <T,>({
     };
 
     const renderTableBody = () => (
-        <tbody className="[&_tr:last-child]:border-0">
+        <tbody className="[&_tr:last-child]:border-0 divide-y divide-[#f1f5f9] dark:divide-gray-800">
             {loading ? (
                 renderSkeleton()
             ) : data.length ? (

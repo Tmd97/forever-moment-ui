@@ -16,7 +16,7 @@ export const AddonDetails = ({ addon, updateAddon }: AddonDetailsProps) => {
     useEffect(() => {
         if (editingField && inputRef.current) {
             inputRef.current.focus();
-            if (inputRef.current instanceof HTMLInputElement && inputRef.current.type !== 'checkbox') {
+            if (inputRef.current instanceof HTMLInputElement && inputRef.current.type !== 'checkbox' && inputRef.current.type !== 'number') {
                 // Move cursor to end
                 const len = inputRef.current.value.length;
                 inputRef.current.setSelectionRange(len, len);

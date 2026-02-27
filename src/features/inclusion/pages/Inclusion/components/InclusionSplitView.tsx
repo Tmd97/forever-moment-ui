@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Button } from '@/components/common/Button';
 import { InclusionDetails } from './InclusionDetails';
 import { DataTable } from '@/components/common/DataTable';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { SearchBar } from '@/components/common/SearchBar';
 import { Plus, X, Edit2, Trash2, CheckCircle } from 'lucide-react';
@@ -27,7 +27,8 @@ export const InclusionSplitView = ({
     selectedInclusion,
     setSelectedInclusion,
     loading,
-    handleDragReorder
+    handleDragReorder,
+    updateInclusion
 }: any) => {
     const [tab, setTab] = useState("general");
     const [search, setSearch] = useState("");
@@ -132,13 +133,30 @@ export const InclusionSplitView = ({
                             },
                             {
                                 header: 'Status',
+                                preventRowClick: true,
                                 className: 'w-[15%] min-w-[120px] py-4 px-6 text-left',
                                 render: (inc: any) => (
-                                    <StatusBadge isActive={inc.isActive} />
+                                    <EditableStatusBadge
+                                        status={inc.isActive ? 'Active' : 'Inactive'}
+                                        options={['Active', 'Inactive']}
+                                        onChange={async (val) => {
+                                            const newStatus = val === 'Active';
+                                            if (newStatus === inc.isActive) return;
+                                            try {
+                                                await updateInclusion(inc.id, {
+                                                    description: inc.description,
+                                                    isIncluded: inc.isIncluded,
+                                                    isActive: newStatus,
+                                                    displayOrder: inc.displayOrder || 0
+                                                });
+                                            } catch (e) { console.error(e); }
+                                        }}
+                                    />
                                 )
                             },
                             {
                                 header: 'Actions',
+                                preventRowClick: true,
                                 className: 'w-[25%] min-w-[100px] py-4 px-6 text-right',
                                 render: (inc: any) => (
                                     <div onClick={(e) => e.stopPropagation()}>
@@ -330,6 +348,7 @@ export const InclusionSplitView = ({
                                 <InclusionDetails
                                     inclusion={selectedInclusion}
                                     onEdit={() => handleOpenModal(selectedInclusion)}
+                                    updateInclusion={updateInclusion}
                                 />
                             </div>
                         )}

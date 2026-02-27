@@ -3,7 +3,7 @@ import { Button } from '@/components/common/Button';
 import { Tabs } from '@/components/common/Tabs';
 import { getExperienceTabs } from './ExperienceDetails';
 import { DataTable } from '@/components/common/DataTable';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { SearchBar } from '@/components/common/SearchBar';
 import { Plus, X } from 'lucide-react';
@@ -41,6 +41,8 @@ export const ExperienceSplitView = ({
     associateLocation,
     updateExperienceLocation,
     disassociateLocation,
+    addons,
+    toggleAddon,
 }: any) => {
     const [tab, setTab] = useState("general");
     const [search, setSearch] = useState("");
@@ -87,10 +89,14 @@ export const ExperienceSplitView = ({
             onDisassociateLocation: (locationId: number) => {
                 disassociateLocation(selectedExperience.id, locationId);
             },
+            onToggleAddon: (addonId: number, isAssociate: boolean, data?: any) => {
+                toggleAddon(selectedExperience.id, addonId, isAssociate, data);
+            },
             updateExperience,
-            locations
+            locations,
+            addons
         });
-    }, [selectedExperience, experienceDetail, inclusions, cancellationPolicies, subCategories, locations, handleOpenModal, toggleCancellationPolicy, toggleInclusion, updateExperience, associateLocation, updateExperienceLocation, disassociateLocation]);
+    }, [selectedExperience, experienceDetail, inclusions, cancellationPolicies, subCategories, locations, addons, handleOpenModal, toggleCancellationPolicy, toggleInclusion, updateExperience, associateLocation, updateExperienceLocation, disassociateLocation, toggleAddon]);
 
     const renderFullTable = () => {
         return (
@@ -158,11 +164,36 @@ export const ExperienceSplitView = ({
                             },
                             {
                                 header: 'Status',
+                                preventRowClick: true,
                                 className: 'w-[20%] min-w-[100px] py-4 px-6 text-left',
-                                render: (exp: any) => <StatusBadge status={exp.isActive ? 'Active' : 'Inactive'} />
+                                render: (exp: any) => (
+                                    <EditableStatusBadge
+                                        status={exp.isActive ? 'Active' : 'Inactive'}
+                                        options={['Active', 'Inactive']}
+                                        onChange={async (val) => {
+                                            const newStatus = val === 'Active';
+                                            if (newStatus === exp.isActive) return;
+                                            try {
+                                                await updateExperience(exp.id, {
+                                                    name: exp.name || "",
+                                                    slug: exp.slug || "",
+                                                    tagName: exp.tagName || "",
+                                                    basePrice: exp.basePrice || 0,
+                                                    displayOrder: exp.displayOrder || 0,
+                                                    isFeatured: exp.isFeatured || false,
+                                                    subCategoryId: exp.subCategoryId || 0,
+                                                    isActive: newStatus
+                                                });
+                                            } catch (e) {
+                                                console.error(e);
+                                            }
+                                        }}
+                                    />
+                                )
                             },
                             {
                                 header: 'Actions',
+                                preventRowClick: true,
                                 className: 'w-[20%] min-w-[80px] py-4 px-6 text-right',
                                 render: (exp: any) => (
                                     <div onClick={(e) => e.stopPropagation()}>

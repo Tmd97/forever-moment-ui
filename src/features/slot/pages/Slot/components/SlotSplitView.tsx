@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Button } from '@/components/common/Button';
 import { SlotDetails } from './SlotDetails';
 import { DataTable } from '@/components/common/DataTable';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { SearchBar } from '@/components/common/SearchBar';
 import { Plus, X, Edit2, Trash2, Clock } from 'lucide-react';
@@ -25,7 +25,8 @@ export const SlotSplitView = ({
     handleDeleteClick,
     selectedSlot,
     setSelectedSlot,
-    loading
+    loading,
+    updateSlot
 }: any) => {
     const [tab, setTab] = useState("general");
     const [search, setSearch] = useState("");
@@ -115,13 +116,30 @@ export const SlotSplitView = ({
                             },
                             {
                                 header: 'Status',
+                                preventRowClick: true,
                                 className: 'w-[15%] min-w-[100px] py-4 px-6 text-left',
                                 render: (s: any) => (
-                                    <StatusBadge isActive={s.isActive} />
+                                    <EditableStatusBadge
+                                        status={s.isActive ? 'Active' : 'Inactive'}
+                                        options={['Active', 'Inactive']}
+                                        onChange={async (val) => {
+                                            const newStatus = val === 'Active';
+                                            if (newStatus === s.isActive) return;
+                                            try {
+                                                await updateSlot(s.id, {
+                                                    name: s.name,
+                                                    startTime: s.startTime,
+                                                    endTime: s.endTime,
+                                                    isActive: newStatus
+                                                });
+                                            } catch (e) { console.error(e); }
+                                        }}
+                                    />
                                 )
                             },
                             {
                                 header: 'Actions',
+                                preventRowClick: true,
                                 className: 'w-[20%] min-w-[100px] py-4 px-6 text-right',
                                 render: (s: any) => (
                                     <div onClick={(e) => e.stopPropagation()}>
@@ -299,6 +317,7 @@ export const SlotSplitView = ({
                             <SlotDetails
                                 slot={selectedSlot}
                                 onEdit={() => handleOpenModal(selectedSlot)}
+                                updateSlot={updateSlot}
                             />
                         )}
                     </div>

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/common/Button';
 import { DataTable } from '@/components/common/DataTable';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { SearchBar } from '@/components/common/SearchBar';
 import { Plus, X, Shield } from 'lucide-react';
@@ -116,13 +116,29 @@ export const RolesSplitView = ({
                             },
                             {
                                 header: 'Status',
+                                preventRowClick: true,
                                 className: 'w-[15%] min-w-[100px] py-4 px-6 text-left',
                                 render: (r: any) => (
-                                    <StatusBadge isActive={r.active} />
+                                    <EditableStatusBadge
+                                        status={r.active ? 'Active' : 'Inactive'}
+                                        options={['Active', 'Inactive']}
+                                        onChange={async (val) => {
+                                            const newStatus = val === 'Active';
+                                            if (newStatus === r.active) return;
+                                            try {
+                                                await updateRole(r.id, {
+                                                    roleName: r.roleName,
+                                                    description: r.description,
+                                                    active: newStatus
+                                                });
+                                            } catch (e) { console.error(e); }
+                                        }}
+                                    />
                                 )
                             },
                             {
                                 header: 'Actions',
+                                preventRowClick: true,
                                 className: 'w-[15%] min-w-[100px] py-4 px-6 text-right',
                                 render: (r: any) => (
                                     <div onClick={(e) => e.stopPropagation()}>

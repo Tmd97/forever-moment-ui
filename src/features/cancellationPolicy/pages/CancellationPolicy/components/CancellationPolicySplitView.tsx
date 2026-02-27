@@ -3,7 +3,7 @@ import { Button } from '@/components/common/Button';
 import { CancellationPolicyDetails } from './CancellationPolicyDetails';
 import { Tabs } from '@/components/common/Tabs';
 import { DataTable } from '@/components/common/DataTable';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { SearchBar } from '@/components/common/SearchBar';
 import { Plus, X, FileText } from 'lucide-react';
@@ -133,13 +133,30 @@ export const CancellationPolicySplitView = ({
                             },
                             {
                                 header: 'Status',
+                                preventRowClick: true,
                                 className: 'w-[15%] min-w-[120px] py-4 px-6 text-left',
                                 render: (policy: any) => (
-                                    <StatusBadge isActive={policy.isActive} />
+                                    <EditableStatusBadge
+                                        status={policy.isActive ? 'Active' : 'Inactive'}
+                                        options={['Active', 'Inactive']}
+                                        onChange={async (val) => {
+                                            const newStatus = val === 'Active';
+                                            if (newStatus === policy.isActive) return;
+                                            try {
+                                                await updateCancellationPolicy(policy.id, {
+                                                    description: policy.description,
+                                                    isIncluded: policy.isIncluded,
+                                                    isActive: newStatus,
+                                                    displayOrder: policy.displayOrder || 0
+                                                });
+                                            } catch (e) { console.error(e); }
+                                        }}
+                                    />
                                 )
                             },
                             {
                                 header: 'Actions',
+                                preventRowClick: true,
                                 className: 'w-[25%] min-w-[100px] py-4 px-6 text-right',
                                 render: (policy: any) => (
                                     <div onClick={(e) => e.stopPropagation()}>

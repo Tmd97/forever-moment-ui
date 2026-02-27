@@ -51,3 +51,11 @@ export const updateExperienceLocationApi = async (locationId: number, experience
 export const disassociateLocationApi = async (locationId: number, experienceId: number) => {
     return await axios.delete(`/admin/locations/${locationId}/experiences/${experienceId}`);
 };
+
+export const associateAddonApi = async (experienceId: number, addonId: number, data: any) => {
+    return await axios.post(`/admin/experiences/${experienceId}/addons/${addonId}`, {}, { params: data });
+};
+
+export const disassociateAddonApi = async (experienceId: number, addonId: number) => {
+    return await axios.delete(`/admin/experiences/${experienceId}/addons/${addonId}`);
+};

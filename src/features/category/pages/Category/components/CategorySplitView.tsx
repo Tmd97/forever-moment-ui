@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Button } from '@/components/common/Button';
 import { CategoryDetails } from './CategoryDetails';
 import { DataTable } from '@/components/common/DataTable';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { SearchBar } from '@/components/common/SearchBar';
 import { Plus, X } from 'lucide-react';
@@ -118,13 +118,29 @@ export const CategorySplitView = ({
                             },
                             {
                                 header: 'Status',
+                                preventRowClick: true,
                                 className: 'w-[15%] min-w-[120px] py-4 px-6 text-left',
                                 render: (cat: any) => (
-                                    <StatusBadge isActive={cat.isActive} />
+                                    <EditableStatusBadge
+                                        status={cat.isActive ? 'Active' : 'Inactive'}
+                                        options={['Active', 'Inactive']}
+                                        onChange={async (val) => {
+                                            const newStatus = val === 'Active';
+                                            if (newStatus === cat.isActive) return;
+                                            try {
+                                                await updateCategory(cat.id, {
+                                                    name: cat.name,
+                                                    description: cat.description || "",
+                                                    isActive: newStatus
+                                                });
+                                            } catch (e) { console.error(e); }
+                                        }}
+                                    />
                                 )
                             },
                             {
                                 header: 'Actions',
+                                preventRowClick: true,
                                 className: 'w-[20%] min-w-[100px] py-4 px-6 text-right',
                                 render: (cat: any) => (
                                     <div onClick={(e) => e.stopPropagation()}>
@@ -152,7 +168,7 @@ export const CategorySplitView = ({
         return (
             <div className="flex flex-1 h-full overflow-hidden">
                 {/* Left Panel */}
-                <div className="w-[320px] min-w-[320px] bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-800 flex flex-col overflow-hidden">
+                <div className="w-[340px] min-w-[340px] bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-800 flex flex-col overflow-hidden">
                     {/* Top Bar */}
                     <div className="flex items-center justify-between p-5 pb-3">
                         <span className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Categories</span>
@@ -230,7 +246,7 @@ export const CategorySplitView = ({
                                             "font-semibold text-[13.5px] truncate mb-0.5 transition-colors",
                                             isSelected ? "text-blue-900 dark:text-blue-400" : "text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
                                         )}>{cat.name}</div>
-                                        <div className="text-xs text-slate-400 dark:text-slate-500 truncate">Events: {cat.count || 0}</div>
+                                        <div className="text-xs text-slate-400 dark:text-slate-500 truncate font-medium">Events: {cat.count || 0}</div>
                                     </div>
                                     <div className={cn(
                                         "w-2 h-2 rounded-full shrink-0 shadow-sm",
@@ -242,53 +258,42 @@ export const CategorySplitView = ({
                     </div>
                 </div>
 
+                {/* Detail Panel Container */}
                 <div className="flex-1 flex bg-slate-50 dark:bg-gray-900/40 p-3 h-full overflow-hidden">
-                    {selectedCategory ? (
-                        <div className="flex-1 flex bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm relative">
-                            {/* Vertical Tab Nav (Left) */}
-                            <Tabs
-                                tabs={[
-                                    { id: "general", label: "General Info" }
-                                ]}
-                                activeTab={tab}
-                                onTabChange={setTab}
-                            />
+                    <div className="flex-1 flex bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm relative">
+                        {/* Vertical Tab Nav (Left) */}
+                        <Tabs
+                            tabs={[
+                                { id: "general", label: "General Info" }
+                            ]}
+                            activeTab={tab}
+                            onTabChange={setTab}
+                        />
 
-                            {/* Detail Content (Right) */}
-                            <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-                                {/* Close Button Only */}
-                                <button
-                                    onClick={() => setSelectedCategory(null)}
-                                    className="absolute top-1 right-1 z-[60] p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md hover:bg-slate-50/50 dark:hover:bg-gray-800/50 transition-all"
-                                    title="Close Detail View"
-                                >
-                                    <X size={14} />
-                                </button>
+                        {/* Detail Content (Right) */}
+                        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+                            {/* Close Button Only */}
+                            <button
+                                onClick={() => setSelectedCategory(null)}
+                                className="absolute top-1 right-1 z-[60] p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md hover:bg-slate-50/50 dark:hover:bg-gray-800/50 transition-all"
+                                title="Close Detail View"
+                            >
+                                <X size={14} />
+                            </button>
 
-                                {/* Tab Content Area */}
-                                <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-50/30 dark:bg-gray-900/10 relative">
-                                    <div className="max-w-4xl">
-                                        {tab === "general" && (
-                                            <CategoryDetails
-                                                category={selectedCategory}
-                                                updateCategory={updateCategory}
-                                            />
-                                        )}
-                                    </div>
+                            {/* Tab Content Area */}
+                            <div className="flex-1 overflow-y-auto p-8 pt-4">
+                                <div className="max-w-4xl">
+                                    {tab === "general" && (
+                                        <CategoryDetails
+                                            category={selectedCategory}
+                                            updateCategory={updateCategory}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </div>
-                    ) : (
-                        <div className="flex-1 flex items-center justify-center flex-col text-slate-400 dark:text-gray-500 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl shadow-sm">
-                            <div className="w-16 h-16 mb-4 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center">
-                                <svg className="w-8 h-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                </svg>
-                            </div>
-                            <p className="text-base font-medium text-slate-600 dark:text-gray-300">Select a category to view details</p>
-                            <p className="text-sm mt-1">Or click Add to create a new one.</p>
-                        </div>
-                    )}
+                    </div>
                 </div>
             </div>
         );

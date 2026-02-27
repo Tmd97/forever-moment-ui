@@ -4,7 +4,7 @@ import { Tabs } from '@/components/common/Tabs';
 import { LocationDetails } from './LocationDetails';
 import { Pincode } from './Pincode';
 import { DataTable } from '@/components/common/DataTable';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { SearchBar } from '@/components/common/SearchBar';
 import { Plus, MapPin, X } from 'lucide-react';
@@ -122,11 +122,34 @@ export const LocationSplitView = ({
                             },
                             {
                                 header: 'Status',
+                                preventRowClick: true,
                                 className: 'w-[10%] min-w-[100px] py-4 px-6 text-left',
-                                render: (loc: any) => <StatusBadge isActive={loc.isActive} />
+                                render: (loc: any) => (
+                                    <EditableStatusBadge
+                                        status={loc.isActive ? 'Active' : 'Inactive'}
+                                        options={['Active', 'Inactive']}
+                                        onChange={async (val) => {
+                                            const newStatus = val === 'Active';
+                                            if (newStatus === loc.isActive) return;
+                                            try {
+                                                await updateLocation(loc.id, {
+                                                    name: loc.name,
+                                                    city: loc.city || "",
+                                                    state: loc.state || "",
+                                                    country: loc.country || "",
+                                                    address: loc.address || "",
+                                                    latitude: loc.latitude || 0,
+                                                    longitude: loc.longitude || 0,
+                                                    isActive: newStatus
+                                                });
+                                            } catch (e) { console.error(e); }
+                                        }}
+                                    />
+                                )
                             },
                             {
                                 header: 'Actions',
+                                preventRowClick: true,
                                 className: 'w-[10%] min-w-[80px] py-4 px-6 text-right',
                                 render: (loc: any) => (
                                     <div onClick={(e) => e.stopPropagation()}>

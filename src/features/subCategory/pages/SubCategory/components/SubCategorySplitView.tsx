@@ -3,7 +3,7 @@ import { Button } from '@/components/common/Button';
 import { SubCategoryDetails } from './SubCategoryDetails';
 import { Tabs } from '@/components/common/Tabs';
 import { DataTable } from '@/components/common/DataTable';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { SearchBar } from '@/components/common/SearchBar';
 import { Plus, X } from 'lucide-react';
@@ -150,13 +150,31 @@ export const SubCategorySplitView = ({
                             },
                             {
                                 header: 'Status',
+                                preventRowClick: true,
                                 className: 'w-[15%] min-w-[100px] py-4 px-6 text-left',
                                 render: (sc: any) => (
-                                    <StatusBadge isActive={sc.isActive} />
+                                    <EditableStatusBadge
+                                        status={sc.isActive ? 'Active' : 'Inactive'}
+                                        options={['Active', 'Inactive']}
+                                        onChange={async (val) => {
+                                            const newStatus = val === 'Active';
+                                            if (newStatus === sc.isActive) return;
+                                            try {
+                                                await updateSubCategory({
+                                                    id: sc.id,
+                                                    name: sc.name,
+                                                    description: sc.description || "",
+                                                    categoryId: sc.categoryId,
+                                                    isActive: newStatus
+                                                });
+                                            } catch (e) { console.error(e); }
+                                        }}
+                                    />
                                 )
                             },
                             {
                                 header: 'Actions',
+                                preventRowClick: true,
                                 className: 'w-[15%] min-w-[100px] py-4 px-6 text-right',
                                 render: (sc: any) => (
                                     <div onClick={(e) => e.stopPropagation()}>

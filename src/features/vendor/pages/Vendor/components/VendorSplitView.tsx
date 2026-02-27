@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Button } from '@/components/common/Button';
 import { VendorDetails } from './VendorDetails';
 import { DataTable } from '@/components/common/DataTable';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { SearchBar } from '@/components/common/SearchBar';
 import { Plus, X, Edit2, Trash2, Store } from 'lucide-react';
@@ -28,7 +28,8 @@ export const VendorSplitView = ({
     handleDeleteClick,
     selectedVendor,
     setSelectedVendor,
-    loading
+    loading,
+    updateVendor
 }: any) => {
     const [tab, setTab] = useState("general");
     const [search, setSearch] = useState("");
@@ -140,13 +141,26 @@ export const VendorSplitView = ({
                             },
                             {
                                 header: 'Status',
+                                preventRowClick: true,
                                 className: 'w-[15%] min-w-[100px] py-4 px-6 text-left',
                                 render: (v: any) => (
-                                    <StatusBadge status={v.status} activeValue="Active" />
+                                    <EditableStatusBadge
+                                        status={v.status}
+                                        options={['Active', 'Inactive', 'Pending']}
+                                        onChange={async (val) => {
+                                            if (val === v.status) return;
+                                            try {
+                                                await updateVendor(v.id, { status: val });
+                                            } catch (e) {
+                                                console.error(e);
+                                            }
+                                        }}
+                                    />
                                 )
                             },
                             {
                                 header: 'Actions',
+                                preventRowClick: true,
                                 className: 'w-[15%] min-w-[100px] py-4 px-6 text-right',
                                 render: (v: any) => (
                                     <div onClick={(e) => e.stopPropagation()}>
@@ -329,6 +343,7 @@ export const VendorSplitView = ({
                                     vendor={selectedVendor}
                                     onEdit={() => handleOpenModal(selectedVendor)}
                                     onClose={() => setSelectedVendor(null)}
+                                    updateVendor={updateVendor}
                                 />
                             </div>
                         )}

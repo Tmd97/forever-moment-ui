@@ -107,6 +107,13 @@ const VendorPage = ({ data, loading, error, getVendors }: VendorProps) => {
         }
     };
 
+    const handleUpdateVendor = async (id: number, payload: any) => {
+        setVendors(vendors.map(v => v.id === id ? { ...v, ...payload } : v));
+        if (selectedVendor && selectedVendor.id === id) {
+            setSelectedVendor({ ...selectedVendor, ...payload });
+        }
+    };
+
     // Filter handles in VendorSplitView
 
     return (
@@ -118,6 +125,7 @@ const VendorPage = ({ data, loading, error, getVendors }: VendorProps) => {
                 selectedVendor={selectedVendor}
                 setSelectedVendor={setSelectedVendor}
                 loading={loading}
+                updateVendor={handleUpdateVendor}
             />
 
             <Modal

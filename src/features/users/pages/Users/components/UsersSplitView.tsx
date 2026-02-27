@@ -151,6 +151,7 @@ export const UsersSplitView = ({
                             },
                             {
                                 header: 'Actions',
+                                preventRowClick: true,
                                 className: 'w-[10%] min-w-[80px] py-4 px-6 text-right',
                                 render: (u: any) => (
                                     <div onClick={(e) => e.stopPropagation()}>

@@ -1,5 +1,5 @@
 import { Button } from '@/components/common/Button';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { Mail, Phone, Star, Calendar } from 'lucide-react';
 import type { Vendor } from './Vendor';
 
@@ -7,9 +7,10 @@ interface VendorDetailsProps {
     vendor: Vendor;
     onEdit: () => void;
     onClose: () => void;
+    updateVendor: (id: number, payload: any) => Promise<any>;
 }
 
-export const VendorDetails = ({ vendor, onEdit }: VendorDetailsProps) => {
+export const VendorDetails = ({ vendor, onEdit, updateVendor }: VendorDetailsProps) => {
     return (
         <div className="space-y-6">
             {/* Header Section */}
@@ -18,7 +19,16 @@ export const VendorDetails = ({ vendor, onEdit }: VendorDetailsProps) => {
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white">{vendor.name}</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">{vendor.category}</p>
                 </div>
-                <StatusBadge status={vendor.status} />
+                <EditableStatusBadge
+                    status={vendor.status}
+                    options={['Active', 'Inactive', 'Pending']}
+                    onChange={async (val) => {
+                        if (val === vendor.status) return;
+                        try {
+                            await updateVendor(vendor.id, { status: val });
+                        } catch (e) { console.error(e); }
+                    }}
+                />
             </div>
 
             <div className="border-t border-gray-200 dark:border-gray-800 pt-4">

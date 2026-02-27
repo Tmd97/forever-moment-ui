@@ -3,7 +3,8 @@ import {
     createExperienceApi, fetchExperienceData, fetchExperienceByIdApi, deleteExperienceApi, updateExperienceApi, reorderExperienceApi,
     associateCancellationPolicyApi, disassociateCancellationPolicyApi,
     associateInclusionApi, disassociateInclusionApi,
-    associateLocationApi, updateExperienceLocationApi, disassociateLocationApi
+    associateLocationApi, updateExperienceLocationApi, disassociateLocationApi,
+    associateAddonApi, disassociateAddonApi
 } from './api';
 
 export const getExperienceData = (isBackground: boolean = false) => async (dispatch: any) => {
@@ -230,6 +231,30 @@ export const disassociateLocation = (experienceId: number, locationId: number) =
         dispatch({
             type: types.DISASSOCIATE_LOCATION_FAILURE,
             payload: error.response?.data?.message || 'Failed to disassociate location',
+        });
+        throw error;
+    }
+};
+
+export const toggleAddon = (experienceId: number, addonId: number, isAssociate: boolean, data?: any) => async (dispatch: any) => {
+    dispatch({ type: types.TOGGLE_ADDON });
+    try {
+        let response;
+        if (isAssociate) {
+            response = await associateAddonApi(experienceId, addonId, data);
+        } else {
+            response = await disassociateAddonApi(experienceId, addonId);
+        }
+        dispatch({
+            type: types.TOGGLE_ADDON_SUCCESS,
+            payload: response.data,
+        });
+        dispatch(getExperienceById(experienceId));
+        return response.data;
+    } catch (error: any) {
+        dispatch({
+            type: types.TOGGLE_ADDON_FAILURE,
+            payload: error.response?.data?.message || 'Failed to toggle addon',
         });
         throw error;
     }

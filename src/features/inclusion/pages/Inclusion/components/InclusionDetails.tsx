@@ -1,12 +1,14 @@
 import { cn } from '@/utils/cn';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import type { InclusionType } from './Inclusion';
 
 interface InclusionDetailsProps {
     inclusion: InclusionType;
     onEdit: () => void;
+    updateInclusion: (id: number, data: any) => Promise<any>;
 }
 
-export const InclusionDetails = ({ inclusion, onEdit }: InclusionDetailsProps) => {
+export const InclusionDetails = ({ inclusion, onEdit, updateInclusion }: InclusionDetailsProps) => {
     return (
         <div className="space-y-6">
             <div className="space-y-4">
@@ -24,13 +26,25 @@ export const InclusionDetails = ({ inclusion, onEdit }: InclusionDetailsProps) =
                     </span>
                 </div>
                 <div>
-                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</h3>
-                    <span className={cn(
-                        'mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full',
-                        inclusion.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                    )}>
-                        {inclusion.isActive ? 'Active' : 'Inactive'}
-                    </span>
+                    <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Status</h3>
+                    <div className="flex items-center -ml-2">
+                        <EditableStatusBadge
+                            status={inclusion.isActive ? 'Active' : 'Inactive'}
+                            options={['Active', 'Inactive']}
+                            onChange={async (val) => {
+                                const newStatus = val === 'Active';
+                                if (newStatus === inclusion.isActive) return;
+                                try {
+                                    await updateInclusion(inclusion.id, {
+                                        description: inclusion.description,
+                                        isIncluded: inclusion.isIncluded,
+                                        isActive: newStatus,
+                                        displayOrder: inclusion.displayOrder || 0
+                                    });
+                                } catch (e) { console.error(e); }
+                            }}
+                        />
+                    </div>
                 </div>
                 <div>
                     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">ID</h3>

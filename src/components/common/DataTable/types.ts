@@ -7,6 +7,7 @@ export interface Column<T> {
     accessorKey?: keyof T;
     render?: (item: T) => React.ReactNode;
     className?: string;
+    preventRowClick?: boolean;
 }
 
 export interface DataTableProps<T> {

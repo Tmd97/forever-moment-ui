@@ -30,6 +30,7 @@ interface ExperienceProps {
     getSubCategoryData: () => void;
     getInclusionData: () => void;
     getCancellationPolicyData: () => void;
+    getAddonData: () => void;
     createExperience: (data: ExperiencePayload) => Promise<any>;
     updateExperience: (id: number, data: ExperiencePayload) => Promise<any>;
     deleteExperience: (id: number) => Promise<any>;
@@ -41,6 +42,8 @@ interface ExperienceProps {
     associateLocation: (experienceId: number, locationId: number, data: any) => Promise<any>;
     updateExperienceLocation: (experienceId: number, locationId: number, data: any) => Promise<any>;
     disassociateLocation: (experienceId: number, locationId: number) => Promise<any>;
+    addons: any[];
+    toggleAddon: (experienceId: number, addonId: number, isAssociate: boolean, data?: any) => Promise<any>;
 }
 
 const Experience = ({
@@ -69,6 +72,9 @@ const Experience = ({
     associateLocation,
     updateExperienceLocation,
     disassociateLocation,
+    getAddonData,
+    addons,
+    toggleAddon,
 }: ExperienceProps) => {
 
     const [experiences, setExperiences] = useState<ExperienceType[]>([]);
@@ -84,7 +90,8 @@ const Experience = ({
         getInclusionData();
         getCancellationPolicyData();
         getLocationData();
-    }, [getExperienceData, getSubCategoryData, getInclusionData, getCancellationPolicyData, getLocationData]);
+        getAddonData();
+    }, [getExperienceData, getSubCategoryData, getInclusionData, getCancellationPolicyData, getLocationData, getAddonData]);
 
     useEffect(() => {
         if (data && Array.isArray(data)) {
@@ -116,6 +123,10 @@ const Experience = ({
             resetStatus();
             setIsDeleteModalOpen(false);
             if (selectedExperience?.id === deleteId) setSelectedExperience(null);
+        }
+        if (status === types.TOGGLE_ADDON_SUCCESS) {
+            toast.success('Add-on association updated');
+            resetStatus();
         }
     }, [error, status, resetStatus, selectedExperience, deleteId]);
 
@@ -221,6 +232,8 @@ const Experience = ({
                 associateLocation={associateLocation}
                 updateExperienceLocation={updateExperienceLocation}
                 disassociateLocation={disassociateLocation}
+                addons={addons}
+                toggleAddon={toggleAddon}
             />
 
             <Modal
