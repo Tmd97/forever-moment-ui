@@ -43,6 +43,7 @@ export const ExperienceSplitView = ({
     disassociateLocation,
     addons,
     toggleAddon,
+    slots,
 }: any) => {
     const [tab, setTab] = useState("general");
     const [search, setSearch] = useState("");
@@ -80,23 +81,24 @@ export const ExperienceSplitView = ({
             onToggleInclusion: (inclusionId: number, isAssociate: boolean) => {
                 toggleInclusion(selectedExperience.id, inclusionId, isAssociate);
             },
-            onAssociateLocation: (locationId: number, data: any) => {
-                associateLocation(selectedExperience.id, locationId, data);
+            onAssociateLocation: (locationId: number, timeSlotId: number, data: any) => {
+                associateLocation(selectedExperience.id, locationId, timeSlotId, data);
             },
-            onUpdateLocation: (locationId: number, data: any) => {
-                updateExperienceLocation(selectedExperience.id, locationId, data);
+            onUpdateLocation: (locationId: number, timeSlotId: number, data: any) => {
+                updateExperienceLocation(selectedExperience.id, locationId, timeSlotId, data);
             },
-            onDisassociateLocation: (locationId: number) => {
-                disassociateLocation(selectedExperience.id, locationId);
+            onDisassociateLocation: (locationId: number, timeSlotId: number) => {
+                disassociateLocation(selectedExperience.id, locationId, timeSlotId);
             },
             onToggleAddon: (addonId: number, isAssociate: boolean, data?: any) => {
                 toggleAddon(selectedExperience.id, addonId, isAssociate, data);
             },
             updateExperience,
             locations,
-            addons
+            addons,
+            slots,
         });
-    }, [selectedExperience, experienceDetail, inclusions, cancellationPolicies, subCategories, locations, addons, handleOpenModal, toggleCancellationPolicy, toggleInclusion, updateExperience, associateLocation, updateExperienceLocation, disassociateLocation, toggleAddon]);
+    }, [selectedExperience, experienceDetail, inclusions, cancellationPolicies, subCategories, locations, addons, slots, handleOpenModal, toggleCancellationPolicy, toggleInclusion, updateExperience, associateLocation, updateExperienceLocation, disassociateLocation, toggleAddon]);
 
     const renderFullTable = () => {
         return (

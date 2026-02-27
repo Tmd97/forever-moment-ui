@@ -39,11 +39,13 @@ interface ExperienceProps {
     toggleInclusion: (experienceId: number, inclusionId: number, isAssociate: boolean) => Promise<any>;
     reorderExperience: (data: { id: number; newPosition: number }) => Promise<any>;
     getLocationData: () => void;
-    associateLocation: (experienceId: number, locationId: number, data: any) => Promise<any>;
-    updateExperienceLocation: (experienceId: number, locationId: number, data: any) => Promise<any>;
-    disassociateLocation: (experienceId: number, locationId: number) => Promise<any>;
+    associateLocation: (experienceId: number, locationId: number, timeSlotId: number, data: any) => Promise<any>;
+    updateExperienceLocation: (experienceId: number, locationId: number, timeSlotId: number, data: any) => Promise<any>;
+    disassociateLocation: (experienceId: number, locationId: number, timeSlotId: number) => Promise<any>;
     addons: any[];
     toggleAddon: (experienceId: number, addonId: number, isAssociate: boolean, data?: any) => Promise<any>;
+    slots: any[];
+    getSlotData: () => void;
 }
 
 const Experience = ({
@@ -75,6 +77,8 @@ const Experience = ({
     getAddonData,
     addons,
     toggleAddon,
+    slots,
+    getSlotData,
 }: ExperienceProps) => {
 
     const [experiences, setExperiences] = useState<ExperienceType[]>([]);
@@ -91,7 +95,8 @@ const Experience = ({
         getCancellationPolicyData();
         getLocationData();
         getAddonData();
-    }, [getExperienceData, getSubCategoryData, getInclusionData, getCancellationPolicyData, getLocationData, getAddonData]);
+        getSlotData();
+    }, [getExperienceData, getSubCategoryData, getInclusionData, getCancellationPolicyData, getLocationData, getAddonData, getSlotData]);
 
     useEffect(() => {
         if (data && Array.isArray(data)) {
@@ -234,6 +239,7 @@ const Experience = ({
                 disassociateLocation={disassociateLocation}
                 addons={addons}
                 toggleAddon={toggleAddon}
+                slots={slots}
             />
 
             <Modal

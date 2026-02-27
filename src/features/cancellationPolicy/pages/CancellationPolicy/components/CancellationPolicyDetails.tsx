@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
+import { cn } from '@/utils/cn';
 import { Dropdown } from '@/components/common/Dropdown';
 import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
-import { cn } from '@/utils/cn';
+import { Cell, FieldGrid, FieldLabel, SectionLabel } from '@/components/common/DetailsLayout';
 import type { CancellationPolicyType } from './CancellationPolicy';
 
 interface CancellationPolicyDetailsProps {
@@ -83,57 +84,17 @@ export const CancellationPolicyDetails = ({ cancellationPolicy, updateCancellati
         }
     };
 
-    const renderEditableField = (label: string, fieldKey: keyof CancellationPolicyType, value: any, isTextArea = false) => {
-        const isEditing = editingField === fieldKey;
-
-        return (
-            <div className="group flex flex-col gap-1 p-3 -mx-3 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors">
-                <div className="text-sm font-medium text-slate-500 dark:text-gray-400">{label}</div>
-                {isEditing ? (
-                    isTextArea ? (
-                        <textarea
-                            ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onBlur={() => handleSave(fieldKey)}
-                            onKeyDown={(e) => handleKeyDown(e, fieldKey)}
-                            className="w-full bg-white dark:bg-gray-900 border border-blue-500 rounded-lg px-3 py-2 text-[15px] focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm min-h-[100px] resize-y"
-                        />
-                    ) : (
-                        <input
-                            ref={inputRef as React.RefObject<HTMLInputElement>}
-                            type="text"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onBlur={() => handleSave(fieldKey)}
-                            onKeyDown={(e) => handleKeyDown(e, fieldKey)}
-                            className="w-full bg-white dark:bg-gray-900 border border-blue-500 rounded-lg px-3 py-2 text-[15px] focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm"
-                        />
-                    )
-                ) : (
-                    <div
-                        className="text-[15px] text-slate-900 dark:text-white cursor-text min-h-[24px] pr-8 relative"
-                        onClick={() => handleEditStart(String(fieldKey), value || '')}
-                    >
-                        {value || <span className="text-slate-400 italic font-normal">Not specified</span>}
-                        <svg className="w-3.5 h-3.5 absolute right-2 top-1 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                    </div>
-                )}
-            </div>
-        );
-    };
 
     return (
-        <div className="space-y-4">
-            {renderEditableField('Description', 'description', cancellationPolicy.description, true)}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="group relative">
-                    <div className="text-sm font-medium text-slate-500 dark:text-gray-400 mb-1 flex items-center gap-1.5 p-3 -mx-3 pb-0">
-                        Is Included?
-                    </div>
-                    {editingField === 'isIncluded' ? (
-                        <div className="-ml-2">
+        <div>
+            {/* ── GENERAL ─────────────────────────────── */}
+            <SectionLabel>General</SectionLabel>
+            <FieldGrid>
+                {/* Is Included */}
+                <Cell>
+                    <div className="group relative">
+                        <FieldLabel>Is Included?</FieldLabel>
+                        {editingField === 'isIncluded' ? (
                             <Dropdown
                                 label=""
                                 options={[
@@ -148,35 +109,60 @@ export const CancellationPolicyDetails = ({ cancellationPolicy, updateCancellati
                                 placeholder="Select Included Status"
                                 searchable={false}
                             />
-                        </div>
-                    ) : (
-                        <div
-                            className="mt-1 px-2 py-1 rounded-md cursor-pointer hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-gray-700 w-max flex items-center"
-                            onClick={() => setEditingField('isIncluded')}
-                        >
-                            <span className={cn(
-                                'mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full',
-                                cancellationPolicy.isIncluded ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-                            )}>
-                                {cancellationPolicy.isIncluded ? 'Yes' : 'No'}
-                            </span>
-                            <svg className="w-3.5 h-3.5 ml-2 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        </div>
-                    )}
-                </div>
-
-                <div className="group relative">
-                    <div className="text-sm font-medium text-slate-500 dark:text-gray-400 mb-1 flex items-center gap-1.5 p-3 -mx-3 pb-0">
-                        Status
+                        ) : (
+                            <div
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={() => setEditingField('isIncluded')}
+                            >
+                                <span className={cn(
+                                    'inline-flex px-2 py-0.5 text-[11px] font-medium rounded-full',
+                                    cancellationPolicy.isIncluded ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+                                )}>
+                                    {cancellationPolicy.isIncluded ? 'Yes' : 'No'}
+                                </span>
+                                <svg className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                            </div>
+                        )}
                     </div>
-                    <div className="flex items-center -mx-1 mt-1">
+                </Cell>
+
+                {/* Status */}
+                <Cell>
+                    <FieldLabel>Status</FieldLabel>
+                    <div className="mt-1 flex items-center">
                         <EditableStatusBadge
                             status={cancellationPolicy.isActive ? 'Active' : 'Inactive'}
                             options={['Active', 'Inactive']}
                             onChange={(val) => handleStatusChange(val === 'Active' ? 'true' : 'false')}
                         />
                     </div>
-                </div>
+                </Cell>
+            </FieldGrid>
+
+            {/* ── DESCRIPTIONS ─────────────────────────── */}
+            <SectionLabel>Description</SectionLabel>
+            <div className="group bg-slate-50 dark:bg-gray-800/50 border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3">
+                <FieldLabel>Description</FieldLabel>
+                {editingField === 'description' ? (
+                    <textarea
+                        ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+                        className="w-full text-[13px] text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-1.5 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[80px] resize-none leading-relaxed"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={() => handleSave('description')}
+                        onKeyDown={(e) => handleKeyDown(e, 'description')}
+                    />
+                ) : (
+                    <div
+                        className="flex items-start gap-2 cursor-pointer"
+                        onClick={() => handleEditStart('description', cancellationPolicy.description || '')}
+                    >
+                        <p className={cn('text-[13px] leading-relaxed flex-1', cancellationPolicy.description ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 italic')}>
+                            {cancellationPolicy.description || 'Empty'}
+                        </p>
+                        <svg className="w-3 h-3 mt-0.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+                    </div>
+                )}
             </div>
         </div>
     );

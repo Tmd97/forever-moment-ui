@@ -9,13 +9,15 @@ import { format } from 'date-fns';
 interface LocationTabProps {
     availableLocations: any[]; // All active locations in the system
     experienceLocations: any[]; // Locations already associated with this experience
-    onAssociateLocation: (locationId: number, data: any) => void;
-    onUpdateLocation: (locationId: number, data: any) => void;
-    onDisassociateLocation: (locationId: number) => void;
+    onAssociateLocation: (locationId: number, timeSlotId: number, data: any) => void;
+    onUpdateLocation: (locationId: number, timeSlotId: number, data: any) => void;
+    onDisassociateLocation: (locationId: number, timeSlotId: number) => void;
+    slots: any[];
 }
 
 interface LocationFormData {
     priceOverride: number;
+    maxCapacity: number;
     validFrom: string;
     validTo: string;
     isActive: boolean;
@@ -23,6 +25,7 @@ interface LocationFormData {
 
 const emptyForm: LocationFormData = {
     priceOverride: 0,
+    maxCapacity: 0,
     validFrom: '',
     validTo: '',
     isActive: true
@@ -33,17 +36,21 @@ export const LocationTab: React.FC<LocationTabProps> = ({
     experienceLocations,
     onAssociateLocation,
     onUpdateLocation,
-    onDisassociateLocation
+    onDisassociateLocation,
+    slots
 }) => {
     const [search, setSearch] = useState("");
     const [isAssocModalOpen, setIsAssocModalOpen] = useState(false);
     const [selectedLocationId, setSelectedLocationId] = useState<number | null>(null);
     const [formData, setFormData] = useState<LocationFormData>(emptyForm);
+    const [selectedTimeSlotId, setSelectedTimeSlotId] = useState<number | null>(null);
     const [isEditing, setIsEditing] = useState(false);
 
     const filteredAssignedLocations = experienceLocations?.filter((el: any) => {
         if (!search) return true;
-        return el.locationName?.toLowerCase().includes(search.toLowerCase()) || el.city?.toLowerCase().includes(search.toLowerCase());
+        const nameMatch = el.locationName?.toLowerCase().includes(search.toLowerCase());
+        const cityMatch = el.city?.toLowerCase().includes(search.toLowerCase());
+        return nameMatch || cityMatch;
     }) || [];
 
     const handleOpenAssocModal = (existingData?: any) => {
@@ -52,13 +59,16 @@ export const LocationTab: React.FC<LocationTabProps> = ({
             setSelectedLocationId(existingData.locationId);
             setFormData({
                 priceOverride: existingData.priceOverride || 0,
+                maxCapacity: existingData.maxCapacity || 0,
                 validFrom: existingData.validFrom ? new Date(existingData.validFrom).toISOString().split('T')[0] : '',
                 validTo: existingData.validTo ? new Date(existingData.validTo).toISOString().split('T')[0] : '',
                 isActive: existingData.isActive ?? true,
             });
+            setSelectedTimeSlotId(existingData.timeSlotId || null);
         } else {
             setIsEditing(false);
             setSelectedLocationId(null);
+            setSelectedTimeSlotId(null);
             setFormData(emptyForm);
         }
         setIsAssocModalOpen(true);
@@ -67,23 +77,25 @@ export const LocationTab: React.FC<LocationTabProps> = ({
     const handleCloseModal = () => {
         setIsAssocModalOpen(false);
         setSelectedLocationId(null);
+        setSelectedTimeSlotId(null);
         setFormData(emptyForm);
     };
 
     const handleSubmit = () => {
-        if (!selectedLocationId) return;
+        if (!selectedLocationId || !selectedTimeSlotId) return;
 
         const payload = {
             priceOverride: Number(formData.priceOverride),
+            maxCapacity: Number(formData.maxCapacity),
             validFrom: formData.validFrom || new Date().toISOString().split('T')[0],
             validTo: formData.validTo || new Date().toISOString().split('T')[0],
             isActive: formData.isActive
         };
 
         if (isEditing) {
-            onUpdateLocation(selectedLocationId, payload);
+            onUpdateLocation(selectedLocationId, selectedTimeSlotId, payload);
         } else {
-            onAssociateLocation(selectedLocationId, payload);
+            onAssociateLocation(selectedLocationId, selectedTimeSlotId, payload);
         }
         handleCloseModal();
     };
@@ -110,14 +122,14 @@ export const LocationTab: React.FC<LocationTabProps> = ({
 
             <div className="space-y-3 overflow-y-auto pr-2 pb-20">
                 {filteredAssignedLocations.map((el: any) => (
-                    <div key={el.locationId} className="flex flex-col gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm transition-all hover:border-blue-300">
+                    <div key={`${el.locationId}-${el.timeSlotId}`} className="flex flex-col gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm transition-all hover:border-blue-300">
                         <div className="flex items-start justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
                                     <MapPin size={18} />
                                 </div>
-                                <div>
-                                    <h4 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2 truncate">
                                         {el.locationName} {el.city ? `(${el.city})` : ''}
                                         {el.isActive ? (
                                             <span className="text-[10px] uppercase font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">Active</span>
@@ -125,13 +137,18 @@ export const LocationTab: React.FC<LocationTabProps> = ({
                                             <span className="text-[10px] uppercase font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full">Inactive</span>
                                         )}
                                     </h4>
-                                    <p className="text-xs text-slate-500">
-                                        Overrides Price: <span className="font-semibold">₹{el.priceOverride}</span>
-                                    </p>
+                                    <div className="flex items-center gap-4 mt-1">
+                                        <p className="text-xs text-slate-500">
+                                            Price: <span className="font-semibold text-slate-900 dark:text-slate-100">₹{el.priceOverride}</span>
+                                        </p>
+                                        <p className="text-xs text-slate-500">
+                                            Capacity: <span className="font-semibold text-slate-900 dark:text-slate-100">{el.maxCapacity || 0}</span>
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1 shrink-0">
                                 <button
                                     onClick={() => handleOpenAssocModal(el)}
                                     className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -139,7 +156,7 @@ export const LocationTab: React.FC<LocationTabProps> = ({
                                     <Edit2 size={16} />
                                 </button>
                                 <button
-                                    onClick={() => onDisassociateLocation(el.locationId)}
+                                    onClick={() => onDisassociateLocation(el.locationId, el.timeSlotId)}
                                     className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                 >
                                     <Trash2 size={16} />
@@ -147,13 +164,19 @@ export const LocationTab: React.FC<LocationTabProps> = ({
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between text-xs pt-3 border-t border-slate-100 dark:border-gray-800 mt-1">
-                            <span className="text-slate-500">
-                                Valid From: <span className="font-medium text-slate-700 dark:text-slate-300">{el.validFrom ? format(new Date(el.validFrom), 'MMM dd, yyyy') : 'N/A'}</span>
-                            </span>
-                            <span className="text-slate-500">
-                                Valid To: <span className="font-medium text-slate-700 dark:text-slate-300">{el.validTo ? format(new Date(el.validTo), 'MMM dd, yyyy') : 'N/A'}</span>
-                            </span>
+                        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-100 dark:border-gray-800 mt-1">
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Validity</span>
+                                <div className="text-xs text-slate-600 dark:text-slate-400">
+                                    {el.validFrom ? format(new Date(el.validFrom), 'MMM dd') : 'N/A'} - {el.validTo ? format(new Date(el.validTo), 'MMM dd, yyyy') : 'N/A'}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Time Slot</span>
+                                <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 truncate">
+                                    {el.timeSlotLabel || `ID: ${el.timeSlotId}`}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -195,16 +218,46 @@ export const LocationTab: React.FC<LocationTabProps> = ({
                     )}
 
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            Price Override (₹)
-                        </label>
-                        <input
-                            type="number"
-                            min="0"
-                            className="w-full bg-slate-50 dark:bg-gray-800/50 border border-slate-200 dark:border-gray-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-900 dark:text-white"
-                            value={formData.priceOverride}
-                            onChange={(e) => setFormData(prev => ({ ...prev, priceOverride: Number(e.target.value) }))}
+                        <Dropdown
+                            label="Select Time Slot"
+                            options={slots.map((s: any) => ({
+                                id: s.id.toString(),
+                                value: s.id.toString(),
+                                label: s.label
+                            }))}
+                            value={selectedTimeSlotId ? selectedTimeSlotId.toString() : ''}
+                            onChange={(value: string) => setSelectedTimeSlotId(Number(value))}
+                            placeholder="-- Select a Time Slot --"
+                            className="w-full"
+                            disabled={isEditing}
                         />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                Price Override (₹)
+                            </label>
+                            <input
+                                type="number"
+                                min="0"
+                                className="w-full bg-slate-50 dark:bg-gray-800/50 border border-slate-200 dark:border-gray-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-900 dark:text-white font-semibold"
+                                value={formData.priceOverride}
+                                onChange={(e) => setFormData(prev => ({ ...prev, priceOverride: Number(e.target.value) }))}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                Max Capacity
+                            </label>
+                            <input
+                                type="number"
+                                min="0"
+                                className="w-full bg-slate-50 dark:bg-gray-800/50 border border-slate-200 dark:border-gray-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-900 dark:text-white font-semibold"
+                                value={formData.maxCapacity}
+                                onChange={(e) => setFormData(prev => ({ ...prev, maxCapacity: Number(e.target.value) }))}
+                            />
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -237,14 +290,14 @@ export const LocationTab: React.FC<LocationTabProps> = ({
                             <div className="text-sm font-medium text-slate-900 dark:text-white">Active Status</div>
                             <div className="text-xs text-slate-500">Enable or disable this specific price/location rule</div>
                         </div>
-                        <label className="flex items-center cursor-pointer">
+                        <label className="flex items-center cursor-pointer relative">
                             <input
                                 type="checkbox"
                                 className="sr-only peer"
                                 checked={formData.isActive}
                                 onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
                             />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 relative"></div>
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         </label>
                     </div>
 
@@ -254,7 +307,7 @@ export const LocationTab: React.FC<LocationTabProps> = ({
                         </Button>
                         <Button
                             onClick={handleSubmit}
-                            disabled={!selectedLocationId || !formData.validFrom || !formData.validTo}
+                            disabled={!selectedLocationId || !selectedTimeSlotId || !formData.validFrom || !formData.validTo}
                         >
                             {isEditing ? 'Save Changes' : 'Associate'}
                         </Button>

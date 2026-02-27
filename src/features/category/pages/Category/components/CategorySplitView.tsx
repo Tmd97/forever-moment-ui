@@ -9,6 +9,8 @@ import { Plus, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Filter } from '@/components/common/Filter';
 import { Tabs } from '@/components/common/Tabs';
+import { UnsavedChangesModal } from '@/components/common/UnsavedChangesModal';
+import { useBlocker } from 'react-router-dom';
 
 const categoryInitials = (name: string) => name ? name.slice(0, 2).toUpperCase() : 'CA';
 
@@ -35,6 +37,14 @@ export const CategorySplitView = ({
     const [tab, setTab] = useState("general");
     const [search, setSearch] = useState("");
     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
+    const [isDirty, setIsDirty] = useState(false);
+    const [pendingAction, setPendingAction] = useState<{ type: 'click' | 'close', data?: any } | null>(null);
+
+    // Block navigation via router
+    const blocker = useBlocker(
+        ({ currentLocation, nextLocation }) =>
+            isDirty && currentLocation.pathname !== nextLocation.pathname
+    );
 
     const filtered = useMemo(() => (categories || []).filter((c: any) => {
         const matchSearch = c.name && c.name.toLowerCase().includes(search.toLowerCase());
@@ -153,7 +163,14 @@ export const CategorySplitView = ({
                             }
                         ]}
                         keyExtractor={(item: any) => item.id}
-                        onRowClick={(cat: any) => { setSelectedCategory(cat); setTab("general"); }}
+                        onRowClick={(cat: any) => {
+                            if (isDirty) {
+                                setPendingAction({ type: 'click', data: cat });
+                            } else {
+                                setSelectedCategory(cat);
+                                setTab("general");
+                            }
+                        }}
                         loading={loading && (!categories || categories.length === 0)}
                         onReorder={handleDragReorder}
                         draggable={true}
@@ -226,7 +243,14 @@ export const CategorySplitView = ({
                             return (
                                 <div
                                     key={cat.id}
-                                    onClick={() => { setSelectedCategory(cat); setTab("general"); }}
+                                    onClick={() => {
+                                        if (isDirty) {
+                                            setPendingAction({ type: 'click', data: cat });
+                                        } else {
+                                            setSelectedCategory(cat);
+                                            setTab("general");
+                                        }
+                                    }}
                                     className={cn(
                                         "flex items-center gap-3 p-3 mb-1 cursor-pointer transition-all duration-200 rounded-lg group",
                                         isSelected
@@ -274,7 +298,13 @@ export const CategorySplitView = ({
                         <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
                             {/* Close Button Only */}
                             <button
-                                onClick={() => setSelectedCategory(null)}
+                                onClick={() => {
+                                    if (isDirty) {
+                                        setPendingAction({ type: 'close' });
+                                    } else {
+                                        setSelectedCategory(null);
+                                    }
+                                }}
                                 className="absolute top-1 right-1 z-[60] p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md hover:bg-slate-50/50 dark:hover:bg-gray-800/50 transition-all"
                                 title="Close Detail View"
                             >
@@ -282,12 +312,13 @@ export const CategorySplitView = ({
                             </button>
 
                             {/* Tab Content Area */}
-                            <div className="flex-1 overflow-y-auto p-8 pt-4">
+                            <div className="flex-1 overflow-y-auto p-8 pt-4 relative">
                                 <div className="max-w-4xl">
                                     {tab === "general" && (
                                         <CategoryDetails
                                             category={selectedCategory}
                                             updateCategory={updateCategory}
+                                            onDirtyChange={setIsDirty}
                                         />
                                     )}
                                 </div>
@@ -295,6 +326,32 @@ export const CategorySplitView = ({
                         </div>
                     </div>
                 </div>
+                {isDirty && (
+                    <>
+                        <UnsavedChangesModal
+                            isOpen={pendingAction !== null}
+                            onClose={() => setPendingAction(null)}
+                            onConfirm={() => {
+                                if (pendingAction?.type === 'click') {
+                                    setSelectedCategory(pendingAction.data);
+                                    setTab("general");
+                                } else if (pendingAction?.type === 'close') {
+                                    setSelectedCategory(null);
+                                }
+                                setIsDirty(false);
+                                setPendingAction(null);
+                            }}
+                        />
+                        <UnsavedChangesModal
+                            isOpen={blocker.state === "blocked"}
+                            onClose={() => blocker.state === "blocked" && blocker.reset()}
+                            onConfirm={() => {
+                                blocker.state === "blocked" && blocker.proceed();
+                                setIsDirty(false);
+                            }}
+                        />
+                    </>
+                )}
             </div>
         );
     };

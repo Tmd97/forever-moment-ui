@@ -89,7 +89,7 @@ export const AddonSplitView = ({
                                         </div>
                                         <EditableTitle
                                             value={a.name || '-'}
-                                            onChange={(val) => updateAddon({ id: a.id, name: val, description: a.description, basePrice: a.basePrice, isActive: a.isActive, icon: a.icon })}
+                                            onChange={(val) => updateAddon(a.id, { name: val, description: a.description, basePrice: a.basePrice, isActive: a.isActive, icon: a.icon })}
                                         />
                                         {a.description && <p className="text-xs text-slate-500 font-normal truncate mt-0.5 max-w-[250px]">{a.description}</p>}
                                     </div>
@@ -110,7 +110,7 @@ export const AddonSplitView = ({
                                     <EditableStatusBadge
                                         status={a.isActive ? 'Active' : 'Inactive'}
                                         options={['Active', 'Inactive']}
-                                        onChange={(val) => updateAddon({ id: a.id, isActive: val === 'Active', name: a.name, description: a.description, basePrice: a.basePrice, icon: a.icon })}
+                                        onChange={(val) => updateAddon(a.id, { isActive: val === 'Active', name: a.name, description: a.description, basePrice: a.basePrice, icon: a.icon })}
                                     />
                                 )
                             },

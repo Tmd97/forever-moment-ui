@@ -12,6 +12,7 @@ import { profileRoutes } from '@/features/profile/pages/routes';
 import { inclusionRoutes } from '@/features/inclusion/pages/routes';
 import { cancellationPolicyRoutes } from '@/features/cancellationPolicy/pages/routes';
 import { addonRoutes } from '@/features/addon/pages/routes';
+import { imageRoutes } from '@/features/images/pages/routes';
 
 export const adminRoutes = [
     ...dashboardRoutes,
@@ -28,4 +29,5 @@ export const adminRoutes = [
     ...inclusionRoutes,
     ...cancellationPolicyRoutes,
     ...addonRoutes,
+    ...imageRoutes,
 ];

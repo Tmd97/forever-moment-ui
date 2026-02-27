@@ -19,6 +19,7 @@ import { getInclusionData } from '@/features/inclusion/store/actions';
 import { getCancellationPolicyData } from '@/features/cancellationPolicy/store/actions';
 import { getLocationData } from '@/features/location/store/actions';
 import { getAddonData } from '@/features/addon/store/actions';
+import { getSlotData } from '@/features/slot/store/actions';
 import Experience from './components/Experience';
 import type { RootState } from '@/store/store';
 
@@ -33,6 +34,7 @@ const mapStateToProps = (state: RootState) => ({
     cancellationPolicies: state.cancellationPolicy?.data || [],
     locations: state.location?.data || [],
     addons: state.addon?.data || [],
+    slots: state.slot?.data || [],
 });
 
 const mapDispatchToProps = {
@@ -54,6 +56,7 @@ const mapDispatchToProps = {
     disassociateLocation,
     getAddonData,
     toggleAddon,
+    getSlotData,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Experience);

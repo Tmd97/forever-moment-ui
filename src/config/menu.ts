@@ -12,7 +12,8 @@ import {
     Clock,
     Settings,
     Gift,
-    ShieldAlert
+    ShieldAlert,
+    Image
 } from 'lucide-react';
 
 export interface SidebarItem {
@@ -46,6 +47,7 @@ export const sidebarItems: SidebarItem[] = [
         children: [
             { name: 'Locations', path: '/admin/locations', icon: MapPin },
             { name: 'Time Slots', path: '/admin/slots', icon: Clock },
+            { name: 'Images', path: '/admin/images', icon: Image },
             { name: 'Vendors', path: '/admin/vendors', icon: Store },
         ]
     },

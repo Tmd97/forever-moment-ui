@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Edit2, Save, X } from 'lucide-react';
-import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { cn } from '@/utils/cn';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
+import { Cell, FieldGrid, FieldLabel, SectionLabel } from '@/components/common/DetailsLayout';
 
 export const LocationDetails = ({ location, updateLocation }: any) => {
     const [editingField, setEditingField] = useState<string | null>(null);
@@ -49,17 +49,17 @@ export const LocationDetails = ({ location, updateLocation }: any) => {
         }
     };
 
-    const renderEditableField = (label: string, field: string, value: string) => {
+    const renderCellField = (label: string, field: string, value: string) => {
         const isEditing = editingField === field;
 
         return (
             <div className="group relative">
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-tight mb-1">{label}</h3>
+                <FieldLabel>{label}</FieldLabel>
                 {isEditing ? (
                     <input
                         ref={inputRef}
                         type="text"
-                        className="w-full text-base font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-1 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all -ml-2"
+                        className="w-full text-[13px] font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-1 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={() => handleSave(field)}
@@ -67,11 +67,11 @@ export const LocationDetails = ({ location, updateLocation }: any) => {
                     />
                 ) : (
                     <div
-                        className="text-base font-semibold text-gray-900 dark:text-gray-100 px-2 py-1 -ml-2 rounded-md cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-gray-700 relative flex items-center"
+                        className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 cursor-pointer flex gap-2 items-center"
                         onClick={() => handleEditClick(field, value)}
                     >
-                        <span className={cn(!value && "text-slate-400 italic font-normal")}>{value || 'Empty'}</span>
-                        <svg className="w-3.5 h-3.5 ml-2 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        <span className={cn(!value && "text-slate-400 italic font-normal text-[12px]")}>{value || 'Empty'}</span>
+                        <svg className="w-3 h-3 mt-0.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                     </div>
                 )}
             </div>
@@ -81,14 +81,18 @@ export const LocationDetails = ({ location, updateLocation }: any) => {
     if (!location) return null;
 
     return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
-                {renderEditableField('Location Name', 'name', location.name)}
+        <div>
+            {/* ── GENERAL ─────────────────────────────── */}
+            <SectionLabel>General Information</SectionLabel>
+            <FieldGrid>
+                {/* Name */}
+                <Cell>
+                    {renderCellField('Location Name', 'name', location.name)}
+                </Cell>
 
-                <div className="group relative">
-                    <div className="text-sm font-medium text-slate-500 dark:text-gray-400 mb-1 flex items-center gap-1.5 p-3 -mx-3 pb-0">
-                        Status
-                    </div>
+                {/* Status */}
+                <Cell>
+                    <FieldLabel>Status</FieldLabel>
                     <div className="mt-1 flex items-center">
                         <EditableStatusBadge
                             status={location.isActive ? 'Active' : 'Inactive'}
@@ -115,11 +119,51 @@ export const LocationDetails = ({ location, updateLocation }: any) => {
                             }}
                         />
                     </div>
-                </div>
+                </Cell>
 
-                {renderEditableField('City', 'city', location.city)}
-                {renderEditableField('State', 'state', location.state)}
-                {renderEditableField('Country', 'country', location.country)}
+                {/* City */}
+                <Cell>
+                    {renderCellField('City', 'city', location.city)}
+                </Cell>
+
+                {/* State */}
+                <Cell>
+                    {renderCellField('State', 'state', location.state)}
+                </Cell>
+
+                {/* Country */}
+                <Cell>
+                    {renderCellField('Country', 'country', location.country)}
+                </Cell>
+
+                {/* Spacer */}
+                <Cell />
+            </FieldGrid>
+
+            {/* ── ADDRESS ─────────────────────────────── */}
+            <SectionLabel>Address Details</SectionLabel>
+            <div className="group bg-slate-50 dark:bg-gray-800/50 border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3">
+                <FieldLabel>Address</FieldLabel>
+                {editingField === 'address' ? (
+                    <textarea
+                        ref={inputRef as any}
+                        className="w-full text-[13px] text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-1.5 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[80px] resize-none leading-relaxed"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={() => handleSave('address')}
+                        onKeyDown={(e) => handleKeyDown(e, 'address')}
+                    />
+                ) : (
+                    <div
+                        className="flex items-start gap-2 cursor-pointer"
+                        onClick={() => handleEditClick('address', location.address || '')}
+                    >
+                        <p className={cn('text-[13px] leading-relaxed flex-1', location.address ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 italic')}>
+                            {location.address || 'Empty'}
+                        </p>
+                        <svg className="w-3 h-3 mt-0.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+                    </div>
+                )}
             </div>
         </div>
     );

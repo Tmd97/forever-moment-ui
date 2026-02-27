@@ -179,10 +179,10 @@ export const toggleInclusion = (experienceId: number, inclusionId: number, isAss
     }
 };
 
-export const associateLocation = (experienceId: number, locationId: number, data: any) => async (dispatch: any) => {
+export const associateLocation = (experienceId: number, locationId: number, timeSlotId: number, data: any) => async (dispatch: any) => {
     dispatch({ type: types.ASSOCIATE_LOCATION });
     try {
-        const response = await associateLocationApi(locationId, experienceId, data);
+        const response = await associateLocationApi(experienceId, locationId, timeSlotId, data);
         dispatch({
             type: types.ASSOCIATE_LOCATION_SUCCESS,
             payload: response.data,
@@ -198,10 +198,10 @@ export const associateLocation = (experienceId: number, locationId: number, data
     }
 };
 
-export const updateExperienceLocation = (experienceId: number, locationId: number, data: any) => async (dispatch: any) => {
+export const updateExperienceLocation = (experienceId: number, locationId: number, timeSlotId: number, data: any) => async (dispatch: any) => {
     dispatch({ type: types.UPDATE_EXPERIENCE_LOCATION });
     try {
-        const response = await updateExperienceLocationApi(locationId, experienceId, data);
+        const response = await updateExperienceLocationApi(experienceId, locationId, timeSlotId, data);
         dispatch({
             type: types.UPDATE_EXPERIENCE_LOCATION_SUCCESS,
             payload: response.data,
@@ -217,10 +217,10 @@ export const updateExperienceLocation = (experienceId: number, locationId: numbe
     }
 };
 
-export const disassociateLocation = (experienceId: number, locationId: number) => async (dispatch: any) => {
+export const disassociateLocation = (experienceId: number, locationId: number, timeSlotId: number) => async (dispatch: any) => {
     dispatch({ type: types.DISASSOCIATE_LOCATION });
     try {
-        const response = await disassociateLocationApi(locationId, experienceId);
+        const response = await disassociateLocationApi(experienceId, locationId, timeSlotId);
         dispatch({
             type: types.DISASSOCIATE_LOCATION_SUCCESS,
             payload: response.data,

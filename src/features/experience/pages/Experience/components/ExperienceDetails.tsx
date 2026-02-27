@@ -6,31 +6,10 @@ import { LocationTab } from './LocationTab';
 import { AddonsTab } from './AddonsTab';
 import { Dropdown } from '@/components/common/Dropdown';
 import { cn } from '@/utils/cn';
+import { Cell, FieldGrid, FieldLabel, SectionLabel } from '@/components/common/DetailsLayout';
 import type { ExperienceType } from './Experience';
 import type { SidePanelTab } from '@/components/common/SidePanelTabs';
 
-// ─── Stable layout primitives (must be at module level to avoid remounting) ───
-const Cell = ({ children, full = false, className: cls = '' }: { children: React.ReactNode; full?: boolean; className?: string }) => (
-    <div className={cn('bg-white dark:bg-gray-900 px-4 py-3 transition-colors hover:bg-slate-50/60 dark:hover:bg-gray-800/40', full && 'col-span-2', cls)}>
-        {children}
-    </div>
-);
-
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-    <p className="text-[10px] font-semibold tracking-[0.09em] uppercase text-slate-400 dark:text-slate-500 mb-2 mt-5 first:mt-0">
-        {children}
-    </p>
-);
-
-const FieldGrid = ({ children }: { children: React.ReactNode }) => (
-    <div className="grid grid-cols-2 gap-px bg-slate-200 dark:bg-gray-700 border border-slate-200 dark:border-gray-700 rounded-xl overflow-hidden mb-1">
-        {children}
-    </div>
-);
-
-const FieldLabel = ({ children }: { children: React.ReactNode }) => (
-    <p className="text-[10px] font-semibold tracking-[0.08em] uppercase text-slate-400 dark:text-slate-500 mb-1">{children}</p>
-);
 
 interface ExperienceDetailsProps {
     experience: ExperienceType;
@@ -42,11 +21,12 @@ interface ExperienceDetailsProps {
     addons: any[];
     onToggleCancellationPolicy: (id: number, checked: boolean) => void;
     onToggleInclusion: (id: number, checked: boolean) => void;
-    onAssociateLocation: (id: number, data: any) => void;
-    onUpdateLocation: (id: number, data: any) => void;
-    onDisassociateLocation: (id: number) => void;
+    onAssociateLocation: (locationId: number, timeSlotId: number, data: any) => void;
+    onUpdateLocation: (locationId: number, timeSlotId: number, data: any) => void;
+    onDisassociateLocation: (locationId: number, timeSlotId: number) => void;
     onToggleAddon: (addonId: number, isAssociate: boolean, data?: any) => void;
     updateExperience: (id: number, data: any) => Promise<any>;
+    slots: any[];
 }
 
 const GeneralInfoTab = ({ experience, experienceDetail, updateExperience, subCategories }: any) => {
@@ -507,6 +487,7 @@ export const getExperienceTabs = (params: ExperienceDetailsProps): SidePanelTab[
                     onAssociateLocation={params.onAssociateLocation}
                     onUpdateLocation={params.onUpdateLocation}
                     onDisassociateLocation={params.onDisassociateLocation}
+                    slots={params.slots}
                 />
             )
         },

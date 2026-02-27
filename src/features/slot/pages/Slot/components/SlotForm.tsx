@@ -3,11 +3,10 @@ import { Button } from '@/components/common/Button';
 import { Loader2 } from 'lucide-react';
 import { Dropdown } from '@/components/common/Dropdown';
 import { Input } from '@/components/common/Input';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import { DatePicker } from '@/components/common/DatePicker';
 
 interface SlotFormData {
-    name: string;
+    label: string;
     startTime: Date | null;
     endTime: Date | null;
     isActive: boolean;
@@ -23,7 +22,7 @@ interface SlotFormProps {
 
 export const SlotForm = ({ initialData, onSubmit, onCancel, submitLabel, isLoading }: SlotFormProps) => {
     const [formData, setFormData] = useState<SlotFormData>(
-        initialData || { name: '', startTime: null, endTime: null, isActive: true }
+        initialData || { label: '', startTime: null, endTime: null, isActive: true }
     );
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -40,45 +39,33 @@ export const SlotForm = ({ initialData, onSubmit, onCancel, submitLabel, isLoadi
             )}
             <div>
                 <Input
-                    label="Name"
+                    label="Label"
                     type='text'
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    value={formData.label}
+                    onChange={(e) => setFormData({ ...formData, label: e.target.value })}
                     required
                     disabled={isLoading}
                 />
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1 flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Start Time
-                    </label>
+                <div className="flex-1">
                     <DatePicker
+                        label="Start Time"
                         selected={formData.startTime}
                         onChange={(date: Date | null) => setFormData({ ...formData, startTime: date })}
                         showTimeSelect
                         showTimeSelectOnly
-                        timeIntervals={15}
-                        timeCaption="Time"
-                        dateFormat="h:mm aa"
-                        className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white"
                         disabled={isLoading}
                         required
                     />
                 </div>
-                <div className="flex-1 flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        End Time
-                    </label>
+                <div className="flex-1">
                     <DatePicker
+                        label="End Time"
                         selected={formData.endTime}
                         onChange={(date: Date | null) => setFormData({ ...formData, endTime: date })}
                         showTimeSelect
                         showTimeSelectOnly
-                        timeIntervals={15}
-                        timeCaption="Time"
-                        dateFormat="h:mm aa"
-                        className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white"
                         disabled={isLoading}
                         required
                     />
@@ -104,6 +91,6 @@ export const SlotForm = ({ initialData, onSubmit, onCancel, submitLabel, isLoadi
                     {isLoading ? 'Saving...' : submitLabel}
                 </Button>
             </div>
-        </form>
+        </form >
     );
 };

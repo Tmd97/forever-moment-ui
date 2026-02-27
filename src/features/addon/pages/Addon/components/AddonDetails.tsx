@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Pencil, Check, X } from 'lucide-react';
-import { Dropdown } from '@/components/common/Dropdown';
+import { cn } from '@/utils/cn';
+import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
+import { Cell, FieldGrid, FieldLabel, SectionLabel } from '@/components/common/DetailsLayout';
 import type { AddonType } from '@/features/addon/store/action-types';
 
 interface AddonDetailsProps {
@@ -16,11 +17,6 @@ export const AddonDetails = ({ addon, updateAddon }: AddonDetailsProps) => {
     useEffect(() => {
         if (editingField && inputRef.current) {
             inputRef.current.focus();
-            if (inputRef.current instanceof HTMLInputElement && inputRef.current.type !== 'checkbox' && inputRef.current.type !== 'number') {
-                // Move cursor to end
-                const len = inputRef.current.value.length;
-                inputRef.current.setSelectionRange(len, len);
-            }
         }
     }, [editingField]);
 
@@ -40,13 +36,13 @@ export const AddonDetails = ({ addon, updateAddon }: AddonDetailsProps) => {
         );
     }
 
-    const handleEditStart = (field: string, value: string | boolean | number) => {
+    const handleEditStart = (field: string, value: any) => {
         setEditingField(field);
         setEditValue(value);
     };
 
     const handleSave = async (field: keyof AddonType) => {
-        if (editingField === field && editValue !== addon[field]) {
+        if (editValue !== addon[field]) {
             try {
                 await updateAddon(addon.id, {
                     ...addon,
@@ -59,129 +55,55 @@ export const AddonDetails = ({ addon, updateAddon }: AddonDetailsProps) => {
         setEditingField(null);
     };
 
-    const handleCancel = () => {
-        setEditingField(null);
-        setEditValue('');
-    };
-
     const handleKeyDown = (e: React.KeyboardEvent, field: keyof AddonType) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSave(field);
         } else if (e.key === 'Escape') {
-            handleCancel();
+            setEditingField(null);
         }
     };
 
-    const renderEditableField = (
-        field: keyof AddonType,
-        label: string,
-        type: 'text' | 'textarea' | 'number' = 'text',
-        formatter?: (val: any) => string
-    ) => {
-        const isEditing = editingField === field;
-        const displayValue = formatter ? formatter(addon[field]) : String(addon[field] || '-');
+    const renderCellField = (label: string, fieldKey: keyof AddonType, value: any, isTextArea = false, displayOverride?: string) => {
+        const isEditing = editingField === fieldKey;
+        const displayValue = displayOverride !== undefined ? displayOverride : value;
 
         return (
-            <div className="group border-b border-slate-100 dark:border-gray-800 last:border-0 pb-4 last:pb-0">
-                <label className="text-xs font-semibold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-1.5 block">
-                    {label}
-                </label>
+            <div className={cn('group relative', isTextArea && 'col-span-2')}>
+                <FieldLabel>{label}</FieldLabel>
                 {isEditing ? (
-                    <div className="flex items-start gap-2">
-                        {type === 'textarea' ? (
-                            <textarea
-                                ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-                                value={editValue as string}
-                                onChange={(e) => setEditValue(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Escape') handleCancel();
-                                    // Enter creates new line in textarea, use Ctrl+Enter or Cmd+Enter to save
-                                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                                        handleSave(field);
-                                    }
-                                }}
-                                onBlur={() => handleSave(field)}
-                                className="w-full bg-white dark:bg-gray-800 border border-blue-500 rounded px-2 py-1 text-sm outline-none shadow-sm dark:text-white"
-                                rows={3}
-                            />
-                        ) : (
-                            <input
-                                ref={inputRef as React.RefObject<HTMLInputElement>}
-                                type={type}
-                                value={editValue as string | number}
-                                onChange={(e) => setEditValue(type === 'number' ? Number(e.target.value) : e.target.value)}
-                                onKeyDown={(e) => handleKeyDown(e, field)}
-                                onBlur={() => handleSave(field)}
-                                className="w-full bg-white dark:bg-gray-800 border border-blue-500 rounded px-2 py-1 text-sm outline-none shadow-sm dark:text-white"
-                            />
-                        )}
-                        <div className="flex flex-col gap-1 shrink-0">
-                            <button onMouseDown={(e) => { e.preventDefault(); handleSave(field); }} className="text-green-600 hover:bg-green-50 p-1 rounded">
-                                <Check size={14} />
-                            </button>
-                            <button onMouseDown={(e) => { e.preventDefault(); handleCancel(); }} className="text-red-500 hover:bg-red-50 p-1 rounded">
-                                <X size={14} />
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <div
-                        className="flex items-start justify-between p-1.5 -ml-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors"
-                        onClick={() => handleEditStart(field, addon[field] !== undefined ? String(addon[field]) : '')}
-                    >
-                        <span className={`text-sm text-slate-800 dark:text-slate-200 ${type === 'textarea' ? 'whitespace-pre-wrap' : ''}`}>
-                            {displayValue}
-                        </span>
-                        <Pencil size={14} className="text-slate-300 dark:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity mt-0.5" />
-                    </div>
-                )}
-            </div>
-        );
-    };
-
-    const renderStatusField = () => {
-        const isEditing = editingField === 'isActive';
-
-        return (
-            <div className="group border-b border-slate-100 dark:border-gray-800 last:border-0 pb-4 last:pb-0">
-                <label className="text-xs font-semibold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-1.5 block">
-                    Status
-                </label>
-                {isEditing ? (
-                    <div className="flex items-center gap-2">
-                        <Dropdown
-                            options={[
-                                { label: 'Active', value: 'true' },
-                                { label: 'Inactive', value: 'false' }
-                            ]}
-                            value={String(editValue)}
-                            onChange={(val) => {
-                                setEditValue(val === 'true');
-                                // Add a small delay to allow state update before save
-                                setTimeout(() => handleSave('isActive'), 50);
-                            }}
-                            className="w-40"
+                    isTextArea ? (
+                        <textarea
+                            ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+                            value={editValue as string}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onBlur={() => handleSave(fieldKey)}
+                            onKeyDown={(e) => handleKeyDown(e, fieldKey)}
+                            className="w-full text-[13px] font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-1 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[80px] resize-none leading-relaxed"
                         />
-                        <div className="flex flex-col gap-1 shrink-0">
-                            <button onMouseDown={(e) => { e.preventDefault(); handleCancel(); }} className="text-red-500 hover:bg-red-50 p-1 rounded">
-                                <X size={14} />
-                            </button>
-                        </div>
-                    </div>
+                    ) : (
+                        <input
+                            ref={inputRef as React.RefObject<HTMLInputElement>}
+                            type={fieldKey === 'basePrice' ? 'number' : 'text'}
+                            value={editValue as string | number}
+                            onChange={(e) => setEditValue(fieldKey === 'basePrice' ? Number(e.target.value) : e.target.value)}
+                            onBlur={() => handleSave(fieldKey)}
+                            onKeyDown={(e) => handleKeyDown(e, fieldKey)}
+                            className="w-full text-[13px] font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-1 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        />
+                    )
                 ) : (
                     <div
-                        className="flex items-center justify-between p-1.5 -ml-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors"
-                        onClick={() => handleEditStart('isActive', addon.isActive)}
+                        className={cn(
+                            'text-[13px] font-semibold text-gray-900 dark:text-gray-100 cursor-pointer flex gap-2',
+                            isTextArea ? 'items-start whitespace-pre-line leading-relaxed' : 'items-center'
+                        )}
+                        onClick={() => handleEditStart(String(fieldKey), value)}
                     >
-                        <span className={
-                            addon.isActive
-                                ? 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                : 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                        }>
-                            {addon.isActive ? 'Active' : 'Inactive'}
+                        <span className={cn(!displayValue && 'text-slate-400 italic font-normal text-[12px]')}>
+                            {displayValue || 'Empty'}
                         </span>
-                        <Pencil size={14} className="text-slate-300 dark:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <svg className="w-3 h-3 mt-0.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
                     </div>
                 )}
             </div>
@@ -189,13 +111,70 @@ export const AddonDetails = ({ addon, updateAddon }: AddonDetailsProps) => {
     };
 
     return (
-        <div className="p-6 space-y-6 max-h-full overflow-y-auto">
-            <div className="space-y-4">
-                {renderEditableField('name', 'Name')}
-                {renderEditableField('description', 'Description', 'textarea')}
-                {renderEditableField('basePrice', 'Base Price', 'number', (val) => `₹${val || 0}`)}
-                {renderEditableField('icon', 'Icon Name/Emoji')}
-                {renderStatusField()}
+        <div>
+            {/* ── GENERAL ─────────────────────────────── */}
+            <SectionLabel>General</SectionLabel>
+            <FieldGrid>
+                {/* Name */}
+                <Cell>
+                    {renderCellField('Name', 'name', addon.name)}
+                </Cell>
+
+                {/* Status */}
+                <Cell>
+                    <FieldLabel>Status</FieldLabel>
+                    <div className="mt-1 flex items-center">
+                        <EditableStatusBadge
+                            status={addon.isActive ? 'Active' : 'Inactive'}
+                            options={['Active', 'Inactive']}
+                            onChange={async (val) => {
+                                const newStatus = val === 'Active';
+                                if (newStatus === addon.isActive) return;
+                                try {
+                                    await updateAddon(addon.id, { ...addon, isActive: newStatus });
+                                } catch (e) {
+                                    console.error("Failed to update status", e);
+                                }
+                            }}
+                        />
+                    </div>
+                </Cell>
+
+                {/* Price */}
+                <Cell>
+                    {renderCellField('Base Price', 'basePrice', addon.basePrice, false, `₹${addon.basePrice || 0}`)}
+                </Cell>
+
+                {/* Icon */}
+                <Cell>
+                    {renderCellField('Icon Name/Emoji', 'icon', addon.icon)}
+                </Cell>
+            </FieldGrid>
+
+            {/* ── DESCRIPTIONS ─────────────────────────── */}
+            <SectionLabel>Description</SectionLabel>
+            <div className="group bg-slate-50 dark:bg-gray-800/50 border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3">
+                <FieldLabel>Description</FieldLabel>
+                {editingField === 'description' ? (
+                    <textarea
+                        ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+                        className="w-full text-[13px] text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-1.5 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[80px] resize-none leading-relaxed"
+                        value={editValue as string}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onBlur={() => handleSave('description')}
+                        onKeyDown={(e) => handleKeyDown(e, 'description')}
+                    />
+                ) : (
+                    <div
+                        className="flex items-start gap-2 cursor-pointer"
+                        onClick={() => handleEditStart('description', addon.description || '')}
+                    >
+                        <p className={cn('text-[13px] leading-relaxed flex-1', addon.description ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 italic')}>
+                            {addon.description || 'Empty'}
+                        </p>
+                        <svg className="w-3 h-3 mt-0.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+                    </div>
+                )}
             </div>
         </div>
     );

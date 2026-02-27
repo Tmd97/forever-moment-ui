@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Modal } from '@/components/common/Modal';
 import { SlotForm } from './SlotForm';
 import { DeleteModal } from '@/components/common/DeleteModal';
@@ -21,20 +21,20 @@ interface SlotProps {
 
 export interface SlotType {
     id: number;
-    name: string;
+    label: string;
     startTime: string;
     endTime: string;
     isActive: boolean;
 }
 
 type SlotFormData = {
-    name: string;
+    label: string;
     startTime: Date | null;
     endTime: Date | null;
     isActive: boolean;
 };
 
-const emptyForm: SlotFormData = { name: '', startTime: null, endTime: null, isActive: true };
+const emptyForm: SlotFormData = { label: '', startTime: null, endTime: null, isActive: true };
 
 const Slot = ({
     data,
@@ -54,7 +54,11 @@ const Slot = ({
     const [formData, setFormData] = useState<SlotFormData>(emptyForm);
 
     const [slots, setSlots] = useState<SlotType[]>([]);
-    const [selectedSlot, setSelectedSlot] = useState<SlotType | null>(null);
+    const [selectedId, setSelectedId] = useState<number | null>(null);
+
+    const selectedSlot = useMemo(() =>
+        slots.find(s => s.id === selectedId) || null,
+        [slots, selectedId]);
 
     useEffect(() => {
         getSlotData();
@@ -107,7 +111,7 @@ const Slot = ({
         if (slot) {
             setEditingId(slot.id);
             setFormData({
-                name: slot.name,
+                label: slot.label,
                 startTime: parseTimeStr(slot.startTime),
                 endTime: parseTimeStr(slot.endTime),
                 isActive: slot.isActive,
@@ -165,7 +169,7 @@ const Slot = ({
                 handleOpenModal={handleOpenModal}
                 handleDeleteClick={handleDeleteClick}
                 selectedSlot={selectedSlot}
-                setSelectedSlot={setSelectedSlot}
+                setSelectedSlot={setSelectedId}
                 loading={loading}
                 updateSlot={updateSlot}
             />

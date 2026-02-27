@@ -160,8 +160,7 @@ export const SubCategorySplitView = ({
                                             const newStatus = val === 'Active';
                                             if (newStatus === sc.isActive) return;
                                             try {
-                                                await updateSubCategory({
-                                                    id: sc.id,
+                                                await updateSubCategory(sc.id, {
                                                     name: sc.name,
                                                     description: sc.description || "",
                                                     categoryId: sc.categoryId,

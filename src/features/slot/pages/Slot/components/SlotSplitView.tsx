@@ -5,9 +5,10 @@ import { DataTable } from '@/components/common/DataTable';
 import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { SearchBar } from '@/components/common/SearchBar';
-import { Plus, X, Edit2, Trash2, Clock } from 'lucide-react';
+import { Plus, X, Clock } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Filter } from '@/components/common/Filter';
+import { Tabs } from '@/components/common/Tabs';
 
 const slotColors = [
     { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400' },
@@ -33,7 +34,7 @@ export const SlotSplitView = ({
     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
 
     const filtered = useMemo(() => (slots || []).filter((s: any) => {
-        const matchSearch = s.name && s.name.toLowerCase().includes(search.toLowerCase());
+        const matchSearch = s.label && s.label.toLowerCase().includes(search.toLowerCase());
 
         let matchStatus = true;
         if (activeFilters.status && activeFilters.status.length > 0) {
@@ -83,8 +84,8 @@ export const SlotSplitView = ({
                         data={filtered}
                         columns={[
                             {
-                                header: 'Name',
-                                accessorKey: 'name',
+                                header: 'Label',
+                                accessorKey: 'label',
                                 className: 'w-[25%] min-w-[200px] py-4 px-6 text-left font-semibold text-slate-900 dark:text-white whitespace-nowrap',
                                 render: (s: any) => {
                                     const colorInfo = getColorForSlot(s.id);
@@ -97,7 +98,7 @@ export const SlotSplitView = ({
                                             )}>
                                                 <Clock className="w-4 h-4" />
                                             </div>
-                                            <span>{s.name}</span>
+                                            <span>{s.label}</span>
                                         </div>
                                     );
                                 }
@@ -127,7 +128,7 @@ export const SlotSplitView = ({
                                             if (newStatus === s.isActive) return;
                                             try {
                                                 await updateSlot(s.id, {
-                                                    name: s.name,
+                                                    label: s.label,
                                                     startTime: s.startTime,
                                                     endTime: s.endTime,
                                                     isActive: newStatus
@@ -152,7 +153,7 @@ export const SlotSplitView = ({
                             }
                         ]}
                         keyExtractor={(item: any) => item.id}
-                        onRowClick={(s: any) => { setSelectedSlot(s); setTab("general"); }}
+                        onRowClick={(s: any) => { setSelectedSlot(s.id); setTab("general"); }}
                         loading={loading && (!slots || slots.length === 0)}
                     />
                 </div>
@@ -161,12 +162,10 @@ export const SlotSplitView = ({
     };
 
     const renderSplitView = () => {
-        const colorInfo = getColorForSlot(selectedSlot.id);
-
         return (
             <div className="flex flex-1 h-full overflow-hidden">
                 {/* Left Panel */}
-                <div className="w-[320px] min-w-[320px] bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-800 flex flex-col overflow-hidden">
+                <div className="w-[340px] min-w-[340px] bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-800 flex flex-col overflow-hidden">
                     {/* Top Bar */}
                     <div className="flex items-center justify-between p-5 pb-3">
                         <span className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Time Slots</span>
@@ -224,7 +223,7 @@ export const SlotSplitView = ({
                             return (
                                 <div
                                     key={s.id}
-                                    onClick={() => { setSelectedSlot(s); setTab("general"); }}
+                                    onClick={() => { setSelectedSlot(s.id); setTab("general"); }}
                                     className={cn(
                                         "flex items-center gap-3 p-3 mb-1 cursor-pointer transition-all duration-200 rounded-lg group",
                                         isSelected
@@ -243,7 +242,7 @@ export const SlotSplitView = ({
                                         <div className={cn(
                                             "font-semibold text-[13.5px] truncate mb-0.5 transition-colors",
                                             isSelected ? "text-blue-900 dark:text-blue-400" : "text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
-                                        )}>{s.name}</div>
+                                        )}>{s.label}</div>
                                         <div className="text-xs text-slate-400 dark:text-slate-500 truncate">{s.startTime || '??'} - {s.endTime || '??'}</div>
                                     </div>
                                     <div className={cn(
@@ -256,70 +255,42 @@ export const SlotSplitView = ({
                     </div>
                 </div>
 
-                {/* Detail Panel */}
-                <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-900">
-                    {/* Detail Header */}
-                    <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 dark:border-gray-800 bg-white dark:bg-gray-900">
-                        <div className="flex items-center gap-5">
-                            <div className={cn(
-                                "w-[60px] h-[60px] rounded-2xl flex items-center justify-center font-extrabold text-xl shadow-sm",
-                                colorInfo.bg,
-                                colorInfo.text
-                            )}>
-                                <Clock className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <div className="font-bold text-2xl text-slate-900 dark:text-white tracking-tight leading-tight flex items-center gap-2">
-                                    {selectedSlot.name}
-                                </div>
-                                <div className="text-[13px] text-slate-500 font-medium mt-1 flex items-center gap-1.5">
-                                    {selectedSlot.startTime || '??'} - {selectedSlot.endTime || '??'} <span className="opacity-50 mx-1">•</span> ID #{selectedSlot.id}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                            <button onClick={() => handleOpenModal(selectedSlot)} className="flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 border-none rounded-lg px-4 py-2 text-[13px] font-semibold transition-colors">
-                                <Edit2 className="w-3.5 h-3.5" /> Edit
-                            </button>
-                            <button onClick={() => handleDeleteClick(selectedSlot.id)} className="flex items-center gap-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 border-none rounded-lg px-4 py-2 text-[13px] font-semibold transition-colors">
-                                <Trash2 className="w-3.5 h-3.5" /> Delete
-                            </button>
-                            <div className="w-px h-6 bg-slate-200 dark:bg-gray-700 mx-1"></div>
-                            <button onClick={() => setSelectedSlot(null)} className="bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg w-9 h-9 flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors">
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </div>
+                {/* Detail Panel Container */}
+                <div className="flex-1 flex bg-slate-50 dark:bg-gray-900/40 p-3 h-full overflow-hidden">
+                    <div className="flex-1 flex bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm relative">
+                        {/* Vertical Tab Nav (Left) */}
+                        <Tabs
+                            tabs={[
+                                { id: "general", label: "General Info" }
+                            ]}
+                            activeTab={tab}
+                            onTabChange={setTab}
+                        />
 
-                    {/* Tabs */}
-                    <div className="flex px-8 gap-6 border-b border-slate-100 dark:border-gray-800">
-                        {[
-                            { id: "general", label: "General Info" }
-                        ].map((t) => (
+                        {/* Detail Content (Right) */}
+                        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+                            {/* Close Button Only */}
                             <button
-                                key={t.id}
-                                onClick={() => setTab(t.id)}
-                                className={cn(
-                                    "bg-transparent border-none border-b-2 py-4 text-[13.5px] cursor-pointer transition-all tracking-wide -mb-[1px]",
-                                    tab === t.id
-                                        ? "border-blue-600 text-blue-600 dark:text-blue-400 font-semibold"
-                                        : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium"
-                                )}
+                                onClick={() => setSelectedSlot(null)}
+                                className="absolute top-1 right-1 z-[60] p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md hover:bg-slate-50/50 dark:hover:bg-gray-800/50 transition-all"
+                                title="Close Detail View"
                             >
-                                {t.label}
+                                <X size={14} />
                             </button>
-                        ))}
-                    </div>
 
-                    {/* Tab Content */}
-                    <div className="flex-1 overflow-y-auto p-8 bg-slate-50/50 dark:bg-gray-900/50">
-                        {tab === "general" && (
-                            <SlotDetails
-                                slot={selectedSlot}
-                                onEdit={() => handleOpenModal(selectedSlot)}
-                                updateSlot={updateSlot}
-                            />
-                        )}
+                            {/* Tab Content Area */}
+                            <div className="flex-1 overflow-y-auto p-8 pt-4">
+                                <div className="max-w-4xl">
+                                    {tab === "general" && (
+                                        <SlotDetails
+                                            slot={selectedSlot}
+                                            onEdit={() => handleOpenModal(selectedSlot)}
+                                            updateSlot={updateSlot}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

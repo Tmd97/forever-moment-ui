@@ -14,6 +14,7 @@ import { profileReducer } from '@/features/profile/store/reducer';
 import { inclusionReducer } from '@/features/inclusion/store/reducer';
 import { cancellationPolicyReducer } from '@/features/cancellationPolicy/store/reducer';
 import { addonReducer } from '@/features/addon/store/reducer';
+import { imageReducer } from '@/features/images/store/reducer';
 
 export const store = configureStore({
   reducer: {
@@ -32,6 +33,7 @@ export const store = configureStore({
     inclusion: inclusionReducer,
     cancellationPolicy: cancellationPolicyReducer,
     addon: addonReducer,
+    image: imageReducer,
   },
 });
 
