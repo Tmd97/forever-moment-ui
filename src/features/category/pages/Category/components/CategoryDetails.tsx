@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { cn } from '@/utils/cn';
 import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { Cell, FieldGrid, FieldLabel, SectionLabel } from '@/components/common/DetailsLayout';
@@ -10,7 +10,7 @@ import type { CategoryType } from './Category';
 interface CategoryDetailsProps {
     category: CategoryType;
     updateCategory: (id: number, data: any) => Promise<any>;
-    onDirtyChange?: (isDirty: boolean) => void;
+    onDirtyChange?: (isDirty: boolean, changes: any[]) => void;
 }
 
 
@@ -26,11 +26,34 @@ export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: Cat
         setLocalData(category);
     }, [category]);
 
-    const isDirty = JSON.stringify(localData) !== JSON.stringify(category);
+    const changes = useMemo(() => {
+        const fieldMapping: Record<string, string> = {
+            name: 'Name',
+            description: 'Description',
+            isActive: 'Status'
+        };
+
+        const changesList: any[] = [];
+        (Object.entries(fieldMapping) as [keyof CategoryType, string][]).forEach(([key, label]) => {
+            const originalVal = category[key];
+            const currentVal = localData[key];
+
+            if (currentVal !== originalVal) {
+                changesList.push({
+                    field: label,
+                    original: key === 'isActive' ? (originalVal ? 'Active' : 'Inactive') : (originalVal || 'Empty'),
+                    current: key === 'isActive' ? (currentVal ? 'Active' : 'Inactive') : (currentVal || 'Empty')
+                });
+            }
+        });
+        return changesList;
+    }, [category, localData]);
+
+    const isDirty = changes.length > 0;
 
     useEffect(() => {
-        onDirtyChange?.(isDirty);
-    }, [isDirty, onDirtyChange]);
+        onDirtyChange?.(isDirty, changes);
+    }, [isDirty, changes, onDirtyChange]);
 
     // Handle browser reload/close
     useEffect(() => {

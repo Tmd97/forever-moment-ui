@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/common/Button';
 import { CategoryDetails } from './CategoryDetails';
 import { DataTable } from '@/components/common/DataTable';
@@ -38,6 +38,7 @@ export const CategorySplitView = ({
     const [search, setSearch] = useState("");
     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
     const [isDirty, setIsDirty] = useState(false);
+    const [pendingChanges, setPendingChanges] = useState<any[]>([]);
     const [pendingAction, setPendingAction] = useState<{ type: 'click' | 'close', data?: any } | null>(null);
 
     // Block navigation via router
@@ -45,6 +46,11 @@ export const CategorySplitView = ({
         ({ currentLocation, nextLocation }) =>
             isDirty && currentLocation.pathname !== nextLocation.pathname
     );
+
+    const handleDirtyChange = useCallback((dirty: boolean, changesList: any[]) => {
+        setIsDirty(dirty);
+        setPendingChanges(changesList || []);
+    }, []);
 
     const filtered = useMemo(() => (categories || []).filter((c: any) => {
         const matchSearch = c.name && c.name.toLowerCase().includes(search.toLowerCase());
@@ -321,7 +327,7 @@ export const CategorySplitView = ({
                                         <CategoryDetails
                                             category={selectedCategory}
                                             updateCategory={updateCategory}
-                                            onDirtyChange={setIsDirty}
+                                            onDirtyChange={handleDirtyChange}
                                         />
                                     )}
                                 </div>
@@ -334,6 +340,9 @@ export const CategorySplitView = ({
                         <UnsavedChangesModal
                             isOpen={pendingAction !== null}
                             onClose={() => setPendingAction(null)}
+                            itemName="category"
+                            changeCount={pendingChanges.length}
+                            changes={pendingChanges}
                             onConfirm={() => {
                                 if (pendingAction?.type === 'click') {
                                     setSelectedCategory(pendingAction.data);
@@ -342,15 +351,20 @@ export const CategorySplitView = ({
                                     setSelectedCategory(null);
                                 }
                                 setIsDirty(false);
+                                setPendingChanges([]);
                                 setPendingAction(null);
                             }}
                         />
                         <UnsavedChangesModal
                             isOpen={blocker.state === "blocked"}
                             onClose={() => blocker.state === "blocked" && blocker.reset()}
+                            itemName="category"
+                            changeCount={pendingChanges.length}
+                            changes={pendingChanges}
                             onConfirm={() => {
                                 blocker.state === "blocked" && blocker.proceed();
                                 setIsDirty(false);
+                                setPendingChanges([]);
                             }}
                         />
                     </>
