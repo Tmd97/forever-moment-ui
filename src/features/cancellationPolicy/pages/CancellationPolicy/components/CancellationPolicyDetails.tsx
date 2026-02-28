@@ -131,9 +131,12 @@ export const CancellationPolicyDetails = ({ cancellationPolicy, updateCancellati
                     <FieldLabel>Status</FieldLabel>
                     <div className="mt-1 flex items-center">
                         <EditableStatusBadge
-                            status={cancellationPolicy.isActive ? 'Active' : 'Inactive'}
-                            options={['Active', 'Inactive']}
-                            onChange={(val) => handleStatusChange(val === 'Active' ? 'true' : 'false')}
+                            status={cancellationPolicy.isActive ? 'true' : 'false'}
+                            options={[
+                                { label: 'Active', value: 'true' },
+                                { label: 'Inactive', value: 'false' }
+                            ]}
+                            onChange={(val) => handleStatusChange(val)}
                         />
                     </div>
                 </Cell>

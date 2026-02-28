@@ -21,7 +21,11 @@ export const VendorDetails = ({ vendor, onEdit, updateVendor }: VendorDetailsPro
                 </div>
                 <EditableStatusBadge
                     status={vendor.status}
-                    options={['Active', 'Inactive', 'Pending']}
+                    options={[
+                        { label: 'Active', value: 'Active' },
+                        { label: 'Inactive', value: 'Inactive' },
+                        { label: 'Pending', value: 'Pending' }
+                    ]}
                     onChange={async (val) => {
                         if (val === vendor.status) return;
                         try {

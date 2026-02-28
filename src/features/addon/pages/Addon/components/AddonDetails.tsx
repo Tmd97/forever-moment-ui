@@ -125,10 +125,13 @@ export const AddonDetails = ({ addon, updateAddon }: AddonDetailsProps) => {
                     <FieldLabel>Status</FieldLabel>
                     <div className="mt-1 flex items-center">
                         <EditableStatusBadge
-                            status={addon.isActive ? 'Active' : 'Inactive'}
-                            options={['Active', 'Inactive']}
+                            status={addon.isActive ? 'true' : 'false'}
+                            options={[
+                                { label: 'Active', value: 'true' },
+                                { label: 'Inactive', value: 'false' }
+                            ]}
                             onChange={async (val) => {
-                                const newStatus = val === 'Active';
+                                const newStatus = val === 'true';
                                 if (newStatus === addon.isActive) return;
                                 try {
                                     await updateAddon(addon.id, { ...addon, isActive: newStatus });

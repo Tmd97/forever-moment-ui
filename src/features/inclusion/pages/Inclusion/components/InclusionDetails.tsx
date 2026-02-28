@@ -29,10 +29,13 @@ export const InclusionDetails = ({ inclusion, onEdit, updateInclusion }: Inclusi
                     <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Status</h3>
                     <div className="flex items-center -ml-2">
                         <EditableStatusBadge
-                            status={inclusion.isActive ? 'Active' : 'Inactive'}
-                            options={['Active', 'Inactive']}
+                            status={inclusion.isActive ? 'true' : 'false'}
+                            options={[
+                                { label: 'Active', value: 'true' },
+                                { label: 'Inactive', value: 'false' }
+                            ]}
                             onChange={async (val) => {
-                                const newStatus = val === 'Active';
+                                const newStatus = val === 'true';
                                 if (newStatus === inclusion.isActive) return;
                                 try {
                                     await updateInclusion(inclusion.id, {

@@ -150,9 +150,12 @@ export const SubCategoryDetails = ({ subCategory, categories, updateSubCategory 
                     <FieldLabel>Status</FieldLabel>
                     <div className="mt-1 flex items-center">
                         <EditableStatusBadge
-                            status={subCategory.isActive ? 'Active' : 'Inactive'}
-                            options={['Active', 'Inactive']}
-                            onChange={(val) => handleStatusChange(val === 'Active' ? 'true' : 'false')}
+                            status={subCategory.isActive ? 'true' : 'false'}
+                            options={[
+                                { label: 'Active', value: 'true' },
+                                { label: 'Inactive', value: 'false' }
+                            ]}
+                            onChange={(val) => handleStatusChange(val)}
                         />
                     </div>
                 </Cell>

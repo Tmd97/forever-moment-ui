@@ -116,9 +116,12 @@ export const RoleDetails = ({ role, updateRole }: RoleDetailsProps) => {
                     </div>
                     <div className="flex items-center -mx-1 mt-1">
                         <EditableStatusBadge
-                            status={role.active ? 'Active' : 'Inactive'}
-                            options={['Active', 'Inactive']}
-                            onChange={(val) => handleStatusChange(val === 'Active' ? 'true' : 'false')}
+                            status={role.active ? 'true' : 'false'}
+                            options={[
+                                { label: 'Active', value: 'true' },
+                                { label: 'Inactive', value: 'false' }
+                            ]}
+                            onChange={(val) => handleStatusChange(val)}
                         />
                     </div>
                 </div>

@@ -95,10 +95,13 @@ export const LocationDetails = ({ location, updateLocation }: any) => {
                     <FieldLabel>Status</FieldLabel>
                     <div className="mt-1 flex items-center">
                         <EditableStatusBadge
-                            status={location.isActive ? 'Active' : 'Inactive'}
-                            options={['Active', 'Inactive']}
+                            status={location.isActive ? 'true' : 'false'}
+                            options={[
+                                { label: 'Active', value: 'true' },
+                                { label: 'Inactive', value: 'false' }
+                            ]}
                             onChange={async (val) => {
-                                const newStatus = val === 'Active';
+                                const newStatus = val === 'true';
                                 if (newStatus === location.isActive) return;
 
                                 const payload = {

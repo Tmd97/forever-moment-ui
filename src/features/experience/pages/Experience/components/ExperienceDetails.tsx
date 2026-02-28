@@ -236,10 +236,13 @@ const GeneralInfoTab = ({ experience, experienceDetail, updateExperience, subCat
                 <Cell>
                     <FieldLabel>Status</FieldLabel>
                     <EditableStatusBadge
-                        status={(experienceDetail?.isActive ?? experience.isActive) ? 'Active' : 'Inactive'}
-                        options={['Active', 'Inactive']}
+                        status={(experienceDetail?.isActive ?? experience.isActive) ? 'true' : 'false'}
+                        options={[
+                            { label: 'Active', value: 'true' },
+                            { label: 'Inactive', value: 'false' }
+                        ]}
                         onChange={async (val) => {
-                            const newStatus = val === 'Active';
+                            const newStatus = val === 'true';
                             if (newStatus === (experienceDetail?.isActive ?? experience.isActive)) return;
                             const payload = {
                                 name: experienceDetail?.name || experience.name || '',

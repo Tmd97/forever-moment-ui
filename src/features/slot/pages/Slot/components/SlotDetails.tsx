@@ -133,10 +133,13 @@ export const SlotDetails = ({ slot, updateSlot }: SlotDetailsProps) => {
                         <FieldLabel>Status</FieldLabel>
                         <div className="flex items-center -mx-1 -mt-1">
                             <EditableStatusBadge
-                                status={slot.isActive ? 'Active' : 'Inactive'}
-                                options={['Active', 'Inactive']}
+                                status={slot.isActive ? 'true' : 'false'}
+                                options={[
+                                    { label: 'Active', value: 'true' },
+                                    { label: 'Inactive', value: 'false' }
+                                ]}
                                 onChange={async (val) => {
-                                    const newStatus = val === 'Active';
+                                    const newStatus = val === 'true';
                                     if (newStatus === slot.isActive) return;
                                     try {
                                         await updateSlot(slot.id, {
