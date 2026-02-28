@@ -188,9 +188,6 @@ const Category = ({
         }
     };
 
-
-
-
     return (
         <div className="category-page-container w-full h-full flex flex-col">
             <CategorySplitView

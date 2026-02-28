@@ -132,10 +132,13 @@ export const CategorySplitView = ({
                                 className: 'w-[15%] min-w-[120px] py-4 px-6 text-left',
                                 render: (cat: any) => (
                                     <EditableStatusBadge
-                                        status={cat.isActive ? 'Active' : 'Inactive'}
-                                        options={['Active', 'Inactive']}
+                                        status={cat.isActive ? 'true' : 'false'}
+                                        options={[
+                                            { label: 'Active', value: 'true' },
+                                            { label: 'Inactive', value: 'false' }
+                                        ]}
                                         onChange={async (val) => {
-                                            const newStatus = val === 'Active';
+                                            const newStatus = val === 'true';
                                             if (newStatus === cat.isActive) return;
                                             try {
                                                 await updateCategory(cat.id, {

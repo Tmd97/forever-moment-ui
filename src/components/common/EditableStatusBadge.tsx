@@ -10,6 +10,8 @@ const STATUS_STYLES: Record<string, { bg: string, text: string, dot: string }> =
     Archived: { bg: "#f1f5f9", text: "#475569", dot: "#94a3b8" },
 };
 
+type StatusOption = string | { label: string; value: string };
+
 export function EditableStatusBadge({
     status,
     onChange,
@@ -17,11 +19,20 @@ export function EditableStatusBadge({
 }: {
     status: string,
     onChange?: (val: string) => void,
-    options?: string[]
+    options?: StatusOption[]
 }) {
     const [open, setOpen] = useState(false);
-    const s = STATUS_STYLES[status] || STATUS_STYLES["Inactive"];
     const ref = useRef<HTMLDivElement>(null);
+
+    // Normalize options to { label, value } format
+    const normalizedOptions = options.map(opt =>
+        typeof opt === 'string' ? { label: opt, value: opt } : opt
+    );
+
+    // Find the current option by value or label
+    const currentOption = normalizedOptions.find(opt => opt.value === status) || normalizedOptions.find(opt => opt.label === status) || normalizedOptions[0];
+    const displayLabel = currentOption?.label || status;
+    const s = STATUS_STYLES[displayLabel] || STATUS_STYLES["Inactive"];
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
@@ -59,7 +70,7 @@ export function EditableStatusBadge({
                 fontSize: 12.5, fontWeight: 600, color: s.text,
             }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: s.dot, flexShrink: 0 }} />
-                <span>{status}</span>
+                <span>{displayLabel}</span>
             </div>
         )
     }
@@ -76,7 +87,7 @@ export function EditableStatusBadge({
                 minWidth: "85px", justifyContent: "center"
             }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: s.dot, flexShrink: 0 }} />
-                <span>{status}</span>
+                <span>{displayLabel}</span>
                 <span style={{ fontSize: 10, opacity: 0.7, marginLeft: 2, flexShrink: 0 }}>▾</span>
             </button>
 
@@ -86,11 +97,11 @@ export function EditableStatusBadge({
                     background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10,
                     boxShadow: "0 8px 24px rgba(0,0,0,0.12)", overflow: "hidden", minWidth: 140,
                 }}>
-                    {options.map(opt => {
-                        const style = STATUS_STYLES[opt] || STATUS_STYLES["Inactive"];
-                        const isActive = opt === status;
+                    {normalizedOptions.map(opt => {
+                        const style = STATUS_STYLES[opt.label] || STATUS_STYLES["Inactive"];
+                        const isActive = opt.value === status;
                         return (
-                            <div key={opt} onClick={(e) => { e.stopPropagation(); onChange(opt); setOpen(false); }} style={{
+                            <div key={opt.value} onClick={(e) => { e.stopPropagation(); onChange(opt.value); setOpen(false); }} style={{
                                 display: "flex", alignItems: "center", gap: 8, padding: "9px 14px",
                                 cursor: "pointer", fontSize: 13, fontWeight: isActive ? 600 : 400,
                                 color: isActive ? style.text : "#374151",
@@ -101,7 +112,7 @@ export function EditableStatusBadge({
                                 onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
                             >
                                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: style.dot, flexShrink: 0 }} />
-                                {opt}
+                                {opt.label}
                                 {isActive && <span style={{ marginLeft: "auto", color: style.dot }}>✓</span>}
                             </div>
                         );

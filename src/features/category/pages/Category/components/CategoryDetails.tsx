@@ -3,6 +3,7 @@ import { cn } from '@/utils/cn';
 import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { Cell, FieldGrid, FieldLabel, SectionLabel } from '@/components/common/DetailsLayout';
 import { TabFooter } from '@/components/common/TabFooter';
+import { Input } from '@/components/common/Input';
 import { Textarea } from '@/components/common/Textarea';
 import type { CategoryType } from './Category';
 
@@ -112,14 +113,14 @@ export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: Cat
                             className="w-full text-[13px] font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-1 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[80px] resize-none leading-relaxed"
                         />
                     ) : (
-                        <input
+                        <Input
                             ref={inputRef as React.RefObject<HTMLInputElement>}
                             type="text"
                             value={editValue}
                             onChange={(e) => handleFieldUpdate(fieldKey, e.target.value)}
                             onBlur={() => setEditingField(null)}
                             onKeyDown={(e) => handleKeyDown(e)}
-                            className="w-full text-[13px] font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-1 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
+                            className="w-full text-[13px] font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-1 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all h-auto"
                         />
                     )
                 ) : (
@@ -163,9 +164,9 @@ export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: Cat
                     <FieldLabel>Status</FieldLabel>
                     <div className="mt-1 flex items-center">
                         <EditableStatusBadge
-                            status={localData.isActive ? 'Active' : 'Inactive'}
-                            options={['Active', 'Inactive']}
-                            onChange={(val) => handleStatusChange(val === 'Active' ? 'true' : 'false')}
+                            status={localData.isActive ? 'true' : 'false'}
+                            options={[{ label: 'Active', value: 'true' }, { label: 'Inactive', value: 'false' }]}
+                            onChange={(val: string) => handleStatusChange(val)}
                         />
                     </div>
                 </Cell>
