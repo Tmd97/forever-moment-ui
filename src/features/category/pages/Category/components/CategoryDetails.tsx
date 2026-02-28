@@ -165,8 +165,11 @@ export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: Cat
                     <div className="mt-1 flex items-center">
                         <EditableStatusBadge
                             status={localData.isActive ? 'true' : 'false'}
-                            options={[{ label: 'Active', value: 'true' }, { label: 'Inactive', value: 'false' }]}
-                            onChange={(val: string) => handleStatusChange(val)}
+                            options={[
+                                { label: 'Active', value: 'true' },
+                                { label: 'Inactive', value: 'false' }
+                            ]}
+                            onChange={(val) => handleStatusChange(val)}
                         />
                     </div>
                 </Cell>
