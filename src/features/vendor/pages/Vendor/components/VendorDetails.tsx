@@ -43,7 +43,8 @@ export const VendorDetails = ({ vendor, onEdit, updateVendor, onDirtyChange }: V
         localData,
         updateField,
         isDirty,
-        handleDiscard
+        handleDiscard,
+        changes
     } = useUnsavedChanges({
         originalData: consolidatedData,
         fieldMapping,
@@ -216,6 +217,7 @@ export const VendorDetails = ({ vendor, onEdit, updateVendor, onDirtyChange }: V
                 isSaving={isSaving}
                 onSave={handleSave}
                 onDiscard={handleDiscard}
+                changeCount={changes.length}
             />
         </div>
     );

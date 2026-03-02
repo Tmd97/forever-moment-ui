@@ -83,7 +83,8 @@ const GeneralInfoTab = ({ experience, experienceDetail, updateExperience, subCat
         localData,
         updateField,
         isDirty,
-        handleDiscard
+        handleDiscard,
+        changes
     } = useUnsavedChanges({
         originalData: consolidatedData,
         fieldMapping,
@@ -352,7 +353,7 @@ const GeneralInfoTab = ({ experience, experienceDetail, updateExperience, subCat
             </FieldGrid>
 
             <SectionLabel>Description</SectionLabel>
-            <div className="flex flex-col gap-2 pb-16">
+            <div className="flex flex-col gap-2">
                 {(['shortDescription', 'description', 'whatToBring', 'termsConditions'] as const).map((field) => {
                     const labelMap: Record<string, string> = {
                         shortDescription: 'Short Description',
@@ -394,6 +395,7 @@ const GeneralInfoTab = ({ experience, experienceDetail, updateExperience, subCat
                 isSaving={isSaving}
                 onSave={handleFinalSave}
                 onDiscard={handleDiscard}
+                changeCount={changes.length}
             />
         </div>
     );

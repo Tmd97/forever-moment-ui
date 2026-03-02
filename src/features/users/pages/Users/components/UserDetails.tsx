@@ -39,7 +39,8 @@ export const UserDetails = ({ user, updateUser, onDirtyChange }: UserDetailsProp
         localData,
         updateField,
         isDirty,
-        handleDiscard
+        handleDiscard,
+        changes
     } = useUnsavedChanges({
         originalData: consolidatedData,
         fieldMapping,
@@ -166,6 +167,7 @@ export const UserDetails = ({ user, updateUser, onDirtyChange }: UserDetailsProp
                 isSaving={isSaving}
                 onSave={handleSave}
                 onDiscard={handleDiscard}
+                changeCount={changes.length}
             />
         </div>
     );

@@ -30,7 +30,8 @@ export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: Cat
         localData,
         updateField,
         isDirty,
-        handleDiscard
+        handleDiscard,
+        changes
     } = useUnsavedChanges({
         originalData: category,
         fieldMapping,
@@ -125,7 +126,7 @@ export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: Cat
     };
 
     return (
-        <div className="space-y-8" style={{ paddingBottom: isDirty ? '60px' : '0' }}>
+        <div className="space-y-8">
             <SectionLabel>General</SectionLabel>
             <FieldGrid>
                 <Cell>
@@ -190,6 +191,7 @@ export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: Cat
                 isSaving={isSaving}
                 onSave={handleFinalSave}
                 onDiscard={handleDiscard}
+                changeCount={changes.length}
             />
         </div>
     );

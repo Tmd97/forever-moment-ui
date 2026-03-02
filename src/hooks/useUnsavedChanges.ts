@@ -59,22 +59,17 @@ export function useUnsavedChanges<T>({
 
     const isDirty = changes.length > 0;
 
-    // Notify parent of dirty state changes. We deliberately do NOT include
-    // onDirtyChange or `changes` in the dependency array. We use a ref for the
-    // callback (updated each render above) and read `changes` at call-time to
-    // avoid stale data. This prevents the infinite setState loop.
-    const prevIsDirtyRef = useRef(isDirty);
-    // Capture latest changes in a ref so the effect callback can read them
-    const latestChangesRef = useRef(changes);
+    // Notify parent of dirty state changes. We use JSON.stringify to detect
+    // when the actual content of the changes array changes, ensuring we
+    // notify the parent of multiple field modifications while remaining dirty.
+    const prevChangesJsonRef = useRef(JSON.stringify(changes));
     useEffect(() => {
-        latestChangesRef.current = changes;
-    });
-    useEffect(() => {
-        if (prevIsDirtyRef.current !== isDirty) {
-            prevIsDirtyRef.current = isDirty;
-            onDirtyChangeRef.current?.(isDirty, latestChangesRef.current);
+        const currentChangesJson = JSON.stringify(changes);
+        if (prevChangesJsonRef.current !== currentChangesJson) {
+            prevChangesJsonRef.current = currentChangesJson;
+            onDirtyChangeRef.current?.(isDirty, changes);
         }
-    }, [isDirty]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [isDirty, changes]);
 
     // Handle browser reload/close
     useEffect(() => {

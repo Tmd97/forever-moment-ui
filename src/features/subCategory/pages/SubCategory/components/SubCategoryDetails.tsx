@@ -31,7 +31,8 @@ export const SubCategoryDetails = ({ subCategory, categories, updateSubCategory,
         localData,
         updateField,
         isDirty,
-        handleDiscard
+        handleDiscard,
+        changes
     } = useUnsavedChanges({
         originalData: subCategory,
         fieldMapping,
@@ -217,6 +218,7 @@ export const SubCategoryDetails = ({ subCategory, categories, updateSubCategory,
                 isSaving={isSaving}
                 onSave={handleFinalSave}
                 onDiscard={handleDiscard}
+                changeCount={changes.length}
             />
         </div>
     );

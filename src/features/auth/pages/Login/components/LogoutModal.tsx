@@ -1,6 +1,5 @@
 import { LogOut } from 'lucide-react';
 import { Modal } from '@/components/common/Modal';
-import { Button } from '@/components/common/Button';
 
 interface LogoutModalProps {
     isOpen: boolean;
@@ -14,29 +13,26 @@ export const LogoutModal = ({ isOpen, onClose, onConfirm }: LogoutModalProps) =>
             isOpen={isOpen}
             onClose={onClose}
             title="Logout"
+            description="This will logout you from the system. Are you sure?"
             icon={LogOut}
+            variant="info"
+            className="sm:max-w-lg"
             footer={
-                <div className="flex justify-end gap-3 w-full -mr-2">
-                    <Button
-                        variant="outline"
+                <>
+                    <button
                         onClick={onClose}
-                        className="w-full sm:w-auto"
+                        className="flex-1 py-3 px-5 rounded-xl bg-[#f1f5f9] text-[14px] font-bold text-[#475569] transition-all hover:bg-[#e2e8f0] active:scale-[0.98]"
                     >
-                        No
-                    </Button>
-                    <Button
-                        variant="brand"
+                        No, stay
+                    </button>
+                    <button
                         onClick={onConfirm}
-                        className="w-full sm:w-auto"
+                        className="flex-1 py-3 px-5 rounded-xl bg-gradient-to-br from-[#1d4ed8] to-[#2563eb] text-[14px] font-bold text-white shadow-[0_4px_14px_rgba(37,99,235,0.25)] transition-all hover:from-[#1e40af] hover:to-[#1d4ed8] hover:-translate-y-px hover:shadow-[0_6px_20px_rgba(37,99,235,0.35)] active:translate-y-0 active:scale-[0.98]"
                     >
-                        Yes
-                    </Button>
-                </div>
+                        Yes, logout
+                    </button>
+                </>
             }
-        >
-            <div className="flex flex-col pt-0">
-                <p className="text-gray-500">This will logout you from the system. Are you sure?</p>
-            </div>
-        </Modal>
+        />
     );
 };

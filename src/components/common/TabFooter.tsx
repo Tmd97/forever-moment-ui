@@ -6,6 +6,7 @@ interface TabFooterProps {
     isSaving: boolean;
     onSave: () => void;
     onDiscard: () => void;
+    changeCount?: number;
     saveLabel?: string;
     discardLabel?: string;
     statusLabel?: string;
@@ -17,6 +18,7 @@ export const TabFooter = ({
     isSaving,
     onSave,
     onDiscard,
+    changeCount = 0,
     saveLabel = "Save",
     discardLabel = "Discard",
     statusLabel = "Unsaved changes",
@@ -26,12 +28,19 @@ export const TabFooter = ({
 
     return (
         <div className={cn(
-            "absolute bottom-0 left-0 right-0 py-2.5 pl-6 pr-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-slate-200 dark:border-gray-800 flex items-center justify-between animate-in fade-in slide-in-from-bottom-5 duration-300 z-[70] shadow-[0_-4px_12px_rgba(0,0,0,0.04)]",
+            "sticky bottom-[-32px] -mx-8 -mb-8 mt-auto py-3 pl-8 pr-6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-slate-200 dark:border-gray-800 flex items-center justify-between animate-in fade-in slide-in-from-bottom-5 duration-300 z-[70] shadow-[0_-8px_20px_rgba(0,0,0,0.06)]",
             className
         )}>
-            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                <span className="text-[12px] font-medium leading-tight">{statusLabel}</span>
+            <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                <div className="flex items-center gap-2">
+                    <span className="text-[12px] font-medium leading-tight">{statusLabel}</span>
+                    {changeCount > 0 && (
+                        <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-amber-500 rounded-full shadow-sm">
+                            {changeCount}
+                        </span>
+                    )}
+                </div>
             </div>
 
             <div className="flex items-center gap-3">

@@ -29,7 +29,8 @@ export const AddonDetails = ({ addon, updateAddon, onDirtyChange }: AddonDetails
         localData,
         updateField,
         isDirty,
-        handleDiscard
+        handleDiscard,
+        changes
     } = useUnsavedChanges({
         originalData: addon,
         fieldMapping,
@@ -199,6 +200,7 @@ export const AddonDetails = ({ addon, updateAddon, onDirtyChange }: AddonDetails
                 isSaving={isSaving}
                 onSave={handleFinalSave}
                 onDiscard={handleDiscard}
+                changeCount={changes.length}
             />
         </div>
     );

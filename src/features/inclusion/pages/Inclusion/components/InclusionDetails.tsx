@@ -35,7 +35,8 @@ export const InclusionDetails = ({ inclusion, updateInclusion, onDirtyChange }: 
         localData,
         updateField,
         isDirty,
-        handleDiscard
+        handleDiscard,
+        changes
     } = useUnsavedChanges({
         originalData: consolidatedData,
         fieldMapping,
@@ -145,6 +146,7 @@ export const InclusionDetails = ({ inclusion, updateInclusion, onDirtyChange }: 
                 isSaving={isSaving}
                 onSave={handleSave}
                 onDiscard={handleDiscard}
+                changeCount={changes.length}
             />
         </div>
     );

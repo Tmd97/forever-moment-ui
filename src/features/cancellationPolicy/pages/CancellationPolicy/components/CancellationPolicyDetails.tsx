@@ -36,7 +36,8 @@ export const CancellationPolicyDetails = ({ cancellationPolicy, updateCancellati
         localData,
         updateField,
         isDirty,
-        handleDiscard
+        handleDiscard,
+        changes
     } = useUnsavedChanges({
         originalData: consolidatedData,
         fieldMapping,
@@ -164,6 +165,7 @@ export const CancellationPolicyDetails = ({ cancellationPolicy, updateCancellati
                 isSaving={isSaving}
                 onSave={handleSave}
                 onDiscard={handleDiscard}
+                changeCount={changes.length}
             />
         </div>
     );

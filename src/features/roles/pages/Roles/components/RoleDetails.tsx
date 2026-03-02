@@ -32,7 +32,8 @@ export const RoleDetails = ({ role, updateRole, onDirtyChange }: RoleDetailsProp
         localData,
         updateField,
         isDirty,
-        handleDiscard
+        handleDiscard,
+        changes
     } = useUnsavedChanges({
         originalData: consolidatedData,
         fieldMapping,
@@ -146,6 +147,7 @@ export const RoleDetails = ({ role, updateRole, onDirtyChange }: RoleDetailsProp
                 isSaving={isSaving}
                 onSave={handleSave}
                 onDiscard={handleDiscard}
+                changeCount={changes.length}
             />
         </div>
     );

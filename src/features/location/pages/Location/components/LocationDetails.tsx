@@ -24,7 +24,8 @@ export const LocationDetails = ({ location, updateLocation, onDirtyChange }: any
         localData,
         updateField,
         isDirty,
-        handleDiscard
+        handleDiscard,
+        changes
     } = useUnsavedChanges({
         originalData: location,
         fieldMapping,
@@ -108,7 +109,7 @@ export const LocationDetails = ({ location, updateLocation, onDirtyChange }: any
     if (!location) return null;
 
     return (
-        <div className="space-y-8" style={{ paddingBottom: isDirty ? '60px' : '0' }}>
+        <div className="space-y-8">
             <SectionLabel>General Information</SectionLabel>
             <FieldGrid>
                 <Cell>
@@ -173,6 +174,7 @@ export const LocationDetails = ({ location, updateLocation, onDirtyChange }: any
                 isSaving={isSaving}
                 onSave={handleFinalSave}
                 onDiscard={handleDiscard}
+                changeCount={changes.length}
             />
         </div>
     );

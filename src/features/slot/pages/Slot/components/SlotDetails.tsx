@@ -37,7 +37,8 @@ export const SlotDetails = ({ slot, updateSlot, onDirtyChange }: SlotDetailsProp
         localData,
         updateField,
         isDirty,
-        handleDiscard
+        handleDiscard,
+        changes
     } = useUnsavedChanges({
         originalData: consolidatedData,
         fieldMapping,
@@ -179,6 +180,7 @@ export const SlotDetails = ({ slot, updateSlot, onDirtyChange }: SlotDetailsProp
                 isSaving={isSaving}
                 onSave={handleSave}
                 onDiscard={handleDiscard}
+                changeCount={changes.length}
             />
         </div>
     );
