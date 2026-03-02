@@ -137,9 +137,15 @@ export const LocationSplitView = ({
         );
     }, []);
 
-    const renderDetailsPanel = useCallback((loc: any, activeTab: string, _dirtyState: any) => {
+    const renderDetailsPanel = useCallback((loc: any, activeTab: string, dirtyState: any) => {
         if (activeTab === "general") {
-            return <LocationDetails location={loc} updateLocation={updateLocation} />;
+            return (
+                <LocationDetails
+                    location={loc}
+                    updateLocation={updateLocation}
+                    onDirtyChange={dirtyState.handleDirtyChange}
+                />
+            );
         }
         if (activeTab === "pincodes") {
             return (

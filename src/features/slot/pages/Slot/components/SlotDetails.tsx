@@ -1,20 +1,48 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { FieldGrid, Cell, FieldLabel, SectionLabel } from '@/components/common/DetailsLayout';
 import { cn } from '@/utils/cn';
 import { DatePicker } from '@/components/common/DatePicker';
+import { TabFooter } from '@/components/common/TabFooter';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import type { SlotType } from './Slot';
 
 interface SlotDetailsProps {
     slot: SlotType;
-    onEdit: () => void;
     updateSlot: (id: number, data: any) => Promise<any>;
+    onDirtyChange?: (isDirty: boolean, changes: any[]) => void;
 }
 
-export const SlotDetails = ({ slot, updateSlot }: SlotDetailsProps) => {
+export const SlotDetails = ({ slot, updateSlot, onDirtyChange }: SlotDetailsProps) => {
     const [editingField, setEditingField] = useState<string | null>(null);
     const [editValue, setEditValue] = useState<any>(null);
+    const [isSaving, setIsSaving] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    const consolidatedData = useMemo(() => ({
+        label: slot.label || '',
+        startTime: slot.startTime || '',
+        endTime: slot.endTime || '',
+        isActive: slot.isActive ?? true
+    }), [slot]);
+
+    const fieldMapping = useMemo(() => ({
+        label: 'Label',
+        startTime: 'Start Time',
+        endTime: 'End Time',
+        isActive: 'Status'
+    }), []);
+
+    const {
+        localData,
+        updateField,
+        isDirty,
+        handleDiscard
+    } = useUnsavedChanges({
+        originalData: consolidatedData,
+        fieldMapping,
+        onDirtyChange
+    });
 
     useEffect(() => {
         if (editingField && inputRef.current && editingField === 'label') {
@@ -24,17 +52,21 @@ export const SlotDetails = ({ slot, updateSlot }: SlotDetailsProps) => {
 
     const parseTimeStr = (timeStr?: string) => {
         if (!timeStr) return null;
-        const [hours, minutes] = timeStr.split(':');
-        const d = new Date();
-        d.setHours(parseInt(hours, 10));
-        d.setMinutes(parseInt(minutes, 10));
-        d.setSeconds(0);
-        d.setMilliseconds(0);
-        return d;
+        try {
+            const [hours, minutes] = timeStr.split(':');
+            const d = new Date();
+            d.setHours(parseInt(hours, 10));
+            d.setMinutes(parseInt(minutes, 10));
+            d.setSeconds(0);
+            d.setMilliseconds(0);
+            return d;
+        } catch (e) {
+            return null;
+        }
     };
 
     const formatTimeStr = (d: Date | null) => {
-        if (!d) return null;
+        if (!d) return '';
         const hours = d.getHours().toString().padStart(2, '0');
         const minutes = d.getMinutes().toString().padStart(2, '0');
         return `${hours}:${minutes}`;
@@ -49,37 +81,26 @@ export const SlotDetails = ({ slot, updateSlot }: SlotDetailsProps) => {
         }
     };
 
-    const handleSave = async (field: string, isTime = false) => {
-        const newValue = isTime ? formatTimeStr(editValue) : editValue;
-        const currentValue = String(slot[field as keyof SlotType] || '');
-
-        if (newValue !== currentValue) {
-            const payload = {
-                label: slot.label,
-                startTime: slot.startTime,
-                endTime: slot.endTime,
-                isActive: slot.isActive,
-                [field]: newValue
-            };
-
-            try {
-                await updateSlot(slot.id, payload);
-            } catch (e) {
-                console.error("Failed to update field", e);
-            }
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            await updateSlot(slot.id, localData);
+        } catch (e) {
+            console.error("Failed to update slot", e);
+        } finally {
+            setIsSaving(false);
         }
-        setEditingField(null);
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent, field: string) => {
+    const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
-            handleSave(field);
+            setEditingField(null);
         } else if (e.key === 'Escape') {
             setEditingField(null);
         }
     };
 
-    const renderCellField = (label: string, field: string, value: any, isTime = false) => {
+    const renderCellField = (label: string, field: any, value: any, isTime = false) => {
         const isEditing = editingField === field;
         return (
             <Cell>
@@ -88,11 +109,14 @@ export const SlotDetails = ({ slot, updateSlot }: SlotDetailsProps) => {
                     isTime ? (
                         <DatePicker
                             selected={editValue}
-                            onChange={(date: Date | null) => setEditValue(date)}
-                            onBlur={() => handleSave(field, true)}
+                            onChange={(date: Date | null) => {
+                                setEditValue(date);
+                                updateField(field, formatTimeStr(date));
+                            }}
+                            onBlur={() => setEditingField(null)}
                             showTimeSelect
                             showTimeSelectOnly
-                            className="text-[13px] font-medium px-2 py-0.5"
+                            className="text-[13px] font-medium px-2 py-0.5 border border-blue-500 rounded-md outline-none"
                         />
                     ) : (
                         <input
@@ -100,9 +124,12 @@ export const SlotDetails = ({ slot, updateSlot }: SlotDetailsProps) => {
                             type="text"
                             className="w-full text-[13px] font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-0.5 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
                             value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onBlur={() => handleSave(field)}
-                            onKeyDown={(e) => handleKeyDown(e, field)}
+                            onChange={(e) => {
+                                setEditValue(e.target.value);
+                                updateField(field, e.target.value);
+                            }}
+                            onBlur={() => setEditingField(null)}
+                            onKeyDown={handleKeyDown}
                         />
                     )
                 ) : (
@@ -124,39 +151,35 @@ export const SlotDetails = ({ slot, updateSlot }: SlotDetailsProps) => {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 pb-20">
             <div>
                 <SectionLabel>General Information</SectionLabel>
                 <FieldGrid>
-                    {renderCellField('Label', 'label', slot.label)}
+                    {renderCellField('Label', 'label', localData.label)}
                     <Cell>
                         <FieldLabel>Status</FieldLabel>
-                        <div className="flex items-center -mx-1 -mt-1">
+                        <div className="flex items-center -mx-1 mt-1">
                             <EditableStatusBadge
-                                status={slot.isActive ? 'true' : 'false'}
+                                status={localData.isActive ? 'true' : 'false'}
                                 options={[
                                     { label: 'Active', value: 'true' },
                                     { label: 'Inactive', value: 'false' }
                                 ]}
-                                onChange={async (val) => {
-                                    const newStatus = val === 'true';
-                                    if (newStatus === slot.isActive) return;
-                                    try {
-                                        await updateSlot(slot.id, {
-                                            label: slot.label,
-                                            startTime: slot.startTime,
-                                            endTime: slot.endTime,
-                                            isActive: newStatus
-                                        });
-                                    } catch (error) { console.error('Failed to update status', error); }
-                                }}
+                                onChange={(val) => updateField('isActive', val === 'true')}
                             />
                         </div>
                     </Cell>
-                    {renderCellField('Start Time', 'startTime', slot.startTime, true)}
-                    {renderCellField('End Time', 'endTime', slot.endTime, true)}
+                    {renderCellField('Start Time', 'startTime', localData.startTime, true)}
+                    {renderCellField('End Time', 'endTime', localData.endTime, true)}
                 </FieldGrid>
             </div>
+
+            <TabFooter
+                isDirty={isDirty}
+                isSaving={isSaving}
+                onSave={handleSave}
+                onDiscard={handleDiscard}
+            />
         </div>
     );
 };

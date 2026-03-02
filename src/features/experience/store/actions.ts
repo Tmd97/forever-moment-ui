@@ -4,7 +4,7 @@ import {
     associateCancellationPolicyApi, disassociateCancellationPolicyApi,
     associateInclusionApi, disassociateInclusionApi,
     associateLocationApi, updateExperienceLocationApi, disassociateLocationApi,
-    associateAddonApi, disassociateAddonApi
+    associateAddonApi, disassociateAddonApi, toggleExperienceActiveApi, toggleExperienceFeaturedApi
 } from './api';
 
 export const getExperienceData = (isBackground: boolean = false) => async (dispatch: any) => {
@@ -255,6 +255,44 @@ export const toggleAddon = (experienceId: number, addonId: number, isAssociate: 
         dispatch({
             type: types.TOGGLE_ADDON_FAILURE,
             payload: error.response?.data?.message || 'Failed to toggle addon',
+        });
+        throw error;
+    }
+};
+
+export const toggleExperienceActive = (id: number) => async (dispatch: any) => {
+    dispatch({ type: types.TOGGLE_EXPERIENCE_ACTIVE });
+    try {
+        const response = await toggleExperienceActiveApi(id);
+        dispatch({
+            type: types.TOGGLE_EXPERIENCE_ACTIVE_SUCCESS,
+            payload: response.data,
+        });
+        dispatch(getExperienceData(true));
+        return response.data;
+    } catch (error: any) {
+        dispatch({
+            type: types.TOGGLE_EXPERIENCE_ACTIVE_FAILURE,
+            payload: error.response?.data?.message || 'Failed to toggle experience status',
+        });
+        throw error;
+    }
+};
+
+export const toggleExperienceFeatured = (id: number) => async (dispatch: any) => {
+    dispatch({ type: types.TOGGLE_EXPERIENCE_FEATURED });
+    try {
+        const response = await toggleExperienceFeaturedApi(id);
+        dispatch({
+            type: types.TOGGLE_EXPERIENCE_FEATURED_SUCCESS,
+            payload: response.data,
+        });
+        dispatch(getExperienceData(true));
+        return response.data;
+    } catch (error: any) {
+        dispatch({
+            type: types.TOGGLE_EXPERIENCE_FEATURED_FAILURE,
+            payload: error.response?.data?.message || 'Failed to toggle featured status',
         });
         throw error;
     }

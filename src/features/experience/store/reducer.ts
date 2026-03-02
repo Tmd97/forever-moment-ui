@@ -66,6 +66,20 @@ export const experienceReducer = (state = initialState, action: any) => {
         case types.TOGGLE_INCLUSION_FAILURE:
             return { ...state, loading: false, error: action.payload };
 
+        case types.TOGGLE_EXPERIENCE_ACTIVE:
+            return { ...state, status: types.TOGGLE_EXPERIENCE_ACTIVE, error: null };
+        case types.TOGGLE_EXPERIENCE_ACTIVE_SUCCESS:
+            return { ...state, status: types.TOGGLE_EXPERIENCE_ACTIVE_SUCCESS };
+        case types.TOGGLE_EXPERIENCE_ACTIVE_FAILURE:
+            return { ...state, status: 'FAILURE', error: action.payload };
+
+        case types.TOGGLE_EXPERIENCE_FEATURED:
+            return { ...state, status: types.TOGGLE_EXPERIENCE_FEATURED, error: null };
+        case types.TOGGLE_EXPERIENCE_FEATURED_SUCCESS:
+            return { ...state, status: types.TOGGLE_EXPERIENCE_FEATURED_SUCCESS };
+        case types.TOGGLE_EXPERIENCE_FEATURED_FAILURE:
+            return { ...state, status: 'FAILURE', error: action.payload };
+
         case types.RESET_STATUS:
             return { ...state, status: 'IDLE', error: null, selectedExperienceDetail: null };
 

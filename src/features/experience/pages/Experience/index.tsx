@@ -13,6 +13,8 @@ import {
     updateExperienceLocation,
     disassociateLocation,
     toggleAddon,
+    toggleExperienceActive,
+    toggleExperienceFeatured,
 } from '@/features/experience/store/actions';
 import { getSubCategoryData } from '@/features/subCategory/store/actions';
 import { getInclusionData } from '@/features/inclusion/store/actions';
@@ -57,6 +59,8 @@ const mapDispatchToProps = {
     getAddonData,
     toggleAddon,
     getSlotData,
+    toggleExperienceActive,
+    toggleExperienceFeatured,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Experience);

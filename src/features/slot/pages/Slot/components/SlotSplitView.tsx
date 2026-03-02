@@ -130,18 +130,18 @@ export const SlotSplitView = ({
         );
     }, []);
 
-    const renderDetailsPanel = useCallback((slot: any, activeTab: string, _dirtyState: any) => {
+    const renderDetailsPanel = useCallback((slot: any, activeTab: string, dirtyState: any) => {
         if (activeTab === "general") {
             return (
                 <SlotDetails
                     slot={slot}
-                    onEdit={() => handleOpenModal(slot)}
                     updateSlot={updateSlot}
+                    onDirtyChange={dirtyState.handleDirtyChange}
                 />
             );
         }
         return null;
-    }, [handleOpenModal, updateSlot]);
+    }, [updateSlot]);
 
     const customFilter = useCallback((s: any, activeFilters: Record<string, string[]>) => {
         let matchStatus = true;

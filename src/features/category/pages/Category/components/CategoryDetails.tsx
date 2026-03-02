@@ -1,10 +1,11 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { cn } from '@/utils/cn';
 import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { Cell, FieldGrid, FieldLabel, SectionLabel } from '@/components/common/DetailsLayout';
 import { TabFooter } from '@/components/common/TabFooter';
 import { Input } from '@/components/common/Input';
 import { Textarea } from '@/components/common/Textarea';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import type { CategoryType } from './Category';
 
 interface CategoryDetailsProps {
@@ -13,60 +14,28 @@ interface CategoryDetailsProps {
     onDirtyChange?: (isDirty: boolean, changes: any[]) => void;
 }
 
-
 export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: CategoryDetailsProps) => {
-    const [localData, setLocalData] = useState<CategoryType>(category);
     const [editingField, setEditingField] = useState<string | null>(null);
     const [editValue, setEditValue] = useState<string>('');
     const [isSaving, setIsSaving] = useState(false);
     const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
-    // Sync local state when category prop changes (from outside)
-    useEffect(() => {
-        setLocalData(category);
-    }, [category]);
+    const fieldMapping = useMemo(() => ({
+        name: 'Name',
+        description: 'Description',
+        isActive: 'Status'
+    }), []);
 
-    const changes = useMemo(() => {
-        const fieldMapping: Record<string, string> = {
-            name: 'Name',
-            description: 'Description',
-            isActive: 'Status'
-        };
-
-        const changesList: any[] = [];
-        (Object.entries(fieldMapping) as [keyof CategoryType, string][]).forEach(([key, label]) => {
-            const originalVal = category[key];
-            const currentVal = localData[key];
-
-            if (currentVal !== originalVal) {
-                changesList.push({
-                    field: label,
-                    original: key === 'isActive' ? (originalVal ? 'Active' : 'Inactive') : (originalVal || 'Empty'),
-                    current: key === 'isActive' ? (currentVal ? 'Active' : 'Inactive') : (currentVal || 'Empty')
-                });
-            }
-        });
-        return changesList;
-    }, [category, localData]);
-
-    const isDirty = changes.length > 0;
-
-    useEffect(() => {
-        onDirtyChange?.(isDirty, changes);
-    }, [isDirty, changes, onDirtyChange]);
-
-    // Handle browser reload/close
-    useEffect(() => {
-        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isDirty) {
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        };
-
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isDirty]);
+    const {
+        localData,
+        updateField,
+        isDirty,
+        handleDiscard
+    } = useUnsavedChanges({
+        originalData: category,
+        fieldMapping,
+        onDirtyChange
+    });
 
     useEffect(() => {
         if (editingField && inputRef.current) {
@@ -81,12 +50,7 @@ export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: Cat
 
     const handleFieldUpdate = (field: keyof CategoryType, value: string) => {
         setEditValue(value);
-        if (localData[field] !== value) {
-            setLocalData(prev => ({
-                ...prev,
-                [field]: value
-            }));
-        }
+        updateField(field, value);
     };
 
     const handleFinalSave = async () => {
@@ -104,21 +68,13 @@ export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: Cat
         }
     };
 
-    const handleDiscard = () => {
-        setLocalData(category);
-    };
-
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             setEditingField(null);
         } else if (e.key === 'Escape') {
-            // Revert local change for this specific field if escaping? 
-            // Actually Discard button handles global revert.
             setEditingField(null);
         }
     };
-
-
 
     const renderCellField = (label: string, fieldKey: keyof CategoryType, value: any, isTextArea = false) => {
         const isEditing = editingField === fieldKey;
@@ -165,24 +121,17 @@ export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: Cat
     };
 
     const handleStatusChange = (newStatus: string) => {
-        const isActive = newStatus === 'true';
-        setLocalData(prev => ({
-            ...prev,
-            isActive: isActive
-        }));
+        updateField('isActive', newStatus === 'true');
     };
 
     return (
         <div className="space-y-8" style={{ paddingBottom: isDirty ? '60px' : '0' }}>
-            {/* ── GENERAL ─────────────────────────────── */}
             <SectionLabel>General</SectionLabel>
             <FieldGrid>
-                {/* Name */}
                 <Cell>
                     {renderCellField('Name', 'name', localData.name)}
                 </Cell>
 
-                {/* Status */}
                 <Cell>
                     <FieldLabel>Status</FieldLabel>
                     <div className="mt-1 flex items-center">
@@ -197,7 +146,6 @@ export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: Cat
                     </div>
                 </Cell>
 
-                {/* Slug (Display Only if available) */}
                 {category.slug && (
                     <>
                         <Cell>
@@ -213,7 +161,6 @@ export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: Cat
                 )}
             </FieldGrid>
 
-            {/* ── DESCRIPTIONS ─────────────────────────── */}
             <SectionLabel>Description</SectionLabel>
             <div className="group bg-slate-50 dark:bg-gray-800/50 border border-slate-200 dark:border-gray-700 rounded-xl px-4 py-3">
                 <FieldLabel>Short Description</FieldLabel>

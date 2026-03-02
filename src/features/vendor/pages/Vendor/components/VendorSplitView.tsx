@@ -134,7 +134,7 @@ export const VendorSplitView = ({
         );
     }, []);
 
-    const renderDetailsPanel = useCallback((v: any, activeTab: string, _dirtyState: any) => {
+    const renderDetailsPanel = useCallback((v: any, activeTab: string, dirtyState: any) => {
         if (activeTab === "general") {
             return (
                 <VendorDetails
@@ -142,6 +142,7 @@ export const VendorSplitView = ({
                     onEdit={() => handleOpenModal(v)}
                     onClose={() => setSelectedVendor(null)}
                     updateVendor={updateVendor}
+                    onDirtyChange={dirtyState.handleDirtyChange}
                 />
             );
         }

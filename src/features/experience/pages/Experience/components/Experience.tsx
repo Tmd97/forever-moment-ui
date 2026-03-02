@@ -46,6 +46,8 @@ interface ExperienceProps {
     toggleAddon: (experienceId: number, addonId: number, isAssociate: boolean, data?: any) => Promise<any>;
     slots: any[];
     getSlotData: () => void;
+    toggleExperienceActive: (id: number) => Promise<any>;
+    toggleExperienceFeatured: (id: number) => Promise<any>;
 }
 
 const Experience = ({
@@ -79,6 +81,8 @@ const Experience = ({
     toggleAddon,
     slots,
     getSlotData,
+    toggleExperienceActive,
+    toggleExperienceFeatured,
 }: ExperienceProps) => {
 
     const [experiences, setExperiences] = useState<ExperienceType[]>([]);
@@ -240,6 +244,8 @@ const Experience = ({
                 addons={addons}
                 toggleAddon={toggleAddon}
                 slots={slots}
+                toggleExperienceActive={toggleExperienceActive}
+                toggleExperienceFeatured={toggleExperienceFeatured}
             />
 
             <Modal

@@ -59,3 +59,11 @@ export const associateAddonApi = async (experienceId: number, addonId: number, d
 export const disassociateAddonApi = async (experienceId: number, addonId: number) => {
     return await axios.delete(`/admin/experiences/${experienceId}/addons/${addonId}`);
 };
+
+export const toggleExperienceActiveApi = async (id: number) => {
+    return await axios.patch(`/admin/experiences/${id}/toggle-active`);
+};
+
+export const toggleExperienceFeaturedApi = async (id: number) => {
+    return await axios.patch(`/admin/experiences/${id}/toggle-featured`);
+};

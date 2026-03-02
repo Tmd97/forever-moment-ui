@@ -1,18 +1,40 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { cn } from '@/utils/cn';
 import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { Cell, FieldGrid, FieldLabel, SectionLabel } from '@/components/common/DetailsLayout';
+import { TabFooter } from '@/components/common/TabFooter';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import type { AddonType } from '@/features/addon/store/action-types';
 
 interface AddonDetailsProps {
-    addon: AddonType | null;
+    addon: AddonType;
     updateAddon: (id: number, data: any) => Promise<any>;
+    onDirtyChange?: (isDirty: boolean, changes: any[]) => void;
 }
 
-export const AddonDetails = ({ addon, updateAddon }: AddonDetailsProps) => {
+export const AddonDetails = ({ addon, updateAddon, onDirtyChange }: AddonDetailsProps) => {
     const [editingField, setEditingField] = useState<string | null>(null);
     const [editValue, setEditValue] = useState<string | boolean | number>('');
+    const [isSaving, setIsSaving] = useState(false);
     const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+
+    const fieldMapping = useMemo(() => ({
+        name: 'Name',
+        basePrice: 'Base Price',
+        isActive: 'Status',
+        icon: 'Icon'
+    }), []);
+
+    const {
+        localData,
+        updateField,
+        isDirty,
+        handleDiscard
+    } = useUnsavedChanges({
+        originalData: addon,
+        fieldMapping,
+        onDirtyChange
+    });
 
     useEffect(() => {
         if (editingField && inputRef.current) {
@@ -20,45 +42,37 @@ export const AddonDetails = ({ addon, updateAddon }: AddonDetailsProps) => {
         }
     }, [editingField]);
 
-    if (!addon) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full text-slate-400 dark:text-gray-500 p-8 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-gray-800 flex items-center justify-center">
-                    <svg className="w-8 h-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div>
-                    <p className="font-medium text-slate-600 dark:text-slate-300 mb-1">No Addon Selected</p>
-                    <p className="text-sm">Select an addon from the list to view its details</p>
-                </div>
-            </div>
-        );
-    }
-
     const handleEditStart = (field: string, value: any) => {
         setEditingField(field);
         setEditValue(value);
     };
 
-    const handleSave = async (field: keyof AddonType) => {
-        if (editValue !== addon[field]) {
-            try {
-                await updateAddon(addon.id, {
-                    ...addon,
-                    [field]: editValue,
-                });
-            } catch (error) {
-                console.error("Failed to update addon:", error);
-            }
-        }
-        setEditingField(null);
+    const handleFieldUpdate = (field: keyof AddonType, value: any) => {
+        setEditValue(value);
+        updateField(field, value);
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent, field: keyof AddonType) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSave(field);
+    const handleFinalSave = async () => {
+        setIsSaving(true);
+        try {
+            await updateAddon(addon.id, {
+                ...addon,
+                name: localData.name,
+                basePrice: localData.basePrice,
+                isActive: localData.isActive,
+                icon: localData.icon,
+                description: localData.description || ''
+            });
+        } catch (error) {
+            console.error("Failed to save addon changes:", error);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            setEditingField(null);
         } else if (e.key === 'Escape') {
             setEditingField(null);
         }
@@ -76,9 +90,9 @@ export const AddonDetails = ({ addon, updateAddon }: AddonDetailsProps) => {
                         <textarea
                             ref={inputRef as React.RefObject<HTMLTextAreaElement>}
                             value={editValue as string}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onBlur={() => handleSave(fieldKey)}
-                            onKeyDown={(e) => handleKeyDown(e, fieldKey)}
+                            onChange={(e) => handleFieldUpdate(fieldKey, e.target.value)}
+                            onBlur={() => setEditingField(null)}
+                            onKeyDown={(e) => handleKeyDown(e)}
                             className="w-full text-[13px] font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-1 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[80px] resize-none leading-relaxed"
                         />
                     ) : (
@@ -86,9 +100,9 @@ export const AddonDetails = ({ addon, updateAddon }: AddonDetailsProps) => {
                             ref={inputRef as React.RefObject<HTMLInputElement>}
                             type={fieldKey === 'basePrice' ? 'number' : 'text'}
                             value={editValue as string | number}
-                            onChange={(e) => setEditValue(fieldKey === 'basePrice' ? Number(e.target.value) : e.target.value)}
-                            onBlur={() => handleSave(fieldKey)}
-                            onKeyDown={(e) => handleKeyDown(e, fieldKey)}
+                            onChange={(e) => handleFieldUpdate(fieldKey, fieldKey === 'basePrice' ? Number(e.target.value) : e.target.value)}
+                            onBlur={() => setEditingField(null)}
+                            onKeyDown={(e) => handleKeyDown(e)}
                             className="w-full text-[13px] font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-1 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all"
                         />
                     )
@@ -125,32 +139,33 @@ export const AddonDetails = ({ addon, updateAddon }: AddonDetailsProps) => {
                     <FieldLabel>Status</FieldLabel>
                     <div className="mt-1 flex items-center">
                         <EditableStatusBadge
-                            status={addon.isActive ? 'true' : 'false'}
+                            status={localData.isActive ? 'true' : 'false'}
                             options={[
                                 { label: 'Active', value: 'true' },
                                 { label: 'Inactive', value: 'false' }
                             ]}
-                            onChange={async (val) => {
-                                const newStatus = val === 'true';
-                                if (newStatus === addon.isActive) return;
-                                try {
-                                    await updateAddon(addon.id, { ...addon, isActive: newStatus });
-                                } catch (e) {
-                                    console.error("Failed to update status", e);
-                                }
-                            }}
+                            onChange={(val) => updateField('isActive', val === 'true')}
                         />
                     </div>
                 </Cell>
 
+                {/* Name */}
+                <Cell>
+                    {renderCellField('Name', 'name', localData.name)}
+                </Cell>
+
+                <Cell>
+                    {/* Placeholder for status already rendered above */}
+                </Cell>
+
                 {/* Price */}
                 <Cell>
-                    {renderCellField('Base Price', 'basePrice', addon.basePrice, false, `₹${addon.basePrice || 0}`)}
+                    {renderCellField('Base Price', 'basePrice', localData.basePrice, false, `₹${localData.basePrice || 0}`)}
                 </Cell>
 
                 {/* Icon */}
                 <Cell>
-                    {renderCellField('Icon Name/Emoji', 'icon', addon.icon)}
+                    {renderCellField('Icon Name/Emoji', 'icon', localData.icon)}
                 </Cell>
             </FieldGrid>
 
@@ -163,22 +178,28 @@ export const AddonDetails = ({ addon, updateAddon }: AddonDetailsProps) => {
                         ref={inputRef as React.RefObject<HTMLTextAreaElement>}
                         className="w-full text-[13px] text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-blue-500 rounded-md px-2 py-1.5 outline-none shadow-sm focus:ring-2 focus:ring-blue-500/20 transition-all min-h-[80px] resize-none leading-relaxed"
                         value={editValue as string}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onBlur={() => handleSave('description')}
-                        onKeyDown={(e) => handleKeyDown(e, 'description')}
+                        onChange={(e) => handleFieldUpdate('description', e.target.value)}
+                        onBlur={() => setEditingField(null)}
+                        onKeyDown={(e) => handleKeyDown(e)}
                     />
                 ) : (
                     <div
                         className="flex items-start gap-2 cursor-pointer"
-                        onClick={() => handleEditStart('description', addon.description || '')}
+                        onClick={() => handleEditStart('description', localData.description || '')}
                     >
-                        <p className={cn('text-[13px] leading-relaxed flex-1', addon.description ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 italic')}>
-                            {addon.description || 'Empty'}
+                        <p className={cn('text-[13px] leading-relaxed flex-1', localData.description ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 italic')}>
+                            {localData.description || 'Empty'}
                         </p>
                         <svg className="w-3 h-3 mt-0.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
                     </div>
                 )}
             </div>
+            <TabFooter
+                isDirty={isDirty}
+                isSaving={isSaving}
+                onSave={handleFinalSave}
+                onDiscard={handleDiscard}
+            />
         </div>
     );
 };

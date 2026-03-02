@@ -135,14 +135,14 @@ export const InclusionSplitView = ({
         );
     }, []);
 
-    const renderDetailsPanel = useCallback((inclusion: any, activeTab: string, _dirtyState: any) => {
+    const renderDetailsPanel = useCallback((inclusion: any, activeTab: string, dirtyState: any) => {
         if (activeTab === "general") {
             return (
                 <div className="pt-2">
                     <InclusionDetails
                         inclusion={inclusion}
-                        onEdit={() => handleOpenModal(inclusion)}
                         updateInclusion={updateInclusion}
+                        onDirtyChange={dirtyState.handleDirtyChange}
                     />
                 </div>
             );

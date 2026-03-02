@@ -129,12 +129,13 @@ export const RolesSplitView = ({
         );
     }, []);
 
-    const renderDetailsPanel = useCallback((r: any, activeTab: string, _dirtyState: any) => {
+    const renderDetailsPanel = useCallback((r: any, activeTab: string, dirtyState: any) => {
         if (activeTab === "general") {
             return (
                 <RoleDetails
                     role={r}
                     updateRole={updateRole}
+                    onDirtyChange={dirtyState.handleDirtyChange}
                 />
             );
         }

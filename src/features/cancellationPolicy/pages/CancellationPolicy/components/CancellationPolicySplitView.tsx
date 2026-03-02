@@ -135,12 +135,13 @@ export const CancellationPolicySplitView = ({
         );
     }, []);
 
-    const renderDetailsPanel = useCallback((policy: any, activeTab: string, _dirtyState: any) => {
+    const renderDetailsPanel = useCallback((policy: any, activeTab: string, dirtyState: any) => {
         if (activeTab === "general") {
             return (
                 <CancellationPolicyDetails
                     cancellationPolicy={policy}
                     updateCancellationPolicy={updateCancellationPolicy}
+                    onDirtyChange={dirtyState.handleDirtyChange}
                 />
             );
         }

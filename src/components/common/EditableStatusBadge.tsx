@@ -73,45 +73,47 @@ export function EditableStatusBadge({
                 </button>
             </PopoverPrimitive.Trigger>
 
-            <PopoverPrimitive.Content
-                align="start"
-                sideOffset={6}
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                    background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10,
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.12)", overflow: "hidden",
-                    minWidth: 150, zIndex: 99999,
-                }}
-            >
-                {normalized.map((opt) => {
-                    const style = STATUS_STYLES[opt.label] ?? STATUS_STYLES["Inactive"];
-                    const isSelected = opt.value === status || opt.label === status;
+            <PopoverPrimitive.Portal>
+                <PopoverPrimitive.Content
+                    align="start"
+                    sideOffset={6}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                        background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10,
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.12)", overflow: "hidden",
+                        minWidth: 150, zIndex: 99999,
+                    }}
+                >
+                    {normalized.map((opt) => {
+                        const style = STATUS_STYLES[opt.label] ?? STATUS_STYLES["Inactive"];
+                        const isSelected = opt.value === status || opt.label === status;
 
-                    return (
-                        <PopoverPrimitive.Close key={opt.value} asChild>
-                            <div
-                                onClick={(e) => { e.stopPropagation(); onChange(opt.value); }}
-                                style={{
-                                    display: "flex", alignItems: "center", gap: 8,
-                                    padding: "9px 14px", cursor: "pointer", fontSize: 13,
-                                    fontWeight: isSelected ? 600 : 400,
-                                    color: isSelected ? style.text : "#374151",
-                                    background: isSelected ? style.bg : "transparent",
-                                    transition: "background 0.12s",
-                                }}
-                                onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = "#f8fafc"; }}
-                                onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
-                            >
-                                <span style={{ width: 7, height: 7, borderRadius: "50%", background: style.dot, flexShrink: 0 }} />
-                                {opt.label}
-                                {isSelected && (
-                                    <Check size={12} style={{ marginLeft: "auto", color: style.dot }} />
-                                )}
-                            </div>
-                        </PopoverPrimitive.Close>
-                    );
-                })}
-            </PopoverPrimitive.Content>
+                        return (
+                            <PopoverPrimitive.Close key={opt.value} asChild>
+                                <div
+                                    onClick={(e) => { e.stopPropagation(); onChange(opt.value); }}
+                                    style={{
+                                        display: "flex", alignItems: "center", gap: 8,
+                                        padding: "9px 14px", cursor: "pointer", fontSize: 13,
+                                        fontWeight: isSelected ? 600 : 400,
+                                        color: isSelected ? style.text : "#374151",
+                                        background: isSelected ? style.bg : "transparent",
+                                        transition: "background 0.12s",
+                                    }}
+                                    onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = "#f8fafc"; }}
+                                    onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
+                                >
+                                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: style.dot, flexShrink: 0 }} />
+                                    {opt.label}
+                                    {isSelected && (
+                                        <Check size={12} style={{ marginLeft: "auto", color: style.dot }} />
+                                    )}
+                                </div>
+                            </PopoverPrimitive.Close>
+                        );
+                    })}
+                </PopoverPrimitive.Content>
+            </PopoverPrimitive.Portal>
         </PopoverPrimitive.Root>
     );
 }

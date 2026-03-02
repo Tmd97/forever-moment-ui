@@ -1,6 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import { getExperienceTabs } from './ExperienceDetails';
 import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
+import { EditableFeatureBadge } from '@/components/common/EditableFeatureBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { cn } from '@/utils/cn';
 import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
@@ -39,6 +40,8 @@ export const ExperienceSplitView = ({
     addons,
     toggleAddon,
     slots,
+    toggleExperienceActive,
+    toggleExperienceFeatured
 }: any) => {
 
     const columns = [
@@ -69,6 +72,25 @@ export const ExperienceSplitView = ({
             render: (exp: any) => <span className="font-medium">₹{exp.basePrice || 0}</span>
         },
         {
+            header: 'Featured',
+            accessorKey: 'isFeatured',
+            preventRowClick: true,
+            className: 'w-[10%] min-w-[100px] py-4 px-6 text-left',
+            render: (exp: any) => (
+                <EditableFeatureBadge
+                    isFeatured={exp.isFeatured}
+                    onChange={async (val) => {
+                        if (val === exp.isFeatured) return;
+                        try {
+                            await toggleExperienceFeatured(exp.id);
+                        } catch (e) {
+                            console.error('Failed to update featured status', e);
+                        }
+                    }}
+                />
+            )
+        },
+        {
             header: 'Status',
             preventRowClick: true,
             className: 'w-[20%] min-w-[100px] py-4 px-6 text-left',
@@ -80,16 +102,7 @@ export const ExperienceSplitView = ({
                         const newStatus = val === 'Active';
                         if (newStatus === exp.isActive) return;
                         try {
-                            await updateExperience(exp.id, {
-                                name: exp.name || "",
-                                slug: exp.slug || "",
-                                tagName: exp.tagName || "",
-                                basePrice: exp.basePrice || 0,
-                                displayOrder: exp.displayOrder || 0,
-                                isFeatured: exp.isFeatured || false,
-                                subCategoryId: exp.subCategoryId || 0,
-                                isActive: newStatus
-                            });
+                            await toggleExperienceActive(exp.id);
                         } catch (e) {
                             console.error(e);
                         }
@@ -145,47 +158,56 @@ export const ExperienceSplitView = ({
         );
     }, []);
 
-    const tabsData = useMemo(() => {
-        if (!selectedExperience) return [];
-        return getExperienceTabs({
+    const tabsData = useMemo(() => [
+        { id: 'general', label: 'General Information' },
+        { id: 'inclusions', label: 'Inclusions' },
+        { id: 'locations', label: 'Locations' },
+        { id: 'policies', label: 'Cancellation Policy' },
+        { id: 'addons', label: 'Add-ons' }
+    ], []);
+
+    const renderDetailsPanel = useCallback((_exp: any, activeTab: string, dirtyState: any) => {
+        if (!selectedExperience) return null;
+
+        // Transformation logic moved inside to ensure it depends on the correct selectedExperience
+        // and we use a memoized version if possible, but actually we can just use _exp which is selectedItem
+        const tabs = getExperienceTabs({
             experience: {
-                ...selectedExperience,
-                title: selectedExperience.name,
-                price: `₹${selectedExperience.basePrice || 0}`,
-                status: selectedExperience.isActive ? 'Active' : 'Inactive'
+                ..._exp,
+                title: _exp.name,
+                price: `₹${_exp.basePrice || 0}`,
+                status: _exp.isActive ? 'Active' : 'Inactive'
             },
             experienceDetail,
             inclusions,
             cancellationPolicies,
             subCategories,
             onToggleCancellationPolicy: (policyId: number, isAssociate: boolean) => {
-                toggleCancellationPolicy(selectedExperience.id, policyId, isAssociate);
+                toggleCancellationPolicy(_exp.id, policyId, isAssociate);
             },
             onToggleInclusion: (inclusionId: number, isAssociate: boolean) => {
-                toggleInclusion(selectedExperience.id, inclusionId, isAssociate);
+                toggleInclusion(_exp.id, inclusionId, isAssociate);
             },
             onAssociateLocation: (locationId: number, timeSlotId: number, data: any) => {
-                associateLocation(selectedExperience.id, locationId, timeSlotId, data);
+                associateLocation(_exp.id, locationId, timeSlotId, data);
             },
             onUpdateLocation: (locationId: number, timeSlotId: number, data: any) => {
-                updateExperienceLocation(selectedExperience.id, locationId, timeSlotId, data);
+                updateExperienceLocation(_exp.id, locationId, timeSlotId, data);
             },
             onDisassociateLocation: (locationId: number, timeSlotId: number) => {
-                disassociateLocation(selectedExperience.id, locationId, timeSlotId);
+                disassociateLocation(_exp.id, locationId, timeSlotId);
             },
             onToggleAddon: (addonId: number, isAssociate: boolean, data?: any) => {
-                toggleAddon(selectedExperience.id, addonId, isAssociate, data);
+                toggleAddon(_exp.id, addonId, isAssociate, data);
             },
             updateExperience,
             locations,
             addons,
             slots,
+            onDirtyChange: dirtyState.handleDirtyChange
         });
-    }, [selectedExperience, experienceDetail, inclusions, cancellationPolicies, subCategories, locations, addons, slots, toggleCancellationPolicy, toggleInclusion, updateExperience, associateLocation, updateExperienceLocation, disassociateLocation, toggleAddon]);
-
-    const renderDetailsPanel = useCallback((_exp: any, activeTab: string, _dirtyState: any) => {
-        return tabsData.find(t => t.id === activeTab)?.content || null;
-    }, [tabsData]);
+        return tabs.find(t => t.id === activeTab)?.content || null;
+    }, [experienceDetail, inclusions, cancellationPolicies, subCategories, locations, addons, slots, toggleCancellationPolicy, toggleInclusion, updateExperience, associateLocation, updateExperienceLocation, disassociateLocation, toggleAddon]);
 
     const customFilter = useCallback((exp: any, activeFilters: Record<string, string[]>) => {
         let matchStatus = true;

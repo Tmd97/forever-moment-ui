@@ -114,13 +114,14 @@ export const AddonSplitView = ({
         );
     }, []);
 
-    const renderDetailsPanel = useCallback((addon: any, activeTab: string, _dirtyState: any) => {
+    const renderDetailsPanel = useCallback((addon: any, activeTab: string, dirtyState: any) => {
         if (activeTab === 'general') {
             return (
                 <div className="pt-2">
                     <AddonDetails
                         addon={addon}
                         updateAddon={updateAddon}
+                        onDirtyChange={dirtyState.handleDirtyChange}
                     />
                 </div>
             );

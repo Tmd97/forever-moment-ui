@@ -142,13 +142,14 @@ export const SubCategorySplitView = ({
         );
     }, []);
 
-    const renderDetailsPanel = useCallback((sc: any, activeTab: string, _dirtyState: any) => {
+    const renderDetailsPanel = useCallback((sc: any, activeTab: string, dirtyState: any) => {
         if (activeTab === "general") {
             return (
                 <SubCategoryDetails
                     subCategory={sc}
                     categories={categories}
                     updateSubCategory={updateSubCategory}
+                    onDirtyChange={dirtyState.handleDirtyChange}
                 />
             );
         }

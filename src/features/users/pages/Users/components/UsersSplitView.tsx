@@ -125,7 +125,7 @@ export const UsersSplitView = ({
         );
     }, [roles]);
 
-    const renderDetailsPanel = useCallback((user: any, activeTab: string, _dirtyState: any) => {
+    const renderDetailsPanel = useCallback((user: any, activeTab: string, dirtyState: any) => {
         if (activeTab === "general") {
             const activeRoleIds = user?.roleIds && user.roleIds.length > 0 ? user.roleIds : (user?.roleId != null ? [user.roleId] : []);
             const roleNames = activeRoleIds.map((id: number) => roles?.find((r: any) => r.id === id)?.roleName).filter(Boolean).join(', ');
@@ -136,6 +136,7 @@ export const UsersSplitView = ({
                     user={{ ...user, role: selectedRoleNameStr, rolesData: roles }}
                     onEdit={() => handleOpenModal(user)}
                     updateUser={updateUser}
+                    onDirtyChange={dirtyState.handleDirtyChange}
                 />
             );
         }
