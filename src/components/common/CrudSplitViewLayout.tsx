@@ -8,6 +8,7 @@ import type { FilterCategory } from '@/components/common/Filter';
 import { Tabs } from '@/components/common/Tabs';
 import { UnsavedChangesModal } from '@/components/common/UnsavedChangesModal';
 import { useBlocker } from 'react-router-dom';
+import { cn } from '@/utils/cn';
 
 export interface CrudSplitViewLayoutProps<T> {
     data: T[];
@@ -48,6 +49,7 @@ export interface CrudSplitViewLayoutProps<T> {
     onAdd?: () => void;
     emptyStateIcon?: React.ReactNode;
     renderCustomDetailsHeader?: (item: T) => React.ReactNode;
+    detailsPanelClassName?: string;
 }
 
 export function CrudSplitViewLayout<T>({
@@ -69,7 +71,8 @@ export function CrudSplitViewLayout<T>({
     customSearch,
     onAdd,
     emptyStateIcon = "📝",
-    renderCustomDetailsHeader
+    renderCustomDetailsHeader,
+    detailsPanelClassName
 }: CrudSplitViewLayoutProps<T>) {
     const defaultTab = tabs.length > 0 ? tabs[0].id : "";
     const [tab, setTab] = useState(defaultTab);
@@ -257,7 +260,7 @@ export function CrudSplitViewLayout<T>({
 
                 {/* Detail Panel Container */}
                 <div className="flex-1 flex bg-slate-50 dark:bg-gray-900/40 p-3 h-full overflow-hidden">
-                    <div className="flex-1 flex bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm relative">
+                    <div className={cn("flex-1 flex bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm relative", detailsPanelClassName)}>
                         {/* Vertical Tab Nav (Left) */}
                         {tabs.length > 0 && (
                             <Tabs
@@ -279,11 +282,12 @@ export function CrudSplitViewLayout<T>({
                             </button>
                             {renderCustomDetailsHeader && selectedItem && renderCustomDetailsHeader(selectedItem)}
                             {/* Tab Content Area */}
-                            <div className="flex-1 overflow-y-auto p-8 pt-4 relative">
-                                <div className="max-w-4xl">
+                            <div className="flex-1 min-h-0 overflow-y-auto p-8 pt-4 relative">
+                                <div className="max-w-4xl flex flex-col w-full">
                                     {selectedItem && renderDetailsPanel(selectedItem, tab, { isDirty, handleDirtyChange })}
                                 </div>
                             </div>
+                            <div id="crud-tab-footer-portal" className="shrink-0 w-full z-[70]" />
                         </div>
                     </div>
                 </div>

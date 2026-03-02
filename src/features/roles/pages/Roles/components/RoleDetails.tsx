@@ -147,7 +147,7 @@ export const RoleDetails = ({ role, updateRole, onDirtyChange }: RoleDetailsProp
                 isSaving={isSaving}
                 onSave={handleSave}
                 onDiscard={handleDiscard}
-                changeCount={changes.length}
+                changes={changes}
             />
         </div>
     );

@@ -191,7 +191,7 @@ export const CategoryDetails = ({ category, updateCategory, onDirtyChange }: Cat
                 isSaving={isSaving}
                 onSave={handleFinalSave}
                 onDiscard={handleDiscard}
-                changeCount={changes.length}
+                changes={changes}
             />
         </div>
     );

@@ -218,7 +218,7 @@ export const SubCategoryDetails = ({ subCategory, categories, updateSubCategory,
                 isSaving={isSaving}
                 onSave={handleFinalSave}
                 onDiscard={handleDiscard}
-                changeCount={changes.length}
+                changes={changes}
             />
         </div>
     );

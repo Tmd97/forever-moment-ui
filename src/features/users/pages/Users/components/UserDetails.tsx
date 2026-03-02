@@ -167,7 +167,7 @@ export const UserDetails = ({ user, updateUser, onDirtyChange }: UserDetailsProp
                 isSaving={isSaving}
                 onSave={handleSave}
                 onDiscard={handleDiscard}
-                changeCount={changes.length}
+                changes={changes}
             />
         </div>
     );

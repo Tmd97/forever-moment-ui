@@ -180,7 +180,7 @@ export const SlotDetails = ({ slot, updateSlot, onDirtyChange }: SlotDetailsProp
                 isSaving={isSaving}
                 onSave={handleSave}
                 onDiscard={handleDiscard}
-                changeCount={changes.length}
+                changes={changes}
             />
         </div>
     );

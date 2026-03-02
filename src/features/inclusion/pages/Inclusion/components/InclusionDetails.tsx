@@ -146,7 +146,7 @@ export const InclusionDetails = ({ inclusion, updateInclusion, onDirtyChange }: 
                 isSaving={isSaving}
                 onSave={handleSave}
                 onDiscard={handleDiscard}
-                changeCount={changes.length}
+                changes={changes}
             />
         </div>
     );

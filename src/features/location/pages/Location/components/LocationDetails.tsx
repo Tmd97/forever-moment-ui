@@ -174,7 +174,7 @@ export const LocationDetails = ({ location, updateLocation, onDirtyChange }: any
                 isSaving={isSaving}
                 onSave={handleFinalSave}
                 onDiscard={handleDiscard}
-                changeCount={changes.length}
+                changes={changes}
             />
         </div>
     );

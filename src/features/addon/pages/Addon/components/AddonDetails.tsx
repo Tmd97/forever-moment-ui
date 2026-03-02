@@ -200,7 +200,7 @@ export const AddonDetails = ({ addon, updateAddon, onDirtyChange }: AddonDetails
                 isSaving={isSaving}
                 onSave={handleFinalSave}
                 onDiscard={handleDiscard}
-                changeCount={changes.length}
+                changes={changes}
             />
         </div>
     );

@@ -165,7 +165,7 @@ export const CancellationPolicyDetails = ({ cancellationPolicy, updateCancellati
                 isSaving={isSaving}
                 onSave={handleSave}
                 onDiscard={handleDiscard}
-                changeCount={changes.length}
+                changes={changes}
             />
         </div>
     );

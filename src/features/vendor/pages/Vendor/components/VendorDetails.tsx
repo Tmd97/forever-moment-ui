@@ -217,7 +217,7 @@ export const VendorDetails = ({ vendor, onEdit, updateVendor, onDirtyChange }: V
                 isSaving={isSaving}
                 onSave={handleSave}
                 onDiscard={handleDiscard}
-                changeCount={changes.length}
+                changes={changes}
             />
         </div>
     );

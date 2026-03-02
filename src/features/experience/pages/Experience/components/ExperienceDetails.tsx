@@ -395,7 +395,7 @@ const GeneralInfoTab = ({ experience, experienceDetail, updateExperience, subCat
                 isSaving={isSaving}
                 onSave={handleFinalSave}
                 onDiscard={handleDiscard}
-                changeCount={changes.length}
+                changes={changes}
             />
         </div>
     );
