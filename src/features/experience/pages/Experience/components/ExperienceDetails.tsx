@@ -10,6 +10,7 @@ import { cn } from '@/utils/cn';
 import { Cell, FieldGrid, FieldLabel, SectionLabel } from '@/components/common/DetailsLayout';
 import { TabFooter } from '@/components/common/TabFooter';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { TABS } from '@/config/constants';
 import type { ExperienceType } from './Experience';
 import type { SidePanelTab } from '@/components/common/SidePanelTabs';
 
@@ -401,8 +402,8 @@ const GeneralInfoTab = ({ experience, experienceDetail, updateExperience, subCat
 export const getExperienceTabs = (params: ExperienceDetailsProps): SidePanelTab[] => {
     return [
         {
-            id: 'general',
-            label: 'General Information',
+            id: TABS.GENERAL.id,
+            label: TABS.GENERAL.label,
             content: (
                 <GeneralInfoTab
                     experience={params.experience}
@@ -414,8 +415,8 @@ export const getExperienceTabs = (params: ExperienceDetailsProps): SidePanelTab[
             )
         },
         {
-            id: 'inclusions',
-            label: 'Inclusions',
+            id: TABS.INCLUSIONS.id,
+            label: TABS.INCLUSIONS.label,
             content: (
                 <InclusionsTab
                     inclusions={params.inclusions}
@@ -425,8 +426,8 @@ export const getExperienceTabs = (params: ExperienceDetailsProps): SidePanelTab[
             )
         },
         {
-            id: 'locations',
-            label: 'Locations',
+            id: TABS.LOCATIONS.id,
+            label: TABS.LOCATIONS.label,
             content: (
                 <LocationTab
                     availableLocations={params.locations}
@@ -439,8 +440,8 @@ export const getExperienceTabs = (params: ExperienceDetailsProps): SidePanelTab[
             )
         },
         {
-            id: 'policies',
-            label: 'Cancellation Policy',
+            id: TABS.POLICIES.id,
+            label: TABS.POLICIES.label,
             content: (
                 <CancellationPolicyTab
                     cancellationPolicies={params.cancellationPolicies}
@@ -450,8 +451,8 @@ export const getExperienceTabs = (params: ExperienceDetailsProps): SidePanelTab[
             )
         },
         {
-            id: 'addons',
-            label: 'Add-ons',
+            id: TABS.ADDONS.id,
+            label: TABS.ADDONS.label,
             content: (
                 <AddonsTab
                     availableAddons={params.addons}

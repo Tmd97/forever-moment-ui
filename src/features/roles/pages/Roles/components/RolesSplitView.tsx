@@ -5,6 +5,7 @@ import { RowActions } from '@/components/common/RowActions';
 import { Shield } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
+import { TABS } from '@/config/constants';
 import type { RoleType } from './Roles';
 
 const roleColors = [
@@ -130,7 +131,7 @@ export const RolesSplitView = ({
     }, []);
 
     const renderDetailsPanel = useCallback((r: any, activeTab: string, dirtyState: any) => {
-        if (activeTab === "general") {
+        if (activeTab === TABS.GENERAL.id) {
             return (
                 <RoleDetails
                     role={r}
@@ -167,7 +168,7 @@ export const RolesSplitView = ({
             columns={columns}
             keyExtractor={(item: any) => item.id}
             renderListItem={renderListItem}
-            tabs={[{ id: "general", label: "General Info" }]}
+            tabs={[{ id: TABS.GENERAL.id, label: TABS.GENERAL.labelShort }]}
             renderDetailsPanel={renderDetailsPanel}
             filterConfig={[
                 {

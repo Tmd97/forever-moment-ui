@@ -5,6 +5,7 @@ import { RowActions } from '@/components/common/RowActions';
 import { Store } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
+import { TABS } from '@/config/constants';
 import type { Vendor } from './Vendor';
 
 const vendorInitials = (name: string) => name ? name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'VD';
@@ -135,7 +136,7 @@ export const VendorSplitView = ({
     }, []);
 
     const renderDetailsPanel = useCallback((v: any, activeTab: string, dirtyState: any) => {
-        if (activeTab === "general") {
+        if (activeTab === TABS.GENERAL.id) {
             return (
                 <VendorDetails
                     vendor={v}
@@ -205,7 +206,7 @@ export const VendorSplitView = ({
             columns={columns}
             keyExtractor={(item: any) => item.id}
             renderListItem={renderListItem}
-            tabs={[{ id: "general", label: "General Info" }]}
+            tabs={[{ id: TABS.GENERAL.id, label: TABS.GENERAL.labelShort }]}
             renderDetailsPanel={renderDetailsPanel}
             filterConfig={[
                 {

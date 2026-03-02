@@ -4,6 +4,7 @@ import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { cn } from '@/utils/cn';
 import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
+import { TABS } from '@/config/constants';
 
 const categoryInitials = (name: string) => name ? name.slice(0, 2).toUpperCase() : 'CA';
 
@@ -133,7 +134,7 @@ export const CategorySplitView = ({
     }, []);
 
     const renderDetailsPanel = useCallback((cat: any, activeTab: string, dirtyState: any) => {
-        if (activeTab === "general") {
+        if (activeTab === TABS.GENERAL.id) {
             return (
                 <CategoryDetails
                     category={cat}
@@ -165,7 +166,7 @@ export const CategorySplitView = ({
             keyExtractor={(item: any) => item.id}
             onDragReorder={handleDragReorder}
             renderListItem={renderListItem}
-            tabs={[{ id: "general", label: "General Info" }]}
+            tabs={[{ id: TABS.GENERAL.id, label: TABS.GENERAL.labelShort }]}
             renderDetailsPanel={renderDetailsPanel}
             searchFields={['name']}
             filterConfig={[

@@ -7,6 +7,7 @@ import { PackageOpen } from 'lucide-react';
 import type { AddonType } from '@/features/addon/store/action-types';
 import { cn } from '@/utils/cn';
 import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
+import { TABS } from '@/config/constants';
 
 export const AddonSplitView = ({
     addons,
@@ -115,7 +116,7 @@ export const AddonSplitView = ({
     }, []);
 
     const renderDetailsPanel = useCallback((addon: any, activeTab: string, dirtyState: any) => {
-        if (activeTab === 'general') {
+        if (activeTab === TABS.GENERAL.id) {
             return (
                 <div className="pt-2">
                     <AddonDetails
@@ -152,7 +153,7 @@ export const AddonSplitView = ({
             columns={columns}
             keyExtractor={(item: any) => item.id}
             renderListItem={renderListItem}
-            tabs={[{ id: 'general', label: 'General Info' }]}
+            tabs={[{ id: TABS.GENERAL.id, label: TABS.GENERAL.labelShort }]}
             renderDetailsPanel={renderDetailsPanel}
             filterConfig={[
                 {

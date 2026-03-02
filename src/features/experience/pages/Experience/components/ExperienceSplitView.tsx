@@ -5,6 +5,7 @@ import { EditableFeatureBadge } from '@/components/common/EditableFeatureBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { cn } from '@/utils/cn';
 import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
+import { TABS } from '@/config/constants';
 
 const expInitials = (name: string) => name ? name.slice(0, 2).toUpperCase() : 'EX';
 
@@ -159,11 +160,11 @@ export const ExperienceSplitView = ({
     }, []);
 
     const tabsData = useMemo(() => [
-        { id: 'general', label: 'General Information' },
-        { id: 'inclusions', label: 'Inclusions' },
-        { id: 'locations', label: 'Locations' },
-        { id: 'policies', label: 'Cancellation Policy' },
-        { id: 'addons', label: 'Add-ons' }
+        { id: TABS.GENERAL.id, label: TABS.GENERAL.label },
+        { id: TABS.INCLUSIONS.id, label: TABS.INCLUSIONS.label },
+        { id: TABS.LOCATIONS.id, label: TABS.LOCATIONS.label },
+        { id: TABS.POLICIES.id, label: TABS.POLICIES.label },
+        { id: TABS.ADDONS.id, label: TABS.ADDONS.label }
     ], []);
 
     const renderDetailsPanel = useCallback((_exp: any, activeTab: string, dirtyState: any) => {

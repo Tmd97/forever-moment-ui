@@ -6,6 +6,7 @@ import { RowActions } from '@/components/common/RowActions';
 import { ImageDetails } from './ImageDetails';
 import { getImageUrl } from '@/features/images/store/api';
 import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
+import { TABS } from '@/config/constants';
 
 interface ImageSplitViewProps {
     images: any[];
@@ -189,7 +190,7 @@ export const ImageSplitView = ({
             columns={columns}
             keyExtractor={(item: any) => item.id}
             renderListItem={renderListItem}
-            tabs={[{ id: "general", label: "Details" }]}
+            tabs={[{ id: TABS.DETAILS.id, label: TABS.DETAILS.label }]}
             renderDetailsPanel={renderDetailsPanel}
             filterConfig={[
                 {

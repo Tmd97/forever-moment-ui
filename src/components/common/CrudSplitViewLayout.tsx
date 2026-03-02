@@ -77,7 +77,7 @@ export function CrudSplitViewLayout<T>({
     const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
     const [isDirty, setIsDirty] = useState(false);
     const [pendingChanges, setPendingChanges] = useState<any[]>([]);
-    const [pendingAction, setPendingAction] = useState<{ type: 'click' | 'close', data?: any } | null>(null);
+    const [pendingAction, setPendingAction] = useState<{ type: 'click' | 'close' | 'tab', data?: any } | null>(null);
 
     // Keep tab valid if tabs array changes
     useEffect(() => {
@@ -125,6 +125,14 @@ export function CrudSplitViewLayout<T>({
         } else {
             onSelectItem(item);
             setTab(defaultTab);
+        }
+    };
+
+    const handleTabChange = (newTab: string) => {
+        if (isDirty) {
+            setPendingAction({ type: 'tab', data: newTab });
+        } else {
+            setTab(newTab);
         }
     };
 
@@ -255,7 +263,7 @@ export function CrudSplitViewLayout<T>({
                             <Tabs
                                 tabs={tabs}
                                 activeTab={tab}
-                                onTabChange={setTab}
+                                onTabChange={handleTabChange}
                             />
                         )}
 
@@ -293,6 +301,8 @@ export function CrudSplitViewLayout<T>({
                                     setTab(defaultTab);
                                 } else if (pendingAction?.type === 'close') {
                                     onSelectItem(null);
+                                } else if (pendingAction?.type === 'tab') {
+                                    setTab(pendingAction.data);
                                 }
                                 setIsDirty(false);
                                 setPendingChanges([]);

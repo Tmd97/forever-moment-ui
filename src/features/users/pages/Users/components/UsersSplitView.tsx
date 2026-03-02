@@ -3,6 +3,7 @@ import { UserDetails } from './UserDetails';
 import { RowActions } from '@/components/common/RowActions';
 import { cn } from '@/utils/cn';
 import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
+import { TABS } from '@/config/constants';
 import type { UserType } from './Users';
 
 const userInitials = (name: string) => name ? name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'US';
@@ -126,7 +127,7 @@ export const UsersSplitView = ({
     }, [roles]);
 
     const renderDetailsPanel = useCallback((user: any, activeTab: string, dirtyState: any) => {
-        if (activeTab === "general") {
+        if (activeTab === TABS.GENERAL.id) {
             const activeRoleIds = user?.roleIds && user.roleIds.length > 0 ? user.roleIds : (user?.roleId != null ? [user.roleId] : []);
             const roleNames = activeRoleIds.map((id: number) => roles?.find((r: any) => r.id === id)?.roleName).filter(Boolean).join(', ');
             const selectedRoleNameStr = roleNames || user?.role || '-';
@@ -171,7 +172,7 @@ export const UsersSplitView = ({
             columns={columns}
             keyExtractor={(item: any) => item.id}
             renderListItem={renderListItem as any}
-            tabs={[{ id: "general", label: "General Info" }]}
+            tabs={[{ id: TABS.GENERAL.id, label: TABS.GENERAL.labelShort }]}
             renderDetailsPanel={renderDetailsPanel}
             filterConfig={[
                 {

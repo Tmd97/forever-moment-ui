@@ -4,6 +4,7 @@ import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { cn } from '@/utils/cn';
 import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
+import { TABS } from '@/config/constants';
 
 const subCategoryInitials = (name: string) => name ? name.slice(0, 2).toUpperCase() : 'SC';
 
@@ -143,7 +144,7 @@ export const SubCategorySplitView = ({
     }, []);
 
     const renderDetailsPanel = useCallback((sc: any, activeTab: string, dirtyState: any) => {
-        if (activeTab === "general") {
+        if (activeTab === TABS.GENERAL.id) {
             return (
                 <SubCategoryDetails
                     subCategory={sc}
@@ -194,7 +195,7 @@ export const SubCategorySplitView = ({
             columns={columns}
             keyExtractor={(item: any) => item.id}
             renderListItem={renderListItem}
-            tabs={[{ id: "general", label: "General Info" }]}
+            tabs={[{ id: TABS.GENERAL.id, label: TABS.GENERAL.labelShort }]}
             renderDetailsPanel={renderDetailsPanel}
             filterConfig={[
                 {

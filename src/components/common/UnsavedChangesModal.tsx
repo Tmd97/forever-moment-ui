@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Dialog, DialogContent } from './Dialog';
-import { AlertTriangle, XCircle } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface ChangeDetail {
     field: string;
@@ -28,44 +29,62 @@ export const UnsavedChangesModal = ({
     changeCount = 0,
     changes = [],
 }: UnsavedChangesModalProps) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-[580px] p-0 overflow-hidden border-none bg-[#faf8f5] shadow-[0_32px_64px_rgba(0,0,0,0.14)] rounded-[20px]">
                 <div className="relative p-10 pt-12 pb-8">
-                    {/* Close button */}
-                    <button
-                        onClick={onClose}
-                        className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#ede9e3] text-[#6b6560] flex items-center justify-center transition-all hover:bg-[#e0dbd4] hover:scale-105"
-                    >
-                        <XCircle size={18} />
-                    </button>
-
                     {/* Icon */}
                     <div className="w-[52px] h-[52px] rounded-xl bg-gradient-to-br from-[#eff6ff] to-[#dbeafe] border-[1.5px] border-[#bfdbfe] flex items-center justify-center mb-5">
                         <AlertTriangle className="text-[#2563eb]" size={24} />
                     </div>
 
-                    {/* Unsaved Badge with hover tooltip */}
+                    {/* Unsaved Badge - Clickable for details */}
                     {changeCount > 0 && (
-                        <div className="group relative inline-flex">
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-4 text-[12px] font-semibold text-[#b35c00] bg-[#fff3e0] border border-[#ffe0b2] rounded-full cursor-help whitespace-nowrap">
+                        <div className="mb-4">
+                            <button
+                                onClick={() => setIsExpanded(!isExpanded)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold text-[#b35c00] bg-[#fff3e0] border border-[#ffe0b2] rounded-full transition-all hover:bg-[#ffe0b2] active:scale-95 shadow-sm group"
+                            >
                                 <span className="w-1.5 h-1.5 rounded-full bg-[#f57c00] animate-pulse" />
                                 {changeCount} unsaved {changeCount === 1 ? 'change' : 'changes'}
-                            </div>
+                                {isExpanded ? <ChevronUp size={14} className="ml-1" /> : <ChevronDown size={14} className="ml-1" />}
+                            </button>
 
-                            {/* Hover Details Tooltip */}
-                            {changes.length > 0 && (
-                                <div className="absolute top-full left-0 mt-1 w-64 p-3 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-slate-100 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
-                                    <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Change Details</div>
-                                    <div className="space-y-2 max-h-[150px] overflow-y-auto pr-1">
+                            {/* Details Panel - Expands on click */}
+                            {isExpanded && changes.length > 0 && (
+                                <div className="mt-3 bg-white/60 backdrop-blur-md rounded-2xl border border-[#ede9e3] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <div className="px-5 py-3 border-b border-[#f0ede9] bg-[#fdfcfb]">
+                                        <div className="text-[10px] font-bold text-[#a19992] uppercase tracking-[0.08em]">Detailed Changes</div>
+                                    </div>
+                                    <div className="p-4 space-y-3 max-h-[220px] overflow-y-auto scrollbar-thin">
                                         {changes.map((change, idx) => (
-                                            <div key={idx} className="text-[12px] leading-tight">
-                                                <div className="font-semibold text-slate-700 dark:text-slate-200">{change.field}</div>
-                                                <div className="flex items-center gap-1.5 mt-0.5">
-                                                    <span className="text-slate-400 line-through truncate max-w-[80px]">{String(change.original || 'Empty')}</span>
-                                                    <span className="text-slate-300">→</span>
-                                                    <span className="text-blue-600 font-medium truncate max-w-[80px]">{String(change.current || 'Empty')}</span>
+                                            <div key={idx} className="group/item">
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <span className="text-[12px] font-bold text-[#3d3830]">{change.field}</span>
                                                 </div>
+                                                <div className="flex flex-col gap-1.5 ml-1">
+                                                    <div className="flex items-center gap-2 group/val">
+                                                        <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-[#fef2f2] text-[#991b1b] font-bold uppercase tracking-wider min-w-[32px] text-center">Was</span>
+                                                        <span
+                                                            className="text-[13px] text-[#6b6560] truncate max-w-[380px] hover:text-[#3d3830] transition-colors cursor-help"
+                                                            title={String(change.original || 'Empty')}
+                                                        >
+                                                            {String(change.original || 'Empty')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 group/val">
+                                                        <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-[#f0f9ff] text-[#075985] font-bold uppercase tracking-wider min-w-[32px] text-center">Is</span>
+                                                        <span
+                                                            className="text-[13px] text-[#0369a1] font-semibold truncate max-w-[380px] hover:text-[#0c4a6e] transition-colors cursor-help"
+                                                            title={String(change.current || 'Empty')}
+                                                        >
+                                                            {String(change.current || 'Empty')}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                {idx < changes.length - 1 && <div className="mt-3 border-b border-dashed border-[#ede9e3]" />}
                                             </div>
                                         ))}
                                     </div>
