@@ -67,3 +67,15 @@ export const toggleExperienceActiveApi = async (id: number) => {
 export const toggleExperienceFeaturedApi = async (id: number) => {
     return await axios.patch(`/admin/experiences/${id}/toggle-featured`);
 };
+
+export const bulkAttachExperienceMediaApi = async (experienceId: number, data: { items: any[] }) => {
+    return await axios.post(`/admin/experiences/${experienceId}/media/bulk-attach`, data);
+};
+
+export const disassociateExperienceMediaApi = async (experienceId: number, mediaId: number) => {
+    return await axios.delete(`/admin/experiences/${experienceId}/media/${mediaId}`);
+};
+
+export const fetchExperienceMediaApi = async (experienceId: number) => {
+    return await axios.get(`/admin/experiences/${experienceId}/media`);
+};

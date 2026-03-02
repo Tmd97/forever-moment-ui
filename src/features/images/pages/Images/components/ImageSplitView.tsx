@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { cn } from '@/utils/cn';
 import { RowActions } from '@/components/common/RowActions';
 import { ImageDetails } from './ImageDetails';
-import { getImageUrl } from '@/features/images/store/api';
+import { getImageUrl, getMediaAssetUrl } from '@/features/images/store/api';
 import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
 import { TABS } from '@/config/constants';
 
@@ -38,6 +38,17 @@ export const ImageSplitView = ({
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
+    const getImageType = (img: any) => img.mimeType || img.contentType || '';
+    const getImageSize = (img: any) => img.fileSizeBytes || img.size || 0;
+    const getThumbnailSrc = (img: any) => {
+        if (!img) return '';
+        // If we have an ID, we can fetch via the dedicated image endpoint which is often more reliable
+        if (img.id) return getImageUrl(String(img.id));
+        // Fallbacks
+        if (img.thumbnailUrl) return getMediaAssetUrl(img.thumbnailUrl);
+        if (img.mediaUrl) return getMediaAssetUrl(img.mediaUrl);
+        return '';
+    };
 
     const columns = [
         {
@@ -47,7 +58,7 @@ export const ImageSplitView = ({
             render: (img: any) => (
                 <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 flex items-center justify-center shrink-0 shadow-sm">
                     <img
-                        src={getImageUrl(img.id)}
+                        src={getThumbnailSrc(img)}
                         alt={img.fileName}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -67,7 +78,7 @@ export const ImageSplitView = ({
             header: 'Size',
             accessorKey: 'size',
             className: 'w-[15%] min-w-[100px] py-4 px-6 text-left text-slate-600 dark:text-slate-300',
-            render: (img: any) => <span>{formatSize(img.size)}</span>
+            render: (img: any) => <span>{formatSize(getImageSize(img))}</span>
         },
         {
             header: 'Upload Date',
@@ -83,7 +94,7 @@ export const ImageSplitView = ({
             className: 'w-[10%] min-w-[100px] py-4 px-6 text-center',
             render: (img: any) => (
                 <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-gray-800 text-[10px] font-bold text-slate-500 uppercase tracking-wider border border-slate-200 dark:border-gray-700">
-                    {img.contentType?.split('/')[1] || 'IMG'}
+                    {getImageType(img)?.split('/')[1] || 'IMG'}
                 </span>
             )
         },
@@ -125,7 +136,7 @@ export const ImageSplitView = ({
                 )} />
                 <div className="w-11 h-11 rounded-lg bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 overflow-hidden shadow-sm shrink-0 ml-1">
                     <img
-                        src={getImageUrl(img.id)}
+                        src={getThumbnailSrc(img)}
                         alt=""
                         className="w-full h-full object-cover"
                         onError={(e) => (e.target as HTMLImageElement).src = 'https://placehold.co/100x100?text=ERR'}
@@ -137,9 +148,9 @@ export const ImageSplitView = ({
                         isSelected ? "text-blue-900 dark:text-blue-400" : "text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
                     )}>{img.fileName}</div>
                     <div className="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-2">
-                        <span>{formatSize(img.size)}</span>
+                        <span>{formatSize(getImageSize(img))}</span>
                         <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
-                        <span className="uppercase">{img.contentType?.split('/')[1] || 'IMG'}</span>
+                        <span className="uppercase">{getImageType(img)?.split('/')[1] || 'IMG'}</span>
                     </div>
                 </div>
                 <button
@@ -170,7 +181,7 @@ export const ImageSplitView = ({
     const customFilter = useCallback((img: any, activeFilters: Record<string, string[]>) => {
         let matchType = true;
         if (activeFilters.type && activeFilters.type.length > 0) {
-            const ext = img.contentType?.split('/')[1] || '';
+            const ext = getImageType(img)?.split('/')[1] || '';
             matchType = activeFilters.type.includes(ext.toLowerCase());
         }
         return matchType;

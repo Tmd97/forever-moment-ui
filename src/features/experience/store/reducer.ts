@@ -6,6 +6,7 @@ const initialState = {
     loading: false,
     error: null,
     status: 'IDLE',
+    experienceMedia: [],
 };
 
 export const experienceReducer = (state = initialState, action: any) => {
@@ -82,6 +83,20 @@ export const experienceReducer = (state = initialState, action: any) => {
 
         case types.RESET_STATUS:
             return { ...state, status: 'IDLE', error: null, selectedExperienceDetail: null };
+
+        case types.BULK_ATTACH_MEDIA:
+        case types.DISASSOCIATE_MEDIA:
+        case types.GET_EXPERIENCE_MEDIA:
+            return { ...state, loading: true, error: null };
+        case types.BULK_ATTACH_MEDIA_SUCCESS:
+        case types.DISASSOCIATE_MEDIA_SUCCESS:
+            return { ...state, loading: false };
+        case types.GET_EXPERIENCE_MEDIA_SUCCESS:
+            return { ...state, loading: false, experienceMedia: action.payload };
+        case types.BULK_ATTACH_MEDIA_FAILURE:
+        case types.DISASSOCIATE_MEDIA_FAILURE:
+        case types.GET_EXPERIENCE_MEDIA_FAILURE:
+            return { ...state, loading: false, error: action.payload };
 
         default:
             return state;

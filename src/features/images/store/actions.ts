@@ -21,15 +21,16 @@ export const getImages = () => async (dispatch: any) => {
     }
 };
 
-export const uploadImage = (file: File, metadata: any = {}) => async (dispatch: any) => {
+export const uploadImage = (files: File[], metadata: any = {}) => async (dispatch: any) => {
     dispatch({ type: types.UPLOAD_IMAGE });
     try {
-        const response = await uploadImageApi(file, metadata);
+        const response = await uploadImageApi(files, metadata);
         dispatch({
             type: types.UPLOAD_IMAGE_SUCCESS,
             payload: response.data,
         });
-        toast.success(response.data.msg || 'Image uploaded successfully');
+        const uploadedCount = response?.data?.response?.length || files.length;
+        toast.success(response.data.msg || `${uploadedCount} image${uploadedCount > 1 ? 's' : ''} uploaded successfully`);
         dispatch(getImages());
         return response.data;
     } catch (error: any) {

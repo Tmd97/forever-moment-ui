@@ -4,7 +4,8 @@ import {
     associateCancellationPolicyApi, disassociateCancellationPolicyApi,
     associateInclusionApi, disassociateInclusionApi,
     associateLocationApi, updateExperienceLocationApi, disassociateLocationApi,
-    associateAddonApi, disassociateAddonApi, toggleExperienceActiveApi, toggleExperienceFeaturedApi
+    associateAddonApi, disassociateAddonApi, toggleExperienceActiveApi, toggleExperienceFeaturedApi,
+    bulkAttachExperienceMediaApi, disassociateExperienceMediaApi, fetchExperienceMediaApi
 } from './api';
 
 export const getExperienceData = (isBackground: boolean = false) => async (dispatch: any) => {
@@ -301,3 +302,59 @@ export const toggleExperienceFeatured = (id: number) => async (dispatch: any) =>
 export const resetStatus = () => ({
     type: types.RESET_STATUS
 });
+
+export const bulkAttachMedia = (experienceId: number, data: { items: any[] }) => async (dispatch: any) => {
+    dispatch({ type: types.BULK_ATTACH_MEDIA });
+    try {
+        const response = await bulkAttachExperienceMediaApi(experienceId, data);
+        dispatch({
+            type: types.BULK_ATTACH_MEDIA_SUCCESS,
+            payload: response.data,
+        });
+        dispatch(getExperienceById(experienceId));
+        return response.data;
+    } catch (error: any) {
+        dispatch({
+            type: types.BULK_ATTACH_MEDIA_FAILURE,
+            payload: error.response?.data?.message || 'Failed to bulk attach media',
+        });
+        throw error;
+    }
+};
+
+export const disassociateMedia = (experienceId: number, mediaId: number) => async (dispatch: any) => {
+    dispatch({ type: types.DISASSOCIATE_MEDIA });
+    try {
+        const response = await disassociateExperienceMediaApi(experienceId, mediaId);
+        dispatch({
+            type: types.DISASSOCIATE_MEDIA_SUCCESS,
+            payload: response.data,
+        });
+        dispatch(getExperienceById(experienceId));
+        return response.data;
+    } catch (error: any) {
+        dispatch({
+            type: types.DISASSOCIATE_MEDIA_FAILURE,
+            payload: error.response?.data?.message || 'Failed to disassociate media',
+        });
+        throw error;
+    }
+};
+
+export const getExperienceMedia = (experienceId: number) => async (dispatch: any) => {
+    dispatch({ type: types.GET_EXPERIENCE_MEDIA });
+    try {
+        const response = await fetchExperienceMediaApi(experienceId);
+        dispatch({
+            type: types.GET_EXPERIENCE_MEDIA_SUCCESS,
+            payload: response.data.response || response.data,
+        });
+        return response.data.response || response.data;
+    } catch (error: any) {
+        dispatch({
+            type: types.GET_EXPERIENCE_MEDIA_FAILURE,
+            payload: error.response?.data?.message || 'Failed to fetch experience media',
+        });
+        throw error;
+    }
+};

@@ -15,7 +15,7 @@ interface ImagesProps {
     error: string | null;
     status: string;
     getImages: () => void;
-    uploadImage: (file: File, metadata: any) => Promise<any>;
+    uploadImage: (files: File[], metadata: any) => Promise<any>;
     deleteImage: (id: string) => Promise<any>;
     downloadImage: (id: string, fileName: string) => void;
     getImageMetadata: (id: string) => void;
@@ -66,9 +66,9 @@ const Images = ({
         }
     }, [error, resetStatus]);
 
-    const handleUpload = async (file: File, metadata: any) => {
+    const handleUpload = async (files: File[], metadata: any) => {
         try {
-            await uploadImage(file, metadata);
+            await uploadImage(files, metadata);
         } catch (e) {
             console.error("Upload failed", e);
         }

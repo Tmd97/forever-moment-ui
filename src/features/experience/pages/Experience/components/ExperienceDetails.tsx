@@ -5,6 +5,7 @@ import { InclusionsTab } from './InclusionsTab';
 import { CancellationPolicyTab } from './CancellationPolicyTab';
 import { LocationTab } from './LocationTab';
 import { AddonsTab } from './AddonsTab';
+import { ExperienceImages } from './ExperienceImages';
 import { Dropdown } from '@/components/common/Dropdown';
 import { cn } from '@/utils/cn';
 import { Cell, FieldGrid, FieldLabel, SectionLabel } from '@/components/common/DetailsLayout';
@@ -31,6 +32,12 @@ interface ExperienceDetailsProps {
     onToggleAddon: (addonId: number, isAssociate: boolean, data?: any) => void;
     updateExperience: (id: number, data: any) => Promise<any>;
     slots: any[];
+    images: any[];
+    getImages: () => void;
+    experienceMedia: any[];
+    getExperienceMedia: (experienceId: number) => Promise<any>;
+    bulkAttachMedia: (experienceId: number, data: { items: any[] }) => Promise<any>;
+    disassociateMedia: (experienceId: number, mediaId: number) => Promise<any>;
     onDirtyChange?: (isDirty: boolean, changes: any[]) => void;
 }
 
@@ -460,6 +467,21 @@ export const getExperienceTabs = (params: ExperienceDetailsProps): SidePanelTab[
                     availableAddons={params.addons}
                     experienceAddons={params.experienceDetail?.addons || []}
                     onToggleAddon={params.onToggleAddon}
+                />
+            )
+        },
+        {
+            id: TABS.IMAGES.id,
+            label: TABS.IMAGES.label,
+            content: (
+                <ExperienceImages
+                    experienceId={params.experienceDetail?.id}
+                    experienceMedia={params.experienceMedia}
+                    getExperienceMedia={params.getExperienceMedia}
+                    availableImages={params.images}
+                    getImages={params.getImages}
+                    bulkAttachMedia={params.bulkAttachMedia}
+                    disassociateMedia={params.disassociateMedia}
                 />
             )
         }

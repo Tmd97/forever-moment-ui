@@ -48,6 +48,12 @@ interface ExperienceProps {
     getSlotData: () => void;
     toggleExperienceActive: (id: number) => Promise<any>;
     toggleExperienceFeatured: (id: number) => Promise<any>;
+    images: any[];
+    getImages: () => void;
+    experienceMedia: any[];
+    getExperienceMedia: (experienceId: number) => Promise<any>;
+    bulkAttachMedia: (experienceId: number, data: { items: any[] }) => Promise<any>;
+    disassociateMedia: (experienceId: number, mediaId: number) => Promise<any>;
 }
 
 const Experience = ({
@@ -83,6 +89,12 @@ const Experience = ({
     getSlotData,
     toggleExperienceActive,
     toggleExperienceFeatured,
+    images,
+    getImages,
+    experienceMedia,
+    getExperienceMedia,
+    bulkAttachMedia,
+    disassociateMedia,
 }: ExperienceProps) => {
 
     const [experiences, setExperiences] = useState<ExperienceType[]>([]);
@@ -246,6 +258,12 @@ const Experience = ({
                 slots={slots}
                 toggleExperienceActive={toggleExperienceActive}
                 toggleExperienceFeatured={toggleExperienceFeatured}
+                images={images}
+                getImages={getImages}
+                experienceMedia={experienceMedia}
+                getExperienceMedia={getExperienceMedia}
+                bulkAttachMedia={bulkAttachMedia}
+                disassociateMedia={disassociateMedia}
             />
 
             <Modal

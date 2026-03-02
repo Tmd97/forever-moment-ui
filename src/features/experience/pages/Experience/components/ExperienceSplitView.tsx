@@ -42,7 +42,13 @@ export const ExperienceSplitView = ({
     toggleAddon,
     slots,
     toggleExperienceActive,
-    toggleExperienceFeatured
+    toggleExperienceFeatured,
+    images,
+    getImages,
+    experienceMedia,
+    getExperienceMedia,
+    bulkAttachMedia,
+    disassociateMedia
 }: any) => {
 
     const columns = [
@@ -164,7 +170,8 @@ export const ExperienceSplitView = ({
         { id: TABS.INCLUSIONS.id, label: TABS.INCLUSIONS.label },
         { id: TABS.LOCATIONS.id, label: TABS.LOCATIONS.label },
         { id: TABS.POLICIES.id, label: TABS.POLICIES.label },
-        { id: TABS.ADDONS.id, label: TABS.ADDONS.label }
+        { id: TABS.ADDONS.id, label: TABS.ADDONS.label },
+        // { id: TABS.IMAGES.id, label: TABS.IMAGES.label }
     ], []);
 
     const renderDetailsPanel = useCallback((_exp: any, activeTab: string, dirtyState: any) => {
@@ -205,10 +212,16 @@ export const ExperienceSplitView = ({
             locations,
             addons,
             slots,
+            images,
+            getImages,
+            experienceMedia,
+            getExperienceMedia,
+            bulkAttachMedia,
+            disassociateMedia,
             onDirtyChange: dirtyState.handleDirtyChange
         });
         return tabs.find(t => t.id === activeTab)?.content || null;
-    }, [experienceDetail, inclusions, cancellationPolicies, subCategories, locations, addons, slots, toggleCancellationPolicy, toggleInclusion, updateExperience, associateLocation, updateExperienceLocation, disassociateLocation, toggleAddon]);
+    }, [experienceDetail, inclusions, cancellationPolicies, subCategories, locations, addons, slots, images, experienceMedia, toggleCancellationPolicy, toggleInclusion, updateExperience, associateLocation, updateExperienceLocation, disassociateLocation, toggleAddon, bulkAttachMedia, disassociateMedia, getImages, getExperienceMedia]);
 
     const customFilter = useCallback((exp: any, activeFilters: Record<string, string[]>) => {
         let matchStatus = true;

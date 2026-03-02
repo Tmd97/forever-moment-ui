@@ -15,7 +15,11 @@ import {
     toggleAddon,
     toggleExperienceActive,
     toggleExperienceFeatured,
+    bulkAttachMedia,
+    disassociateMedia,
+    getExperienceMedia,
 } from '@/features/experience/store/actions';
+import { getImages } from '@/features/images/store/actions';
 import { getSubCategoryData } from '@/features/subCategory/store/actions';
 import { getInclusionData } from '@/features/inclusion/store/actions';
 import { getCancellationPolicyData } from '@/features/cancellationPolicy/store/actions';
@@ -37,6 +41,8 @@ const mapStateToProps = (state: RootState) => ({
     locations: state.location?.data || [],
     addons: state.addon?.data || [],
     slots: state.slot?.data || [],
+    images: state.image?.data || [],
+    experienceMedia: state.experience.experienceMedia || [],
 });
 
 const mapDispatchToProps = {
@@ -61,6 +67,10 @@ const mapDispatchToProps = {
     getSlotData,
     toggleExperienceActive,
     toggleExperienceFeatured,
+    bulkAttachMedia,
+    disassociateMedia,
+    getExperienceMedia,
+    getImages,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Experience);
