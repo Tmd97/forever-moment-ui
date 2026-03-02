@@ -1,12 +1,12 @@
 // Placeholder for webEncryptDecrypt.ts
 // This file is required by Http.ts
 
-export const decryptData = async (data: any, iv: any) => {
+export const decryptData = async (data: any, _iv: any) => {
     console.warn('decryptData not implemented');
     return data;
 };
 
-export const encryptData = async (data: any, iv: any) => {
+export const encryptData = async (data: any, _iv: any) => {
     console.warn('encryptData not implemented');
     return data;
 };

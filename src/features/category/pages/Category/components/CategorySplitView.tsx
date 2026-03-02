@@ -1,16 +1,9 @@
-import { useState, useMemo, useCallback } from 'react';
-import { Button } from '@/components/common/Button';
+import { useCallback } from 'react';
 import { CategoryDetails } from './CategoryDetails';
-import { DataTable } from '@/components/common/DataTable';
 import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
-import { SearchBar } from '@/components/common/SearchBar';
-import { Plus, X } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import { Filter } from '@/components/common/Filter';
-import { Tabs } from '@/components/common/Tabs';
-import { UnsavedChangesModal } from '@/components/common/UnsavedChangesModal';
-import { useBlocker } from 'react-router-dom';
+import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
 
 const categoryInitials = (name: string) => name ? name.slice(0, 2).toUpperCase() : 'CA';
 
@@ -34,344 +27,159 @@ export const CategorySplitView = ({
     handleDragReorder,
     updateCategory
 }: any) => {
-    const [tab, setTab] = useState("general");
-    const [search, setSearch] = useState("");
-    const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
-    const [isDirty, setIsDirty] = useState(false);
-    const [pendingChanges, setPendingChanges] = useState<any[]>([]);
-    const [pendingAction, setPendingAction] = useState<{ type: 'click' | 'close', data?: any } | null>(null);
 
-    // Block navigation via router
-    const blocker = useBlocker(
-        ({ currentLocation, nextLocation }) =>
-            isDirty && currentLocation.pathname !== nextLocation.pathname
-    );
+    const columns = [
+        {
+            header: 'Name',
+            accessorKey: 'name',
+            className: 'w-[25%] min-w-[150px] py-4 px-6 text-left font-semibold text-slate-900 dark:text-white whitespace-nowrap',
+            render: (cat: any) => {
+                const colorInfo = getColorForCategory(cat.id);
+                return (
+                    <div className="flex items-center gap-3">
+                        <div className={cn(
+                            "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 shadow-sm",
+                            colorInfo.bg,
+                            colorInfo.text
+                        )}>
+                            {categoryInitials(cat.name)}
+                        </div>
+                        <span>{cat.name}</span>
+                    </div>
+                );
+            }
+        },
+        {
+            header: 'Description',
+            accessorKey: 'description',
+            className: 'w-[30%] min-w-[200px] py-4 px-6 text-left text-slate-600 dark:text-slate-300',
+            render: (cat: any) => (
+                <div className="truncate max-w-[300px]" title={cat.description}>
+                    {cat.description || '-'}
+                </div>
+            )
+        },
+        {
+            header: 'Status',
+            preventRowClick: true,
+            className: 'w-[15%] min-w-[120px] py-4 px-6 text-left',
+            render: (cat: any) => (
+                <EditableStatusBadge
+                    status={cat.isActive ? 'true' : 'false'}
+                    options={[
+                        { label: 'Active', value: 'true' },
+                        { label: 'Inactive', value: 'false' }
+                    ]}
+                    onChange={async (val) => {
+                        const newStatus = val === 'true';
+                        if (newStatus === cat.isActive) return;
+                        try {
+                            await updateCategory(cat.id, {
+                                name: cat.name,
+                                description: cat.description || "",
+                                isActive: newStatus
+                            });
+                        } catch (e) { console.error(e); }
+                    }}
+                />
+            )
+        },
+        {
+            header: 'Actions',
+            preventRowClick: true,
+            className: 'w-[20%] min-w-[100px] py-4 px-6 text-right',
+            render: (cat: any) => (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <RowActions
+                        onEdit={() => handleOpenModal(cat)}
+                        onDelete={() => handleDeleteClick(cat.id)}
+                    />
+                </div>
+            )
+        }
+    ];
 
-    const handleDirtyChange = useCallback((dirty: boolean, changesList: any[]) => {
-        setIsDirty(dirty);
-        setPendingChanges(changesList || []);
+    const renderListItem = useCallback((cat: any, isSelected: boolean) => {
+        const itemColor = getColorForCategory(cat.id);
+        return (
+            <div
+                className={cn(
+                    "flex items-center gap-3 p-3 mb-1 cursor-pointer transition-all duration-200 rounded-lg group",
+                    isSelected
+                        ? "bg-blue-50/80 dark:bg-blue-900/20"
+                        : "hover:bg-slate-50 dark:hover:bg-gray-800/50 transparent"
+                )}
+            >
+                <div className={cn(
+                    "absolute left-2 w-1 h-8 rounded-r-md transition-all duration-300",
+                    isSelected ? "bg-blue-600 opacity-100" : "opacity-0"
+                )} />
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ml-1 shadow-sm", itemColor.bg, itemColor.text)}>
+                    {categoryInitials(cat.name)}
+                </div>
+                <div className="flex-1 min-w-0">
+                    <div className={cn(
+                        "font-semibold text-[13.5px] truncate mb-0.5 transition-colors",
+                        isSelected ? "text-blue-900 dark:text-blue-400" : "text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
+                    )}>{cat.name}</div>
+                    <div className="text-xs text-slate-400 dark:text-slate-500 truncate font-medium">Events: {cat.count || 0}</div>
+                </div>
+                <div className={cn(
+                    "w-2 h-2 rounded-full shrink-0 shadow-sm",
+                    cat.isActive ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"
+                )} />
+            </div>
+        );
     }, []);
 
-    const filtered = useMemo(() => (categories || []).filter((c: any) => {
-        const matchSearch = c.name && c.name.toLowerCase().includes(search.toLowerCase());
-
-        let matchStatus = true;
-        if (activeFilters.status && activeFilters.status.length > 0) {
-            const isActiveString = c.isActive ? 'true' : 'false';
-            matchStatus = activeFilters.status.includes(isActiveString);
+    const renderDetailsPanel = useCallback((cat: any, activeTab: string, dirtyState: any) => {
+        if (activeTab === "general") {
+            return (
+                <CategoryDetails
+                    category={cat}
+                    updateCategory={updateCategory}
+                    onDirtyChange={dirtyState.handleDirtyChange}
+                />
+            );
         }
+        return null;
+    }, [updateCategory]);
 
-        return matchSearch && matchStatus;
-    }), [categories, search, activeFilters]);
+    const customFilter = useCallback((cat: any, activeFilters: Record<string, string[]>) => {
+        if (activeFilters.status && activeFilters.status.length > 0) {
+            const isActiveString = cat.isActive ? 'true' : 'false';
+            return activeFilters.status.includes(isActiveString);
+        }
+        return true;
+    }, []);
 
-    const renderFullTable = () => {
-        return (
-            <div className="flex flex-col flex-1 h-full">
-                {/* Filter & Search Bar */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 bg-slate-50/50 dark:bg-gray-900/50 border-b border-slate-100 dark:border-gray-800">
-                    <Filter
-                        categories={[
-                            {
-                                id: 'status',
-                                name: 'Status',
-                                options: [
-                                    { id: '1', label: 'Active', value: 'true' },
-                                    { id: '2', label: 'Inactive', value: 'false' },
-                                ]
-                            }
-                        ]}
-                        onFilterChange={setActiveFilters}
-                    />
-
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <SearchBar
-                            className="w-full sm:w-72"
-                            inputClassName="py-2.5 pl-10 pr-4"
-                            placeholder="Search categories..."
-                            value={search}
-                            onChange={setSearch}
-                        />
-                        <Button onClick={() => handleOpenModal()} className="h-10 px-4 text-sm gap-2 shadow-sm shrink-0">
-                            <Plus size={16} /> Add Category
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Data Table */}
-                <div className="flex-1 overflow-hidden flex flex-col">
-                    <DataTable
-                        data={filtered}
-                        columns={[
-                            {
-                                header: 'Name',
-                                accessorKey: 'name',
-                                className: 'w-[25%] min-w-[150px] py-4 px-6 text-left font-semibold text-slate-900 dark:text-white whitespace-nowrap',
-                                render: (cat: any) => {
-                                    const colorInfo = getColorForCategory(cat.id);
-                                    return (
-                                        <div className="flex items-center gap-3">
-                                            <div className={cn(
-                                                "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 shadow-sm",
-                                                colorInfo.bg,
-                                                colorInfo.text
-                                            )}>
-                                                {categoryInitials(cat.name)}
-                                            </div>
-                                            <span>{cat.name}</span>
-                                        </div>
-                                    );
-                                }
-                            },
-                            {
-                                header: 'Description',
-                                accessorKey: 'description',
-                                className: 'w-[30%] min-w-[200px] py-4 px-6 text-left text-slate-600 dark:text-slate-300',
-                                render: (cat: any) => (
-                                    <div className="truncate max-w-[300px]" title={cat.description}>
-                                        {cat.description || '-'}
-                                    </div>
-                                )
-                            },
-                            {
-                                header: 'Status',
-                                preventRowClick: true,
-                                className: 'w-[15%] min-w-[120px] py-4 px-6 text-left',
-                                render: (cat: any) => (
-                                    <EditableStatusBadge
-                                        status={cat.isActive ? 'true' : 'false'}
-                                        options={[
-                                            { label: 'Active', value: 'true' },
-                                            { label: 'Inactive', value: 'false' }
-                                        ]}
-                                        onChange={async (val) => {
-                                            const newStatus = val === 'true';
-                                            if (newStatus === cat.isActive) return;
-                                            try {
-                                                await updateCategory(cat.id, {
-                                                    name: cat.name,
-                                                    description: cat.description || "",
-                                                    isActive: newStatus
-                                                });
-                                            } catch (e) { console.error(e); }
-                                        }}
-                                    />
-                                )
-                            },
-                            {
-                                header: 'Actions',
-                                preventRowClick: true,
-                                className: 'w-[20%] min-w-[100px] py-4 px-6 text-right',
-                                render: (cat: any) => (
-                                    <div onClick={(e) => e.stopPropagation()}>
-                                        <RowActions
-                                            onEdit={() => handleOpenModal(cat)}
-                                            onDelete={() => handleDeleteClick(cat.id)}
-                                        />
-                                    </div>
-                                )
-                            }
-                        ]}
-                        keyExtractor={(item: any) => item.id}
-                        onRowClick={(cat: any) => {
-                            if (isDirty) {
-                                setPendingAction({ type: 'click', data: cat });
-                            } else {
-                                setSelectedCategory(cat);
-                                setTab("general");
-                            }
-                        }}
-                        loading={loading && (!categories || categories.length === 0)}
-                        onReorder={handleDragReorder}
-                        draggable={true}
-                    />
-                </div>
-            </div>
-        );
-    };
-
-    const renderSplitView = () => {
-
-        return (
-            <div className="flex flex-1 h-full overflow-hidden">
-                {/* Left Panel */}
-                <div className="w-[340px] min-w-[340px] bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-800 flex flex-col overflow-hidden">
-                    {/* Top Bar */}
-                    <div className="flex items-center justify-between p-5 pb-3">
-                        <span className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Categories</span>
-                    </div>
-
-                    {/* Search */}
-                    <div className="flex items-center gap-2 mx-4 mb-3">
-                        <SearchBar
-                            className="flex-1"
-                            inputClassName="bg-slate-50"
-                            placeholder="Search categories..."
-                            value={search}
-                            onChange={setSearch}
-                        />
-                        <Button onClick={() => handleOpenModal()} className="h-[38px] px-3 text-xs gap-1.5 shadow-sm shrink-0">
-                            <Plus size={14} /> Add
-                        </Button>
-                    </div>
-
-                    {/* Filter Pills */}
-                    <div className="px-4 mb-3">
-                        <Filter
-                            categories={[
-                                {
-                                    id: 'status',
-                                    name: 'Status',
-                                    options: [
-                                        { id: '1', label: 'Active', value: 'true' },
-                                        { id: '2', label: 'Inactive', value: 'false' },
-                                    ]
-                                }
-                            ]}
-                            onFilterChange={setActiveFilters}
-                        />
-                    </div>
-
-                    {/* Count Row */}
-                    <div className="px-5 pb-2 border-b border-slate-100 dark:border-gray-800">
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider">
-                            {filtered.length} categor{filtered.length !== 1 ? "ies" : "y"}
-                        </span>
-                    </div>
-
-                    {/* List */}
-                    <div className="flex-1 overflow-y-auto p-2 scrollbar-thin">
-                        {filtered.length === 0 && !loading && (
-                            <div className="text-center py-10 px-5 text-slate-400">
-                                <div className="text-4xl mb-2 opacity-50">📂</div>
-                                <div className="text-sm font-medium">No categories found</div>
-                            </div>
-                        )}
-                        {filtered.map((cat: any) => {
-                            const isSelected = selectedCategory?.id === cat.id;
-                            const itemColor = getColorForCategory(cat.id);
-                            return (
-                                <div
-                                    key={cat.id}
-                                    onClick={() => {
-                                        if (isDirty) {
-                                            setPendingAction({ type: 'click', data: cat });
-                                        } else {
-                                            setSelectedCategory(cat);
-                                            setTab("general");
-                                        }
-                                    }}
-                                    className={cn(
-                                        "flex items-center gap-3 p-3 mb-1 cursor-pointer transition-all duration-200 rounded-lg group",
-                                        isSelected
-                                            ? "bg-blue-50/80 dark:bg-blue-900/20"
-                                            : "hover:bg-slate-50 dark:hover:bg-gray-800/50 transparent"
-                                    )}
-                                >
-                                    <div className={cn(
-                                        "absolute left-2 w-1 h-8 rounded-r-md transition-all duration-300",
-                                        isSelected ? "bg-blue-600 opacity-100" : "opacity-0"
-                                    )} />
-                                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ml-1 shadow-sm", itemColor.bg, itemColor.text)}>
-                                        {categoryInitials(cat.name)}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className={cn(
-                                            "font-semibold text-[13.5px] truncate mb-0.5 transition-colors",
-                                            isSelected ? "text-blue-900 dark:text-blue-400" : "text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
-                                        )}>{cat.name}</div>
-                                        <div className="text-xs text-slate-400 dark:text-slate-500 truncate font-medium">Events: {cat.count || 0}</div>
-                                    </div>
-                                    <div className={cn(
-                                        "w-2 h-2 rounded-full shrink-0 shadow-sm",
-                                        cat.isActive ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"
-                                    )} />
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Detail Panel Container */}
-                <div className="flex-1 flex bg-slate-50 dark:bg-gray-900/40 p-3 h-full overflow-hidden">
-                    <div className="flex-1 flex bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm relative">
-                        {/* Vertical Tab Nav (Left) */}
-                        <Tabs
-                            tabs={[
-                                { id: "general", label: "General Info" }
-                            ]}
-                            activeTab={tab}
-                            onTabChange={setTab}
-                        />
-
-                        {/* Detail Content (Right) */}
-                        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-                            {/* Close Button Only */}
-                            <button
-                                onClick={() => {
-                                    if (isDirty) {
-                                        setPendingAction({ type: 'close' });
-                                    } else {
-                                        setSelectedCategory(null);
-                                    }
-                                }}
-                                className="absolute top-1 right-1 z-[60] p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md hover:bg-slate-50/50 dark:hover:bg-gray-800/50 transition-all"
-                                title="Close Detail View"
-                            >
-                                <X size={14} />
-                            </button>
-
-                            {/* Tab Content Area */}
-                            <div className="flex-1 overflow-y-auto p-8 pt-4 relative">
-                                <div className="max-w-4xl">
-                                    {tab === "general" && (
-                                        <CategoryDetails
-                                            category={selectedCategory}
-                                            updateCategory={updateCategory}
-                                            onDirtyChange={handleDirtyChange}
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {isDirty && (
-                    <>
-                        <UnsavedChangesModal
-                            isOpen={pendingAction !== null}
-                            onClose={() => setPendingAction(null)}
-                            itemName="category"
-                            changeCount={pendingChanges.length}
-                            changes={pendingChanges}
-                            onConfirm={() => {
-                                if (pendingAction?.type === 'click') {
-                                    setSelectedCategory(pendingAction.data);
-                                    setTab("general");
-                                } else if (pendingAction?.type === 'close') {
-                                    setSelectedCategory(null);
-                                }
-                                setIsDirty(false);
-                                setPendingChanges([]);
-                                setPendingAction(null);
-                            }}
-                        />
-                        <UnsavedChangesModal
-                            isOpen={blocker.state === "blocked"}
-                            onClose={() => blocker.state === "blocked" && blocker.reset()}
-                            itemName="category"
-                            changeCount={pendingChanges.length}
-                            changes={pendingChanges}
-                            onConfirm={() => {
-                                blocker.state === "blocked" && blocker.proceed();
-                                setIsDirty(false);
-                                setPendingChanges([]);
-                            }}
-                        />
-                    </>
-                )}
-            </div>
-        );
-    };
-
-    return selectedCategory ? renderSplitView() : renderFullTable();
+    return (
+        <CrudSplitViewLayout
+            data={categories || []}
+            loading={loading}
+            resourceName="Category"
+            resourceNamePlural="Categories"
+            selectedItem={selectedCategory}
+            onSelectItem={setSelectedCategory}
+            columns={columns}
+            keyExtractor={(item: any) => item.id}
+            onDragReorder={handleDragReorder}
+            renderListItem={renderListItem}
+            tabs={[{ id: "general", label: "General Info" }]}
+            renderDetailsPanel={renderDetailsPanel}
+            searchFields={['name']}
+            filterConfig={[
+                {
+                    id: 'status',
+                    name: 'Status',
+                    options: [
+                        { id: '1', label: 'Active', value: 'true' },
+                        { id: '2', label: 'Inactive', value: 'false' },
+                    ]
+                }
+            ]}
+            customFilter={customFilter}
+            onAdd={() => handleOpenModal()}
+        />
+    );
 };

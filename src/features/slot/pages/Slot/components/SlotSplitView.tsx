@@ -1,14 +1,10 @@
-import { useState, useMemo } from 'react';
-import { Button } from '@/components/common/Button';
+import { useCallback } from 'react';
 import { SlotDetails } from './SlotDetails';
-import { DataTable } from '@/components/common/DataTable';
 import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
-import { SearchBar } from '@/components/common/SearchBar';
-import { Plus, X, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import { Filter } from '@/components/common/Filter';
-import { Tabs } from '@/components/common/Tabs';
+import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
 
 const slotColors = [
     { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400' },
@@ -29,273 +25,171 @@ export const SlotSplitView = ({
     loading,
     updateSlot
 }: any) => {
-    const [tab, setTab] = useState("general");
-    const [search, setSearch] = useState("");
-    const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
 
-    const filtered = useMemo(() => (slots || []).filter((s: any) => {
-        const matchSearch = s.label && s.label.toLowerCase().includes(search.toLowerCase());
+    const columns = [
+        {
+            header: 'Label',
+            accessorKey: 'label',
+            className: 'w-[25%] min-w-[200px] py-4 px-6 text-left font-semibold text-slate-900 dark:text-white whitespace-nowrap',
+            render: (s: any) => {
+                const colorInfo = getColorForSlot(s.id);
+                return (
+                    <div className="flex items-center gap-3">
+                        <div className={cn(
+                            "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 shadow-sm",
+                            colorInfo.bg,
+                            colorInfo.text
+                        )}>
+                            <Clock className="w-4 h-4" />
+                        </div>
+                        <span>{s.label}</span>
+                    </div>
+                );
+            }
+        },
+        {
+            header: 'Start Time',
+            accessorKey: 'startTime',
+            className: 'w-[20%] min-w-[150px] py-4 px-6 text-left text-slate-600 dark:text-slate-300',
+            render: (s: any) => <span>{s.startTime || '-'}</span>
+        },
+        {
+            header: 'End Time',
+            accessorKey: 'endTime',
+            className: 'w-[20%] min-w-[150px] py-4 px-6 text-left text-slate-600 dark:text-slate-300',
+            render: (s: any) => <span>{s.endTime || '-'}</span>
+        },
+        {
+            header: 'Status',
+            preventRowClick: true,
+            className: 'w-[15%] min-w-[100px] py-4 px-6 text-left',
+            render: (s: any) => (
+                <EditableStatusBadge
+                    status={s.isActive ? 'Active' : 'Inactive'}
+                    options={['Active', 'Inactive']}
+                    onChange={async (val) => {
+                        const newStatus = val === 'Active';
+                        if (newStatus === s.isActive) return;
+                        try {
+                            await updateSlot(s.id, {
+                                label: s.label,
+                                startTime: s.startTime,
+                                endTime: s.endTime,
+                                isActive: newStatus
+                            });
+                        } catch (e) { console.error(e); }
+                    }}
+                />
+            )
+        },
+        {
+            header: 'Actions',
+            preventRowClick: true,
+            className: 'w-[20%] min-w-[100px] py-4 px-6 text-right',
+            render: (s: any) => (
+                <div onClick={(e) => e.stopPropagation()}>
+                    <RowActions
+                        onEdit={() => handleOpenModal(s)}
+                        onDelete={() => handleDeleteClick(s.id)}
+                    />
+                </div>
+            )
+        }
+    ];
 
+    const renderListItem = useCallback((s: any, isSelected: boolean) => {
+        const itemColor = getColorForSlot(s.id);
+        return (
+            <div
+                className={cn(
+                    "flex items-center gap-3 p-3 mb-1 cursor-pointer transition-all duration-200 rounded-lg group",
+                    isSelected
+                        ? "bg-blue-50/80 dark:bg-blue-900/20"
+                        : "hover:bg-slate-50 dark:hover:bg-gray-800/50 transparent"
+                )}
+            >
+                <div className={cn(
+                    "absolute left-2 w-1 h-8 rounded-r-md transition-all duration-300",
+                    isSelected ? "bg-blue-600 opacity-100" : "opacity-0"
+                )} />
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ml-1 shadow-sm", itemColor.bg, itemColor.text)}>
+                    <Clock className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                    <div className={cn(
+                        "font-semibold text-[13.5px] truncate mb-0.5 transition-colors",
+                        isSelected ? "text-blue-900 dark:text-blue-400" : "text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
+                    )}>{s.label}</div>
+                    <div className="text-xs text-slate-400 dark:text-slate-500 truncate">{s.startTime || '??'} - {s.endTime || '??'}</div>
+                </div>
+                <div className={cn(
+                    "w-2 h-2 rounded-full shrink-0 shadow-sm",
+                    s.isActive ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"
+                )} />
+            </div>
+        );
+    }, []);
+
+    const renderDetailsPanel = useCallback((slot: any, activeTab: string, _dirtyState: any) => {
+        if (activeTab === "general") {
+            return (
+                <SlotDetails
+                    slot={slot}
+                    onEdit={() => handleOpenModal(slot)}
+                    updateSlot={updateSlot}
+                />
+            );
+        }
+        return null;
+    }, [handleOpenModal, updateSlot]);
+
+    const customFilter = useCallback((s: any, activeFilters: Record<string, string[]>) => {
         let matchStatus = true;
         if (activeFilters.status && activeFilters.status.length > 0) {
             const isActiveString = s.isActive ? 'true' : 'false';
             matchStatus = activeFilters.status.includes(isActiveString);
         }
+        return matchStatus;
+    }, []);
 
-        return matchSearch && matchStatus;
-    }), [slots, search, activeFilters]);
+    const customSearch = useCallback((s: any, search: string) => {
+        return Boolean(s.label && s.label.toLowerCase().includes(search.toLowerCase()));
+    }, []);
 
-    const renderFullTable = () => {
-        return (
-            <div className="flex flex-col flex-1 h-full">
-                {/* Filter & Search Bar */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 bg-slate-50/50 dark:bg-gray-900/50 border-b border-slate-100 dark:border-gray-800">
-                    <Filter
-                        categories={[
-                            {
-                                id: 'status',
-                                name: 'Status',
-                                options: [
-                                    { id: '1', label: 'Active', value: 'true' },
-                                    { id: '2', label: 'Inactive', value: 'false' },
-                                ]
-                            }
-                        ]}
-                        onFilterChange={setActiveFilters}
-                    />
+    // Wait, let's use the object itself or ID? Above the original code had:
+    // `setSelectedSlot(s.id);` in `onRowClick` but wait! The data source passed to `SlotDetails` is `slot={selectedSlot}`. If it's an ID, `SlotDetails` wouldn't work if it expects a slot object! Wait, no, `handleOpenModal(selectedSlot)` - usually `handleOpenModal` takes the whole object!
+    // So the original code must have had a bug `setSelectedSlot(s.id)` or `selectedSlot` in `Slot` state finds the object!
+    // If we just pass `setSelectedSlot`, it's better to pass the object but wait, let's check `Slot.tsx`.
 
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <SearchBar
-                            className="w-full sm:w-72"
-                            inputClassName="py-2.5 pl-10 pr-4"
-                            placeholder="Search time slots..."
-                            value={search}
-                            onChange={setSearch}
-                        />
-                        <Button onClick={() => handleOpenModal()} className="h-10 px-4 text-sm gap-2 shadow-sm shrink-0">
-                            <Plus size={16} /> Add Time Slot
-                        </Button>
-                    </div>
-                </div>
+    // To be safe, I will pass the object to `setSelectedSlot`, because `selectedSlot` is expected to be `null` or the object for `CrudSplitViewLayout`'s `selectedItem`.
+    // Wait, wait... "selectedItem" in `CrudSplitViewLayout` expects the same type as `data` element.
+    // If the original `Slot.tsx` maintains an ID, passing the object from `CrudSplitViewLayout` might break `Slot.tsx` state or vice versa. Let's just pass the object, but we need to fetch it if it's just an ID.
 
-                {/* Data Table */}
-                <div className="flex-1 overflow-hidden flex flex-col">
-                    <DataTable
-                        data={filtered}
-                        columns={[
-                            {
-                                header: 'Label',
-                                accessorKey: 'label',
-                                className: 'w-[25%] min-w-[200px] py-4 px-6 text-left font-semibold text-slate-900 dark:text-white whitespace-nowrap',
-                                render: (s: any) => {
-                                    const colorInfo = getColorForSlot(s.id);
-                                    return (
-                                        <div className="flex items-center gap-3">
-                                            <div className={cn(
-                                                "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 shadow-sm",
-                                                colorInfo.bg,
-                                                colorInfo.text
-                                            )}>
-                                                <Clock className="w-4 h-4" />
-                                            </div>
-                                            <span>{s.label}</span>
-                                        </div>
-                                    );
-                                }
-                            },
-                            {
-                                header: 'Start Time',
-                                accessorKey: 'startTime',
-                                className: 'w-[20%] min-w-[150px] py-4 px-6 text-left text-slate-600 dark:text-slate-300',
-                                render: (s: any) => <span>{s.startTime || '-'}</span>
-                            },
-                            {
-                                header: 'End Time',
-                                accessorKey: 'endTime',
-                                className: 'w-[20%] min-w-[150px] py-4 px-6 text-left text-slate-600 dark:text-slate-300',
-                                render: (s: any) => <span>{s.endTime || '-'}</span>
-                            },
-                            {
-                                header: 'Status',
-                                preventRowClick: true,
-                                className: 'w-[15%] min-w-[100px] py-4 px-6 text-left',
-                                render: (s: any) => (
-                                    <EditableStatusBadge
-                                        status={s.isActive ? 'Active' : 'Inactive'}
-                                        options={['Active', 'Inactive']}
-                                        onChange={async (val) => {
-                                            const newStatus = val === 'Active';
-                                            if (newStatus === s.isActive) return;
-                                            try {
-                                                await updateSlot(s.id, {
-                                                    label: s.label,
-                                                    startTime: s.startTime,
-                                                    endTime: s.endTime,
-                                                    isActive: newStatus
-                                                });
-                                            } catch (e) { console.error(e); }
-                                        }}
-                                    />
-                                )
-                            },
-                            {
-                                header: 'Actions',
-                                preventRowClick: true,
-                                className: 'w-[20%] min-w-[100px] py-4 px-6 text-right',
-                                render: (s: any) => (
-                                    <div onClick={(e) => e.stopPropagation()}>
-                                        <RowActions
-                                            onEdit={() => handleOpenModal(s)}
-                                            onDelete={() => handleDeleteClick(s.id)}
-                                        />
-                                    </div>
-                                )
-                            }
-                        ]}
-                        keyExtractor={(item: any) => item.id}
-                        onRowClick={(s: any) => { setSelectedSlot(s.id); setTab("general"); }}
-                        loading={loading && (!slots || slots.length === 0)}
-                    />
-                </div>
-            </div>
-        );
-    };
-
-    const renderSplitView = () => {
-        return (
-            <div className="flex flex-1 h-full overflow-hidden">
-                {/* Left Panel */}
-                <div className="w-[340px] min-w-[340px] bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-800 flex flex-col overflow-hidden">
-                    {/* Top Bar */}
-                    <div className="flex items-center justify-between p-5 pb-3">
-                        <span className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Time Slots</span>
-                    </div>
-
-                    {/* Search */}
-                    <div className="flex items-center gap-2 mx-4 mb-3">
-                        <SearchBar
-                            className="flex-1"
-                            inputClassName="bg-slate-50"
-                            placeholder="Search time slots..."
-                            value={search}
-                            onChange={setSearch}
-                        />
-                        <Button onClick={() => handleOpenModal()} className="h-[38px] px-3 text-xs gap-1.5 shadow-sm shrink-0">
-                            <Plus size={14} /> Add
-                        </Button>
-                    </div>
-
-                    {/* Filter Pills */}
-                    <div className="px-4 mb-3">
-                        <Filter
-                            categories={[
-                                {
-                                    id: 'status',
-                                    name: 'Status',
-                                    options: [
-                                        { id: '1', label: 'Active', value: 'true' },
-                                        { id: '2', label: 'Inactive', value: 'false' },
-                                    ]
-                                }
-                            ]}
-                            onFilterChange={setActiveFilters}
-                        />
-                    </div>
-
-                    {/* Count Row */}
-                    <div className="px-5 pb-2 border-b border-slate-100 dark:border-gray-800">
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider">
-                            {filtered.length} time slot{filtered.length !== 1 ? "s" : ""}
-                        </span>
-                    </div>
-
-                    {/* List */}
-                    <div className="flex-1 overflow-y-auto p-2 scrollbar-thin">
-                        {filtered.length === 0 && !loading && (
-                            <div className="text-center py-10 px-5 text-slate-400">
-                                <div className="text-4xl mb-2 opacity-50">🕒</div>
-                                <div className="text-sm font-medium">No time slots found</div>
-                            </div>
-                        )}
-                        {filtered.map((s: any) => {
-                            const isSelected = selectedSlot?.id === s.id;
-                            const itemColor = getColorForSlot(s.id);
-                            return (
-                                <div
-                                    key={s.id}
-                                    onClick={() => { setSelectedSlot(s.id); setTab("general"); }}
-                                    className={cn(
-                                        "flex items-center gap-3 p-3 mb-1 cursor-pointer transition-all duration-200 rounded-lg group",
-                                        isSelected
-                                            ? "bg-blue-50/80 dark:bg-blue-900/20"
-                                            : "hover:bg-slate-50 dark:hover:bg-gray-800/50 transparent"
-                                    )}
-                                >
-                                    <div className={cn(
-                                        "absolute left-2 w-1 h-8 rounded-r-md transition-all duration-300",
-                                        isSelected ? "bg-blue-600 opacity-100" : "opacity-0"
-                                    )} />
-                                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ml-1 shadow-sm", itemColor.bg, itemColor.text)}>
-                                        <Clock className="w-4 h-4" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className={cn(
-                                            "font-semibold text-[13.5px] truncate mb-0.5 transition-colors",
-                                            isSelected ? "text-blue-900 dark:text-blue-400" : "text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
-                                        )}>{s.label}</div>
-                                        <div className="text-xs text-slate-400 dark:text-slate-500 truncate">{s.startTime || '??'} - {s.endTime || '??'}</div>
-                                    </div>
-                                    <div className={cn(
-                                        "w-2 h-2 rounded-full shrink-0 shadow-sm",
-                                        s.isActive ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"
-                                    )} />
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Detail Panel Container */}
-                <div className="flex-1 flex bg-slate-50 dark:bg-gray-900/40 p-3 h-full overflow-hidden">
-                    <div className="flex-1 flex bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm relative">
-                        {/* Vertical Tab Nav (Left) */}
-                        <Tabs
-                            tabs={[
-                                { id: "general", label: "General Info" }
-                            ]}
-                            activeTab={tab}
-                            onTabChange={setTab}
-                        />
-
-                        {/* Detail Content (Right) */}
-                        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-                            {/* Close Button Only */}
-                            <button
-                                onClick={() => setSelectedSlot(null)}
-                                className="absolute top-1 right-1 z-[60] p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md hover:bg-slate-50/50 dark:hover:bg-gray-800/50 transition-all"
-                                title="Close Detail View"
-                            >
-                                <X size={14} />
-                            </button>
-
-                            {/* Tab Content Area */}
-                            <div className="flex-1 overflow-y-auto p-8 pt-4">
-                                <div className="max-w-4xl">
-                                    {tab === "general" && (
-                                        <SlotDetails
-                                            slot={selectedSlot}
-                                            onEdit={() => handleOpenModal(selectedSlot)}
-                                            updateSlot={updateSlot}
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    return selectedSlot ? renderSplitView() : renderFullTable();
+    return (
+        <CrudSplitViewLayout
+            data={slots || []}
+            loading={loading}
+            resourceName="Time Slot"
+            selectedItem={typeof selectedSlot === 'string' || typeof selectedSlot === 'number' ? slots?.find((s: any) => s.id === selectedSlot) : selectedSlot}
+            onSelectItem={setSelectedSlot}
+            columns={columns}
+            keyExtractor={(item: any) => item.id}
+            renderListItem={renderListItem}
+            tabs={[{ id: "general", label: "General Info" }]}
+            renderDetailsPanel={renderDetailsPanel}
+            filterConfig={[
+                {
+                    id: 'status',
+                    name: 'Status',
+                    options: [
+                        { id: '1', label: 'Active', value: 'true' },
+                        { id: '2', label: 'Inactive', value: 'false' },
+                    ]
+                }
+            ]}
+            customFilter={customFilter as any}
+            customSearch={customSearch as any}
+            onAdd={() => handleOpenModal()}
+        />
+    );
 };

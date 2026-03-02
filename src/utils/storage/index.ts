@@ -36,7 +36,7 @@ export function getCookie(name: string) {
 export function setCookie(name: string, value: string | number, days: number, domain: string) {
     let d = new Date();
     d.setTime(d.getTime() + 24 * 60 * 60 * 1000 * days);
-    document.cookie = `${name}=${value};domain=${domain};path=/;expires=${d.toGMTString()}`;
+    document.cookie = `${name}=${value};domain=${domain};path=/;expires=${d.toUTCString()}`;
 }
 
 export function deleteCookie(name: string) {

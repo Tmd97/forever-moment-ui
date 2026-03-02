@@ -12,7 +12,7 @@ export const getAddonData = () => async (dispatch: any) => {
         const response = await getAddonDataApi();
         dispatch({
             type: types.GET_ADDON_DATA_SUCCESS,
-            payload: response.data,
+            payload: response.data.response,
         });
     } catch (error: any) {
         dispatch({
