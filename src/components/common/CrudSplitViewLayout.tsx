@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { Button } from '@/components/common/Button';
+
 import { DataTable } from '@/components/common/DataTable';
 import { SearchBar } from '@/components/common/SearchBar';
 import { Plus, X } from 'lucide-react';
@@ -148,44 +148,85 @@ export function CrudSplitViewLayout<T>({
     };
 
     const renderFullTable = () => {
+        const pluralName = resourceNamePlural || resourceName + 's';
         return (
-            <div className="flex flex-col flex-1 h-full">
-                {/* Filter & Search Bar */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 bg-slate-50/50 dark:bg-gray-900/50 border-b border-slate-100 dark:border-gray-800">
-                    {filterConfig.length > 0 ? (
-                        <Filter
-                            categories={filterConfig}
-                            onFilterChange={setActiveFilters}
-                        />
-                    ) : <div />}
-
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <SearchBar
-                            className="w-full sm:w-72"
-                            inputClassName="py-2.5 pl-10 pr-4"
-                            placeholder={`Search ${resourceNamePlural || resourceName + 's'}...`}
-                            value={search}
-                            onChange={setSearch}
-                        />
+            <div className="flex flex-col flex-1 h-full overflow-hidden bg-[#f5f4f0] dark:bg-gray-950">
+                {/* Scrollable content */}
+                <div className="flex-1 overflow-y-auto px-7 py-6 flex flex-col gap-5">
+                    {/* Page Header */}
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <h1 className="text-[26px] font-bold text-slate-900 dark:text-white tracking-tight leading-tight" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                                {pluralName}
+                            </h1>
+                            <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-1">
+                                Manage and organize all {pluralName.toLowerCase()}
+                            </p>
+                        </div>
                         {onAdd && (
-                            <Button onClick={() => onAdd()} className="h-10 px-4 text-sm gap-2 shadow-sm shrink-0">
-                                <Plus size={16} /> Add {resourceName}
-                            </Button>
+                            <button
+                                onClick={() => onAdd()}
+                                className="flex items-center gap-2 text-white text-[13.5px] font-semibold px-[18px] py-[10px] rounded-[10px] transition-all"
+                                style={{
+                                    background: '#6c63ff',
+                                    boxShadow: '0 2px 8px rgba(108,99,255,0.30)',
+                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = '#5a52e8'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = '#6c63ff'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                            >
+                                <Plus size={15} strokeWidth={2.5} />
+                                Add {resourceName}
+                            </button>
                         )}
                     </div>
-                </div>
 
-                {/* Data Table */}
-                <div className="flex-1 overflow-hidden flex flex-col">
-                    <DataTable
-                        data={filtered}
-                        columns={columns}
-                        keyExtractor={keyExtractor}
-                        onRowClick={handleItemClick}
-                        loading={loading && (!data || data.length === 0)}
-                        onReorder={(search === "" && Object.keys(activeFilters).length === 0) ? onDragReorder : undefined}
-                        draggable={(search === "" && Object.keys(activeFilters).length === 0) && !!onDragReorder}
-                    />
+                    {/* Toolbar: Search + Filter */}
+                    <div className="flex items-center gap-3">
+                        <div className="flex-1 relative">
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <circle cx="11" cy="11" r="8" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" />
+                            </svg>
+                            <SearchBar
+                                className="w-full"
+                                inputClassName="pl-9 py-2.5 rounded-[10px] bg-white dark:bg-gray-900 border border-[#e8e6e0] dark:border-gray-700 text-[13.5px] focus:border-[#6c63ff] focus:ring-[3px] focus:ring-[rgba(108,99,255,0.12)] placeholder-[#b0b4be] shadow-sm"
+                                placeholder={`Search ${pluralName.toLowerCase()} by name…`}
+                                value={search}
+                                onChange={setSearch}
+                            />
+                        </div>
+                        {filterConfig.length > 0 && (
+                            <Filter categories={filterConfig} onFilterChange={setActiveFilters} />
+                        )}
+                    </div>
+
+                    {/* Table Card */}
+                    <div
+                        className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden flex flex-col"
+                        style={{ border: '1px solid #e8e6e0', boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)' }}
+                    >
+                        <DataTable
+                            data={filtered}
+                            columns={columns}
+                            keyExtractor={keyExtractor}
+                            onRowClick={handleItemClick}
+                            loading={loading && (!data || data.length === 0)}
+                            onReorder={(search === "" && Object.keys(activeFilters).length === 0) ? onDragReorder : undefined}
+                            draggable={(search === "" && Object.keys(activeFilters).length === 0) && !!onDragReorder}
+                        />
+
+                        {/* Table Footer */}
+                        {!loading && data && data.length > 0 && (
+                            <div
+                                className="flex items-center justify-between px-[18px] py-[13px] text-[12.5px] text-slate-500"
+                                style={{ borderTop: '1px solid #e8e6e0', background: '#fafaf8' }}
+                            >
+                                <span>
+                                    Showing <strong className="text-slate-700 dark:text-slate-200 font-semibold">{filtered.length}</strong> of <strong className="text-slate-700 dark:text-slate-200 font-semibold">{data.length}</strong> {pluralName.toLowerCase()}
+                                </span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         );
@@ -197,43 +238,44 @@ export function CrudSplitViewLayout<T>({
         return (
             <div className="flex flex-1 h-full overflow-hidden">
                 {/* Left Panel */}
-                <div className="w-[340px] min-w-[340px] bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-800 flex flex-col overflow-hidden">
+                <div className="w-[300px] min-w-[300px] bg-white dark:bg-gray-900 border-r border-slate-100 dark:border-gray-800 flex flex-col overflow-hidden shadow-sm">
                     {/* Top Bar */}
-                    <div className="flex items-center justify-between p-5 pb-3">
-                        <span className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">{pluralName}</span>
+                    <div className="flex items-center justify-between px-4 py-4 border-b border-slate-100 dark:border-gray-800">
+                        <div>
+                            <span className="font-bold text-[15px] text-slate-900 dark:text-white tracking-tight">{pluralName}</span>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="inline-flex items-center justify-center text-[10px] font-semibold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 px-2 py-0.5 rounded-full">
+                                    {displayCount}
+                                </span>
+                                <span className="text-[10.5px] text-slate-400 uppercase tracking-wider font-medium">{displayCount === 1 ? resourceName : pluralName}</span>
+                            </div>
+                        </div>
+                        {onAdd && (
+                            <button
+                                onClick={() => onAdd()}
+                                className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all shadow-sm hover:shadow-md"
+                            >
+                                <Plus size={13} />
+                                <span>Add</span>
+                            </button>
+                        )}
                     </div>
 
-                    {/* Search */}
-                    <div className="flex items-center gap-2 mx-4 mb-3">
+                    {/* Search + Filter */}
+                    <div className="flex flex-col gap-2 px-3 py-3 border-b border-slate-50 dark:border-gray-800">
                         <SearchBar
-                            className="flex-1"
-                            inputClassName="bg-slate-50"
+                            className="w-full"
+                            inputClassName="bg-slate-50 dark:bg-gray-800 text-[13px] rounded-xl"
                             placeholder={`Search ${pluralName.toLowerCase()}...`}
                             value={search}
                             onChange={setSearch}
                         />
-                        {onAdd && (
-                            <Button onClick={() => onAdd()} className="h-[38px] px-3 text-xs gap-1.5 shadow-sm shrink-0">
-                                <Plus size={14} /> Add
-                            </Button>
-                        )}
-                    </div>
-
-                    {/* Filter Pills */}
-                    {filterConfig.length > 0 && (
-                        <div className="px-4 mb-3">
+                        {filterConfig.length > 0 && (
                             <Filter
                                 categories={filterConfig}
                                 onFilterChange={setActiveFilters}
                             />
-                        </div>
-                    )}
-
-                    {/* Count Row */}
-                    <div className="px-5 pb-2 border-b border-slate-100 dark:border-gray-800">
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider">
-                            {displayCount} {displayCount !== 1 ? pluralName.toLowerCase() : resourceName.toLowerCase()}
-                        </span>
+                        )}
                     </div>
 
                     {/* List */}

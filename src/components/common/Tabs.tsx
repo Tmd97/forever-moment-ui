@@ -36,19 +36,22 @@ export const Tabs = ({ tabs, activeTab, onTabChange, variant = "vertical", class
     }
 
     return (
-        <div className={cn("w-[180px] min-w-[180px] border-r border-slate-100 dark:border-gray-800 p-3 flex flex-col gap-1 bg-white dark:bg-gray-900/50", className)}>
+        <div className={cn("w-[160px] min-w-[160px] border-r border-slate-100 dark:border-gray-800 py-4 px-2 flex flex-col gap-0.5 bg-slate-50/50 dark:bg-gray-900/50", className)}>
             {tabs.map((t) => (
                 <button
                     key={t.id}
                     onClick={() => onTabChange(t.id)}
                     className={cn(
-                        "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all text-left w-full",
+                        "flex items-center gap-2 px-3 py-2.5 rounded-lg text-[12.5px] font-medium transition-all text-left w-full relative",
                         activeTab === t.id
-                            ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 font-semibold"
-                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:hover:bg-gray-800/50 dark:hover:text-slate-300"
+                            ? "bg-white dark:bg-gray-800 text-violet-700 dark:text-violet-400 font-semibold shadow-sm"
+                            : "text-slate-500 hover:bg-white/70 dark:hover:bg-gray-800/50 hover:text-slate-700 dark:hover:text-slate-300"
                     )}
                 >
-                    {t.label}
+                    {activeTab === t.id && (
+                        <span className="absolute left-1.5 w-0.5 h-4 bg-violet-600 dark:bg-violet-500 rounded-full" />
+                    )}
+                    <span className={activeTab === t.id ? "ml-2" : ""}>{t.label}</span>
                 </button>
             ))}
         </div>

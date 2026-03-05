@@ -9,15 +9,15 @@ import { TABS } from '@/config/constants';
 
 const expInitials = (name: string) => name ? name.slice(0, 2).toUpperCase() : 'EX';
 
-const expColors = [
-    { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-400' },
-    { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-400' },
-    { bg: 'bg-pink-100 dark:bg-pink-900/30', text: 'text-pink-700 dark:text-pink-400' },
-    { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400' },
-    { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-400' },
+const EXP_GRADIENTS = [
+    'linear-gradient(135deg, #6c63ff, #a78bfa)',    // purple
+    'linear-gradient(135deg, #1a1a2e, #c8a96e)',    // dark-gold
+    'linear-gradient(135deg, #b76e79, #f2c4ce)',    // rose
+    'linear-gradient(135deg, #0ea5e9, #38bdf8)',    // cyan
+    'linear-gradient(135deg, #059669, #34d399)',    // emerald
 ];
 
-const getColorForExp = (id: number) => expColors[(id || 0) % expColors.length];
+const getGradientForExp = (id: number) => EXP_GRADIENTS[(id || 0) % EXP_GRADIENTS.length];
 
 export const ExperienceSplitView = ({
     experiences,
@@ -53,21 +53,35 @@ export const ExperienceSplitView = ({
 
     const columns = [
         {
+            header: '',
+            className: 'w-[28px] py-4 px-2',
+            render: () => (
+                <svg className="text-slate-300 dark:text-gray-600 cursor-grab" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="9" cy="6" r="1.5" /><circle cx="9" cy="12" r="1.5" /><circle cx="9" cy="18" r="1.5" />
+                    <circle cx="15" cy="6" r="1.5" /><circle cx="15" cy="12" r="1.5" /><circle cx="15" cy="18" r="1.5" />
+                </svg>
+            )
+        },
+        {
             header: 'Title',
             accessorKey: 'name',
-            className: 'w-[40%] min-w-[200px] py-4 px-6 text-left font-semibold text-slate-900 dark:text-white whitespace-nowrap',
+            className: 'py-4 px-4 text-left font-semibold text-slate-900 dark:text-white',
             render: (exp: any) => {
-                const colorInfo = getColorForExp(exp.id);
+                const gradient = getGradientForExp(exp.id);
                 return (
                     <div className="flex items-center gap-3">
-                        <div className={cn(
-                            "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 shadow-sm",
-                            colorInfo.bg,
-                            colorInfo.text
-                        )}>
+                        <div
+                            className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 text-white shadow-md"
+                            style={{ background: gradient }}
+                        >
                             {expInitials(exp.name)}
                         </div>
-                        <span>{exp.name}</span>
+                        <div>
+                            <div className="font-semibold text-[13.5px] text-slate-800 dark:text-slate-100 leading-tight">{exp.name}</div>
+                            {exp.subCategoryName && (
+                                <div className="text-[11.5px] text-slate-400 dark:text-slate-500 mt-0.5">{exp.subCategoryName}</div>
+                            )}
+                        </div>
                     </div>
                 );
             }
@@ -75,24 +89,26 @@ export const ExperienceSplitView = ({
         {
             header: 'Price',
             accessorKey: 'basePrice',
-            className: 'w-[20%] min-w-[120px] py-4 px-6 text-left text-slate-600 dark:text-slate-300',
-            render: (exp: any) => <span className="font-medium">₹{exp.basePrice || 0}</span>
+            className: 'py-4 px-4 text-right',
+            render: (exp: any) => (
+                <div className="text-right">
+                    <span className="font-semibold text-[14px] text-slate-800 dark:text-slate-100">₹{(exp.basePrice || 0).toLocaleString('en-IN')}</span>
+                    <span className="text-[11px] text-slate-400 ml-1">/ event</span>
+                </div>
+            )
         },
         {
             header: 'Featured',
             accessorKey: 'isFeatured',
             preventRowClick: true,
-            className: 'w-[10%] min-w-[100px] py-4 px-6 text-left',
+            className: 'py-4 px-4 text-center',
             render: (exp: any) => (
                 <EditableFeatureBadge
                     isFeatured={exp.isFeatured}
                     onChange={async (val) => {
                         if (val === exp.isFeatured) return;
-                        try {
-                            await toggleExperienceFeatured(exp.id);
-                        } catch (e) {
-                            console.error('Failed to update featured status', e);
-                        }
+                        try { await toggleExperienceFeatured(exp.id); }
+                        catch (e) { console.error('Failed to update featured status', e); }
                     }}
                 />
             )
@@ -100,7 +116,7 @@ export const ExperienceSplitView = ({
         {
             header: 'Status',
             preventRowClick: true,
-            className: 'w-[20%] min-w-[100px] py-4 px-6 text-left',
+            className: 'py-4 px-4 text-center',
             render: (exp: any) => (
                 <EditableStatusBadge
                     status={exp.isActive ? 'Active' : 'Inactive'}
@@ -108,11 +124,8 @@ export const ExperienceSplitView = ({
                     onChange={async (val) => {
                         const newStatus = val === 'Active';
                         if (newStatus === exp.isActive) return;
-                        try {
-                            await toggleExperienceActive(exp.id);
-                        } catch (e) {
-                            console.error(e);
-                        }
+                        try { await toggleExperienceActive(exp.id); }
+                        catch (e) { console.error(e); }
                     }}
                 />
             )
@@ -120,7 +133,7 @@ export const ExperienceSplitView = ({
         {
             header: 'Actions',
             preventRowClick: true,
-            className: 'w-[20%] min-w-[80px] py-4 px-6 text-right',
+            className: 'py-4 px-4 text-right',
             render: (exp: any) => (
                 <div onClick={(e) => e.stopPropagation()}>
                     <RowActions
@@ -133,29 +146,33 @@ export const ExperienceSplitView = ({
     ];
 
     const renderListItem = useCallback((exp: any, isSelected: boolean) => {
-        const itemColor = getColorForExp(exp.id);
+        const gradient = getGradientForExp(exp.id);
         return (
             <div
                 className={cn(
-                    "flex items-center gap-3 p-3 mb-1 cursor-pointer transition-all duration-200 rounded-lg group",
+                    "flex items-center gap-3 p-3 mb-1 cursor-pointer transition-all duration-200 rounded-xl group relative",
                     isSelected
-                        ? "bg-blue-50/80 dark:bg-blue-900/20"
-                        : "hover:bg-slate-50 dark:hover:bg-gray-800/50 transparent"
+                        ? "bg-violet-50 dark:bg-violet-900/20 shadow-sm"
+                        : "hover:bg-slate-50 dark:hover:bg-gray-800/50"
                 )}
             >
-                <div className={cn(
-                    "absolute left-2 w-1 h-8 rounded-r-md transition-all duration-300",
-                    isSelected ? "bg-blue-600 opacity-100" : "opacity-0"
-                )} />
-                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ml-1 shadow-sm", itemColor.bg, itemColor.text)}>
+                {isSelected && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-violet-600 rounded-r-full" />
+                )}
+                <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ml-1 text-white shadow-md"
+                    style={{ background: gradient }}
+                >
                     {expInitials(exp.name)}
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className={cn(
-                        "font-semibold text-[13.5px] truncate mb-0.5 transition-colors",
-                        isSelected ? "text-blue-900 dark:text-blue-400" : "text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400"
+                        "font-semibold text-[13.5px] truncate mb-0.5 transition-colors leading-tight",
+                        isSelected ? "text-violet-900 dark:text-violet-300" : "text-slate-800 dark:text-slate-100 group-hover:text-violet-600"
                     )}>{exp.name}</div>
-                    <div className="text-xs text-slate-400 dark:text-slate-500 truncate font-medium">₹{exp.basePrice || 0}</div>
+                    <div className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+                        ₹{(exp.basePrice || 0).toLocaleString('en-IN')}
+                    </div>
                 </div>
                 <div className={cn(
                     "w-2 h-2 rounded-full shrink-0 shadow-sm",
@@ -171,7 +188,7 @@ export const ExperienceSplitView = ({
         { id: TABS.LOCATIONS.id, label: TABS.LOCATIONS.label },
         { id: TABS.POLICIES.id, label: TABS.POLICIES.label },
         { id: TABS.ADDONS.id, label: TABS.ADDONS.label },
-        // { id: TABS.IMAGES.id, label: TABS.IMAGES.label }
+        { id: TABS.IMAGES.id, label: TABS.IMAGES.label }
     ], []);
 
     const renderDetailsPanel = useCallback((_exp: any, activeTab: string, dirtyState: any) => {

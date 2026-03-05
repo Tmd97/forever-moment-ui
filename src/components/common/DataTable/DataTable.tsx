@@ -20,9 +20,9 @@ import type { DataTableProps, Column, RowId } from './types';
 import { SortableRow } from './SortableRow';
 import { DragHandle } from './DragHandle';
 
-const HEADER_CELL_CLASS = "text-slate-400 dark:text-gray-400 h-10 px-4 text-left align-middle font-bold text-[11.5px] uppercase tracking-wider whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]";
-const BODY_CELL_CLASS = "p-4 align-middle whitespace-nowrap text-gray-700 dark:text-gray-300 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]";
-const ROW_CLASS = "group hover:bg-[#fafbff] dark:hover:bg-slate-800/50 data-[state=selected]:bg-muted border-b transition-colors bg-white dark:bg-gray-900";
+const HEADER_CELL_CLASS = "text-[#6b7280] h-11 px-[18px] text-left align-middle font-semibold text-[11px] uppercase tracking-[0.06em] whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]";
+const BODY_CELL_CLASS = "py-[15px] px-[18px] align-middle text-[13.5px] text-gray-700 dark:text-gray-300 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]";
+const ROW_CLASS = "group hover:bg-[#fafaf8] dark:hover:bg-slate-800/50 data-[state=selected]:bg-muted border-b border-[#f1f5f9] dark:border-gray-800 transition-colors bg-white dark:bg-gray-900 cursor-pointer";
 
 export const DataTable = <T,>({
     data,
@@ -34,7 +34,7 @@ export const DataTable = <T,>({
     onReorder,
     draggable,
     emptyMessage = 'No Data available.',
-    tableClassName = 'table-fixed min-w-[800px] w-full caption-bottom text-sm',
+    tableClassName = 'w-full caption-bottom text-sm',
 }: DataTableProps<T>) => {
     const isDragEnabled = Boolean(onReorder && draggable);
 
@@ -93,8 +93,8 @@ export const DataTable = <T,>({
     };
 
     const renderTableHead = () => (
-        <thead className="sticky top-0 z-10 bg-[#f8fafc] dark:bg-gray-800 shadow-sm [&_tr]:border-b border-b border-[#f1f5f9] dark:border-gray-700">
-            <tr className="bg-[#f8fafc] dark:bg-gray-800 border-none">
+        <thead className="sticky top-0 z-10 bg-[#f8f9fc] dark:bg-gray-800/80 [&_tr]:border-b border-b border-[#eef0f4] dark:border-gray-700">
+            <tr className="bg-[#f8f9fc] dark:bg-gray-800/80 border-none">
                 {columns.map((col, index) => (
                     <th
                         key={getColumnKey(index, col)}
