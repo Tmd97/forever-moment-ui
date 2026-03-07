@@ -8,21 +8,21 @@
                 "type": "text",
                 "sortable": true,
                 "filterable": true,
-                "className": "py-4 px-6 font-medium text-gray-900 dark:text-white"
+                "className": "py-1.5 px-4 font-medium text-gray-900 dark:text-white"
             },
             {
                 "key": "status",
                 "header": "Status",
                 "type": "badge",
                 "sortable": true,
-                "className": "py-4 px-6"
+                "className": "py-1.5 px-4"
             },
             {
                 "key": "actions",
                 "header": "Actions",
                 "type": "actions",
                 "align": "right",
-                "className": "py-4 px-6 text-right"
+                "className": "py-1.5 px-4 text-right"
             }
         ],
         "actions": [
@@ -41,35 +41,35 @@
                 "header": "Title",
                 "type": "text",
                 "sortable": true,
-                "className": "py-4 px-6 font-medium text-gray-900 dark:text-white"
+                "className": "py-1.5 px-4 font-medium text-gray-900 dark:text-white"
             },
             {
                 "key": "category",
                 "header": "Category",
                 "type": "text",
                 "sortable": true,
-                "className": "py-4 px-6 text-sm text-gray-700 dark:text-gray-300"
+                "className": "py-1.5 px-4 text-sm text-gray-700 dark:text-gray-300"
             },
             {
                 "key": "price",
                 "header": "Price",
                 "type": "currency",
                 "sortable": true,
-                "className": "py-4 px-6 text-sm text-gray-700 dark:text-gray-300"
+                "className": "py-1.5 px-4 text-sm text-gray-700 dark:text-gray-300"
             },
             {
                 "key": "status",
                 "header": "Status",
                 "type": "badge",
                 "sortable": true,
-                "className": "py-4 px-6"
+                "className": "py-1.5 px-4"
             },
             {
                 "key": "actions",
                 "header": "Actions",
                 "type": "actions",
                 "align": "right",
-                "className": "py-4 px-6 text-right"
+                "className": "py-1.5 px-4 text-right"
             }
         ],
         "actions": [

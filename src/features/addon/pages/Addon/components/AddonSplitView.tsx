@@ -7,7 +7,7 @@ import { PackageOpen } from 'lucide-react';
 import type { AddonType } from '@/features/addon/store/action-types';
 import { cn } from '@/utils/cn';
 import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
-import { TABS } from '@/config/constants';
+import { TABS, ITEM_ID_PREFIX } from '@/config/constants';
 
 export const AddonSplitView = ({
     addons,
@@ -22,11 +22,15 @@ export const AddonSplitView = ({
     const columns = [
         {
             header: 'Name',
-            className: 'w-[45%] min-w-[200px] py-4 px-6 text-left font-semibold text-slate-900 dark:text-white',
+            className: 'w-[45%] min-w-[200px] py-1.5 px-4 text-left font-semibold text-slate-900 dark:text-white',
             render: (a: any) => (
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
-                        {a.icon || <PackageOpen className="w-4 h-4" />}
+                    <div className={cn(
+                        "h-7 px-2 min-w-[32px] w-auto rounded-[6px] flex items-center gap-1.5 font-bold text-[11px] shrink-0",
+                        "bg-[#f4f6f8] text-slate-500 border border-slate-200/60 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
+                    )}>
+                        <span className="text-[12px] leading-none">📝</span>
+                        {`${ITEM_ID_PREFIX}-${a.id}`}
                     </div>
                     <div>
                         <EditableTitle
@@ -40,7 +44,7 @@ export const AddonSplitView = ({
         },
         {
             header: 'Base Price',
-            className: 'w-[20%] min-w-[120px] py-4 px-6 text-left',
+            className: 'w-[20%] min-w-[120px] py-1.5 px-4 text-left',
             render: (a: any) => (
                 <span className="font-medium text-slate-700 dark:text-slate-300">₹{a.basePrice || 0}</span>
             )
@@ -48,7 +52,7 @@ export const AddonSplitView = ({
         {
             header: 'Status',
             preventRowClick: true,
-            className: 'w-[15%] min-w-[120px] py-4 px-6 text-left',
+            className: 'w-[15%] min-w-[120px] py-1.5 px-4 text-left',
             render: (a: any) => (
                 <EditableStatusBadge
                     status={a.isActive ? 'Active' : 'Inactive'}
@@ -60,7 +64,7 @@ export const AddonSplitView = ({
         {
             header: '',
             preventRowClick: true,
-            className: 'w-[10%] min-w-[80px] py-4 px-6 text-right',
+            className: 'w-[10%] min-w-[80px] py-1.5 px-4 text-right',
             render: (a: any) => (
                 <div onClick={(e) => e.stopPropagation()}>
                     <RowActions
@@ -87,12 +91,11 @@ export const AddonSplitView = ({
                     isSelected ? "bg-blue-600 opacity-100" : "opacity-0"
                 )} />
                 <div className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ml-1 shadow-sm transition-colors",
-                    isSelected
-                        ? "bg-blue-600 text-white"
-                        : "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400"
+                    "h-7 px-2 min-w-[40px] w-auto rounded-[6px] flex items-center gap-1.5 font-bold text-[11px] shrink-0 ml-1",
+                    "bg-[#f4f6f8] text-slate-500 border border-slate-200/60 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
                 )}>
-                    {a.icon || <PackageOpen className="w-5 h-5" />}
+                    <span className="text-[12px] leading-none">📝</span>
+                    {`${ITEM_ID_PREFIX}-${a.id}`}
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className={cn(

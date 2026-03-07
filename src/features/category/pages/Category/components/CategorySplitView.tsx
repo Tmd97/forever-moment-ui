@@ -4,19 +4,9 @@ import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { cn } from '@/utils/cn';
 import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
-import { TABS } from '@/config/constants';
+import { TABS, ITEM_ID_PREFIX } from '@/config/constants';
 
-const categoryInitials = (name: string) => name ? name.slice(0, 2).toUpperCase() : 'CA';
 
-const categoryColors = [
-    { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-400' },
-    { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-400' },
-    { bg: 'bg-pink-100 dark:bg-pink-900/30', text: 'text-pink-700 dark:text-pink-400' },
-    { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400' },
-    { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-400' },
-];
-
-const getColorForCategory = (id: number) => categoryColors[(id || 0) % categoryColors.length];
 
 export const CategorySplitView = ({
     categories,
@@ -33,17 +23,16 @@ export const CategorySplitView = ({
         {
             header: 'Name',
             accessorKey: 'name',
-            className: 'w-[25%] min-w-[150px] py-4 px-6 text-left font-semibold text-slate-900 dark:text-white whitespace-nowrap',
+            className: 'w-[25%] min-w-[150px] py-1.5 px-4 text-left font-semibold text-slate-900 dark:text-white whitespace-nowrap',
             render: (cat: any) => {
-                const colorInfo = getColorForCategory(cat.id);
                 return (
                     <div className="flex items-center gap-3">
                         <div className={cn(
-                            "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 shadow-sm",
-                            colorInfo.bg,
-                            colorInfo.text
+                            "h-7 px-2 min-w-[32px] w-auto rounded-[6px] flex items-center gap-1.5 font-bold text-[11px] shrink-0",
+                            "bg-[#f4f6f8] text-slate-500 border border-slate-200/60 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
                         )}>
-                            {categoryInitials(cat.name)}
+                            <span className="text-[12px] leading-none">📝</span>
+                            {`${ITEM_ID_PREFIX}-${cat.id}`}
                         </div>
                         <span>{cat.name}</span>
                     </div>
@@ -53,7 +42,7 @@ export const CategorySplitView = ({
         {
             header: 'Description',
             accessorKey: 'description',
-            className: 'w-[30%] min-w-[200px] py-4 px-6 text-left text-slate-600 dark:text-slate-300',
+            className: 'w-[30%] min-w-[200px] py-1.5 px-4 text-left text-slate-600 dark:text-slate-300',
             render: (cat: any) => (
                 <div className="truncate max-w-[300px]" title={cat.description}>
                     {cat.description || '-'}
@@ -63,7 +52,7 @@ export const CategorySplitView = ({
         {
             header: 'Status',
             preventRowClick: true,
-            className: 'w-[15%] min-w-[120px] py-4 px-6 text-left',
+            className: 'w-[15%] min-w-[120px] py-1.5 px-4 text-left',
             render: (cat: any) => (
                 <EditableStatusBadge
                     status={cat.isActive ? 'true' : 'false'}
@@ -88,7 +77,7 @@ export const CategorySplitView = ({
         {
             header: 'Actions',
             preventRowClick: true,
-            className: 'w-[20%] min-w-[100px] py-4 px-6 text-right',
+            className: 'w-[20%] min-w-[100px] py-1.5 px-4 text-right',
             render: (cat: any) => (
                 <div onClick={(e) => e.stopPropagation()}>
                     <RowActions
@@ -101,7 +90,6 @@ export const CategorySplitView = ({
     ];
 
     const renderListItem = useCallback((cat: any, isSelected: boolean) => {
-        const itemColor = getColorForCategory(cat.id);
         return (
             <div
                 className={cn(
@@ -115,8 +103,12 @@ export const CategorySplitView = ({
                     "absolute left-2 w-1 h-8 rounded-r-md transition-all duration-300",
                     isSelected ? "bg-blue-600 opacity-100" : "opacity-0"
                 )} />
-                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ml-1 shadow-sm", itemColor.bg, itemColor.text)}>
-                    {categoryInitials(cat.name)}
+                <div className={cn(
+                    "h-7 px-2 min-w-[40px] w-auto rounded-[6px] flex items-center gap-1.5 font-bold text-[11px] shrink-0 ml-1",
+                    "bg-[#f4f6f8] text-slate-500 border border-slate-200/60 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
+                )}>
+                    <span className="text-[12px] leading-none">📝</span>
+                    {`${ITEM_ID_PREFIX}-${cat.id}`}
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className={cn(

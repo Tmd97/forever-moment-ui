@@ -1,23 +1,15 @@
 import { useMemo, useCallback } from 'react';
+import { Sparkles, CheckCircle2, Star, BarChart2 } from 'lucide-react';
 import { getExperienceTabs } from './ExperienceDetails';
 import { EditableStatusBadge } from '@/components/common/EditableStatusBadge';
 import { EditableFeatureBadge } from '@/components/common/EditableFeatureBadge';
 import { RowActions } from '@/components/common/RowActions';
 import { cn } from '@/utils/cn';
 import { CrudSplitViewLayout } from '@/components/common/CrudSplitViewLayout';
-import { TABS } from '@/config/constants';
+import { StatsRow } from '@/components/common/StatsRow';
+import { TABS, ITEM_ID_PREFIX } from '@/config/constants';
 
-const expInitials = (name: string) => name ? name.slice(0, 2).toUpperCase() : 'EX';
 
-const EXP_GRADIENTS = [
-    'linear-gradient(135deg, #6c63ff, #a78bfa)',    // purple
-    'linear-gradient(135deg, #1a1a2e, #c8a96e)',    // dark-gold
-    'linear-gradient(135deg, #b76e79, #f2c4ce)',    // rose
-    'linear-gradient(135deg, #0ea5e9, #38bdf8)',    // cyan
-    'linear-gradient(135deg, #059669, #34d399)',    // emerald
-];
-
-const getGradientForExp = (id: number) => EXP_GRADIENTS[(id || 0) % EXP_GRADIENTS.length];
 
 export const ExperienceSplitView = ({
     experiences,
@@ -48,48 +40,42 @@ export const ExperienceSplitView = ({
     experienceMedia,
     getExperienceMedia,
     bulkAttachMedia,
-    disassociateMedia
+    disassociateMedia,
+    showStats = true
 }: any) => {
 
     const columns = [
         {
             header: '',
-            className: 'w-[28px] py-4 px-2',
-            render: () => (
-                <svg className="text-slate-300 dark:text-gray-600 cursor-grab" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                    <circle cx="9" cy="6" r="1.5" /><circle cx="9" cy="12" r="1.5" /><circle cx="9" cy="18" r="1.5" />
-                    <circle cx="15" cy="6" r="1.5" /><circle cx="15" cy="12" r="1.5" /><circle cx="15" cy="18" r="1.5" />
-                </svg>
-            )
+            className: 'w-[28px] py-1.5 px-2',
+            render: () => null
         },
         {
             header: 'Title',
             accessorKey: 'name',
-            className: 'py-4 px-4 text-left font-semibold text-slate-900 dark:text-white',
-            render: (exp: any) => {
-                const gradient = getGradientForExp(exp.id);
-                return (
-                    <div className="flex items-center gap-3">
-                        <div
-                            className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 text-white shadow-md"
-                            style={{ background: gradient }}
-                        >
-                            {expInitials(exp.name)}
-                        </div>
-                        <div>
-                            <div className="font-semibold text-[13.5px] text-slate-800 dark:text-slate-100 leading-tight">{exp.name}</div>
-                            {exp.subCategoryName && (
-                                <div className="text-[11.5px] text-slate-400 dark:text-slate-500 mt-0.5">{exp.subCategoryName}</div>
-                            )}
-                        </div>
+            className: 'py-1.5 px-4 text-left font-semibold text-slate-900 dark:text-white',
+            render: (exp: any) => (
+                <div className="flex items-center gap-3">
+                    <div className={cn(
+                        "h-7 px-2 min-w-[32px] w-auto rounded-[6px] flex items-center gap-1.5 font-bold text-[11px] shrink-0",
+                        "bg-[#f4f6f8] text-slate-500 border border-slate-200/60 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
+                    )}>
+                        <span className="text-[12px] leading-none">📝</span>
+                        {`${ITEM_ID_PREFIX}-${exp.id}`}
                     </div>
-                );
-            }
+                    <div>
+                        <div className="font-semibold text-[13.5px] text-slate-800 dark:text-slate-100 leading-tight">{exp.name}</div>
+                        {exp.subCategoryName && (
+                            <div className="text-[11.5px] text-slate-400 dark:text-slate-500 mt-0.5">{exp.subCategoryName}</div>
+                        )}
+                    </div>
+                </div>
+            )
         },
         {
             header: 'Price',
             accessorKey: 'basePrice',
-            className: 'py-4 px-4 text-right',
+            className: 'py-1.5 px-4 text-right',
             render: (exp: any) => (
                 <div className="text-right">
                     <span className="font-semibold text-[14px] text-slate-800 dark:text-slate-100">₹{(exp.basePrice || 0).toLocaleString('en-IN')}</span>
@@ -101,7 +87,7 @@ export const ExperienceSplitView = ({
             header: 'Featured',
             accessorKey: 'isFeatured',
             preventRowClick: true,
-            className: 'py-4 px-4 text-center',
+            className: 'py-1.5 px-4 text-center',
             render: (exp: any) => (
                 <EditableFeatureBadge
                     isFeatured={exp.isFeatured}
@@ -116,7 +102,7 @@ export const ExperienceSplitView = ({
         {
             header: 'Status',
             preventRowClick: true,
-            className: 'py-4 px-4 text-center',
+            className: 'py-1.5 px-4 text-center',
             render: (exp: any) => (
                 <EditableStatusBadge
                     status={exp.isActive ? 'Active' : 'Inactive'}
@@ -133,7 +119,7 @@ export const ExperienceSplitView = ({
         {
             header: 'Actions',
             preventRowClick: true,
-            className: 'py-4 px-4 text-right',
+            className: 'py-1.5 px-4 text-right',
             render: (exp: any) => (
                 <div onClick={(e) => e.stopPropagation()}>
                     <RowActions
@@ -145,42 +131,41 @@ export const ExperienceSplitView = ({
         }
     ];
 
-    const renderListItem = useCallback((exp: any, isSelected: boolean) => {
-        const gradient = getGradientForExp(exp.id);
-        return (
-            <div
-                className={cn(
-                    "flex items-center gap-3 p-3 mb-1 cursor-pointer transition-all duration-200 rounded-xl group relative",
-                    isSelected
-                        ? "bg-violet-50 dark:bg-violet-900/20 shadow-sm"
-                        : "hover:bg-slate-50 dark:hover:bg-gray-800/50"
-                )}
-            >
-                {isSelected && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-violet-600 rounded-r-full" />
-                )}
-                <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ml-1 text-white shadow-md"
-                    style={{ background: gradient }}
-                >
-                    {expInitials(exp.name)}
-                </div>
-                <div className="flex-1 min-w-0">
-                    <div className={cn(
-                        "font-semibold text-[13.5px] truncate mb-0.5 transition-colors leading-tight",
-                        isSelected ? "text-violet-900 dark:text-violet-300" : "text-slate-800 dark:text-slate-100 group-hover:text-violet-600"
-                    )}>{exp.name}</div>
-                    <div className="text-xs text-slate-400 dark:text-slate-500 font-medium">
-                        ₹{(exp.basePrice || 0).toLocaleString('en-IN')}
-                    </div>
-                </div>
-                <div className={cn(
-                    "w-2 h-2 rounded-full shrink-0 shadow-sm",
-                    exp.isActive ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"
-                )} />
+    const renderListItem = useCallback((exp: any, isSelected: boolean) => (
+        <div
+            className={cn(
+                "flex items-center gap-3 p-3 mb-1 cursor-pointer transition-all duration-200 rounded-lg group relative",
+                isSelected
+                    ? "bg-violet-50/80 dark:bg-violet-900/20"
+                    : "hover:bg-slate-50 dark:hover:bg-gray-800/50 transparent"
+            )}
+        >
+            <div className={cn(
+                "absolute left-2 w-1 h-8 rounded-r-md transition-all duration-300",
+                isSelected ? "bg-violet-600 opacity-100" : "opacity-0"
+            )} />
+            <div className={cn(
+                "h-7 px-2 min-w-[40px] w-auto rounded-[6px] flex items-center gap-1.5 font-bold text-[11px] shrink-0 ml-1",
+                "bg-[#f4f6f8] text-slate-500 border border-slate-200/60 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
+            )}>
+                <span className="text-[12px] leading-none">📝</span>
+                {`${ITEM_ID_PREFIX}-${exp.id}`}
             </div>
-        );
-    }, []);
+            <div className="flex-1 min-w-0">
+                <div className={cn(
+                    "font-semibold text-[13.5px] truncate mb-0.5 transition-colors leading-tight",
+                    isSelected ? "text-violet-900 dark:text-violet-300" : "text-slate-800 dark:text-slate-100 group-hover:text-violet-600"
+                )}>{exp.name}</div>
+                <div className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+                    ₹{(exp.basePrice || 0).toLocaleString('en-IN')}
+                </div>
+            </div>
+            <div className={cn(
+                "w-2 h-2 rounded-full shrink-0 shadow-sm",
+                exp.isActive ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"
+            )} />
+        </div>
+    ), []);
 
     const tabsData = useMemo(() => [
         { id: TABS.GENERAL.id, label: TABS.GENERAL.label },
@@ -254,6 +239,43 @@ export const ExperienceSplitView = ({
         return exp.name && exp.name.toLowerCase().includes(search.toLowerCase());
     }, []);
 
+    const renderStatsRow = useMemo(() => () => {
+        const exps = experiences || [];
+        const total = exps.length;
+        const active = exps.filter((e: any) => e.isActive).length;
+        const featured = exps.filter((e: any) => e.isFeatured).length;
+        const totalValue = exps.reduce((sum: number, e: any) => sum + (Number(e.basePrice) || 0), 0);
+
+        const cards = [
+            {
+                icon: <Sparkles size={18} color="#6c63ff" />,
+                iconBg: '#ede9ff',
+                value: total,
+                label: 'Total Experiences',
+            },
+            {
+                icon: <CheckCircle2 size={18} color="#12b76a" />,
+                iconBg: '#ecfdf3',
+                value: active,
+                label: 'Active',
+            },
+            {
+                icon: <Star size={18} color="#f5a623" />,
+                iconBg: '#fff8ec',
+                value: featured,
+                label: 'Featured',
+            },
+            {
+                icon: <BarChart2 size={18} color="#f04438" />,
+                iconBg: '#fef3f2',
+                value: `₹${totalValue.toLocaleString('en-IN')}`,
+                label: 'Total Value',
+            },
+        ];
+
+        return <StatsRow stats={cards} />;
+    }, [experiences]);
+
     return (
         <CrudSplitViewLayout
             data={experiences || []}
@@ -281,6 +303,7 @@ export const ExperienceSplitView = ({
             customFilter={customFilter}
             customSearch={customSearch}
             onAdd={() => handleOpenModal()}
+            renderStatsRow={showStats ? renderStatsRow : undefined}
         />
     );
 };

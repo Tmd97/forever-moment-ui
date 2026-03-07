@@ -30,7 +30,7 @@ export const UnsavedChangesModal = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-[540px] p-0 overflow-hidden border-none bg-[#faf9f7] shadow-[0_32px_80px_rgba(0,0,0,0.5)] rounded-[20px]">
+            <DialogContent className="w-[calc(100%-2rem)] mx-auto sm:w-full sm:max-w-[540px] p-0 overflow-hidden border-none bg-[#faf9f7] shadow-[0_32px_80px_rgba(0,0,0,0.5)] rounded-[20px]">
                 {/* Header */}
                 <div className="bg-[#fff8ed] border-b border-[#f0e8d8] p-6 pb-4 flex items-start gap-4">
                     <div className="w-[42px] h-[42px] bg-gradient-to-br from-[#fff3cd] to-[#ffd97d] rounded-[11px] flex items-center justify-center shrink-0 shadow-[0_2px_8px_rgba(255,180,0,0.25)]">
@@ -54,7 +54,7 @@ export const UnsavedChangesModal = ({
                 <ChangesViewer changes={changes} maxHeight="340px" />
 
                 {/* Footer Buttons */}
-                <div className="p-6 pt-4 border-t-[1.5px] border-[#ede7dd] bg-[#faf9f7] flex gap-3">
+                <div className="p-4 sm:p-6 pt-4 border-t-[1.5px] border-[#ede7dd] bg-[#faf9f7] flex flex-col sm:flex-row gap-3">
                     <button
                         onClick={onClose}
                         className="flex-1 py-3.5 px-5 rounded-xl bg-[#ede7dd] text-[14px] font-bold text-[#4a3f35] transition-all hover:bg-[#e0d8cc] active:scale-[0.98]"

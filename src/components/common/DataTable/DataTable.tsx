@@ -20,8 +20,8 @@ import type { DataTableProps, Column, RowId } from './types';
 import { SortableRow } from './SortableRow';
 import { DragHandle } from './DragHandle';
 
-const HEADER_CELL_CLASS = "text-[#6b7280] h-11 px-[18px] text-left align-middle font-semibold text-[11px] uppercase tracking-[0.06em] whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]";
-const BODY_CELL_CLASS = "py-[15px] px-[18px] align-middle text-[13.5px] text-gray-700 dark:text-gray-300 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]";
+const HEADER_CELL_CLASS = "text-[#6b7280] h-8 px-[18px] text-left align-middle font-semibold text-[11px] uppercase tracking-[0.06em] whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]";
+const BODY_CELL_CLASS = "py-[6px] px-[18px] align-middle text-[13.5px] text-gray-700 dark:text-gray-300 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]";
 const ROW_CLASS = "group hover:bg-[#fafaf8] dark:hover:bg-slate-800/50 data-[state=selected]:bg-muted border-b border-[#f1f5f9] dark:border-gray-800 transition-colors bg-white dark:bg-gray-900 cursor-pointer";
 
 export const DataTable = <T,>({

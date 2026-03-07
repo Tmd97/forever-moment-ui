@@ -15,3 +15,5 @@ export const TABS = {
 };
 
 export const TAB_DATA = Object.values(TABS);
+
+export const ITEM_ID_PREFIX = 'FMA';

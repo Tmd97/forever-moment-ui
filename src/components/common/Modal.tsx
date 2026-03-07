@@ -69,7 +69,7 @@ export const Modal = ({
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent
                 className={cn(
-                    "p-0 overflow-hidden border-none bg-white shadow-[0_32px_80px_rgba(0,0,0,0.35)] rounded-[20px]",
+                    "p-0 overflow-hidden border-none bg-white shadow-[0_32px_80px_rgba(0,0,0,0.35)] rounded-[20px] w-[calc(100%-2rem)] mx-auto sm:w-full",
                     className || 'sm:max-w-md'
                 )}
             >

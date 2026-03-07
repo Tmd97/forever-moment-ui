@@ -5,7 +5,7 @@ type StatusOption = string | { label: string; value: string };
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
     Active: { bg: "#d1fae5", text: "#065f46", dot: "#10b981" },
-    Inactive: { bg: "#fee2e2", text: "#991b1b", dot: "#ef4444" },
+    Inactive: { bg: "#f1f5f9", text: "#475569", dot: "#94a3b8" },
     Draft: { bg: "#fef3c7", text: "#92400e", dot: "#f59b0b" },
     Archived: { bg: "#f1f5f9", text: "#475569", dot: "#94a3b8" },
     Pending: { bg: "#e0f2fe", text: "#075985", dot: "#0ea5e9" },
@@ -43,7 +43,7 @@ export function EditableStatusBadge({
                     padding: "5px 10px 5px 8px", borderRadius: 20,
                     background: s.bg, border: `1.5px solid ${s.dot}33`,
                     fontSize: 12.5, fontWeight: 600, color: s.text,
-                    userSelect: "none",
+                    userSelect: "none", minWidth: 85, justifyContent: "center",
                 }}
             >
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: s.dot, flexShrink: 0 }} />
@@ -64,7 +64,7 @@ export function EditableStatusBadge({
                         background: s.bg, border: `1.5px solid ${s.dot}33`,
                         fontSize: 12.5, fontWeight: 600, color: s.text,
                         cursor: "pointer", outline: "none",
-                        userSelect: "none",
+                        userSelect: "none", minWidth: 85, justifyContent: "center",
                     }}
                 >
                     <span style={{ width: 6, height: 6, borderRadius: "50%", background: s.dot, flexShrink: 0 }} />
