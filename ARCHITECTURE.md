@@ -27,26 +27,23 @@ src/
 │   └── ...
 │
 ├── features/            # Core business logic features
-│   ├── admin/           # Admin-specific features
-│   │   ├── category/    # "Category" feature module
-│   │   │   ├── pages/   # Feature-specific pages
-│   │   │   ├── store/   # Redux slice (actions, reducers) & API
-│   │   │   └── components/ # Feature-specific components
-│   │   └── dashboard/   # "Dashboard" feature module
-│   └── customer/        # Customer-facing features
+│   ├── category/        # "Category" feature module
+│   │   ├── pages/       # Feature-specific pages
+│   │   ├── store/       # Redux slice (actions, reducers) & API
+│   │   └── components/  # Feature-specific components
+│   └── dashboard/       # "Dashboard" feature module
 │
 ├── components/          # Shared/Generic UI components
 │   ├── ui/              # Shadcn primitive components (Button, Input, etc.)
-│   ├── admin/common/    # Reusable admin components (DataTable, Sidebar)
-│   └── customer/common/ # Reusable customer components
+│   ├── common/          # Reusable common components (DataTable, etc.)
+│   └── navigation/      # Navigation components
 │
 ├── store/               # Global Redux store configuration
 │   ├── config/          # Configuration state slice
 │   └── reducers.ts      # Root reducer combining feature slices
 │
 ├── layouts/             # Main application layouts
-│   ├── admin/           # AdminLayout (Sidebar + Header + Content)
-│   └── customer/        # CustomerLayout (Navbar + Footer + Content)
+│   └── AdminLayout.tsx  # Main Layout wrapper
 │
 ├── hooks/               # Custom React hooks (useNavigationConfig, etc.)
 ├── services/            # Global services (Auth, Config)
@@ -65,9 +62,9 @@ We use **Redux Toolkit** for state management. The data flow follows a unidirect
 4.  **Selector** retrieves data from State to update the **Component**.
 
 ### Example: Category Feature
--   **State**: `src/features/admin/category/store/reducer.ts`
--   **Actions**: `src/features/admin/category/store/actions.ts`
--   **API**: `src/features/admin/category/store/api.ts`
+-   **State**: `src/features/category/store/reducer.ts`
+-   **Actions**: `src/features/category/store/actions.ts`
+-   **API**: `src/features/category/store/api.ts`
 
 ---
 
@@ -87,11 +84,11 @@ The application is designed to be **configuration-driven**. This means many UI a
 
 ## 🚀 Development Workflow
 
-### Adding a New Admin Feature
-1.  Create directory: `src/features/admin/[feature-name]`
+### Adding a New Feature
+1.  Create directory: `src/features/[feature-name]`
 2.  Add **Store Slice**: Create `store/reducer.ts`, `actions.ts`, `types.ts`
 3.  Add **Pages**: Create `pages/[Feature]Page/index.tsx`
-4.  Add **Route**: Update `src/config/routes.json` or `routes.tsx`
+4.  Add **Route**: Update `src/features/routes.tsx` or main routing
 5.  Add **Menu Item**: Update `src/config/navigation.json`
 
 ### Styling
