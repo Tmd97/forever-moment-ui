@@ -12,9 +12,6 @@ dist
 dist-ssr
 *.local
 
-# Environment variables
-!.env.example
-
 # Testing
 coverage/
 config/navigation.json
